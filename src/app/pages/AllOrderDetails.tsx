@@ -1,0 +1,622 @@
+import { useState } from "react";
+import { ORDERS, type SearchStatus, type OrderRecord, VERIFICATION_TYPES } from "../data/mockData";
+import { Footer } from "../components/Footer";
+
+interface Filters {
+  searchId: string;
+  reportId: string;
+  status: string;
+  searchType: string;
+  firstName: string;
+  lastName: string;
+  ssn: string;
+  dob: string;
+  county: string;
+  state: string;
+  orderReference: string;
+  orderDateFrom: string;
+  orderDateTo: string;
+  sortOrder: string;
+  perPage: string;
+  age: string;
+  applicantEmail: string;
+  criminalRecordsFound: string;
+  orderedBy: string;
+}
+
+const EMPTY_FILTERS: Filters = {
+  searchId: "", reportId: "", status: "", searchType: "",
+  firstName: "", lastName: "", ssn: "", dob: "",
+  county: "", state: "", orderReference: "",
+  orderDateFrom: "", orderDateTo: "",
+  sortOrder: "Status", perPage: "20",
+  age: "", applicantEmail: "", criminalRecordsFound: "", orderedBy: "",
+};
+
+const FIELD_CONTAINER_STYLE: React.CSSProperties = {
+  background: "#FFFFFF",
+  border: "1px solid #E5E7EB",
+  borderRadius: "4px",
+  padding: "4px 8px",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  height: "46px",
+  boxSizing: "border-box",
+};
+
+const FIELD_LABEL_STYLE: React.CSSProperties = {
+  fontSize: "10px",
+  color: "#777777",
+  fontWeight: 500,
+  fontFamily: '"Segoe UI", Arial, sans-serif',
+  lineHeight: "1.2",
+  textTransform: "none",
+};
+
+const FIELD_INPUT_STYLE: React.CSSProperties = {
+  width: "100%",
+  border: "none",
+  outline: "none",
+  background: "transparent",
+  fontSize: "12px",
+  color: "#333333",
+  fontFamily: '"Segoe UI", Arial, sans-serif',
+  padding: "0",
+  height: "20px",
+};
+
+const FIELD_SELECT_STYLE: React.CSSProperties = {
+  width: "100%",
+  border: "none",
+  outline: "none",
+  background: "transparent",
+  fontSize: "12px",
+  color: "#333333",
+  fontFamily: '"Segoe UI", Arial, sans-serif',
+  padding: "0",
+  height: "20px",
+  appearance: "none",
+  backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
+  backgroundRepeat: "no-repeat",
+  backgroundPosition: "right 0px center",
+  paddingRight: "15px",
+  cursor: "pointer",
+};
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={FIELD_CONTAINER_STYLE}>
+      <label style={FIELD_LABEL_STYLE}>{label}</label>
+      <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+const BADGE_STYLES: Record<SearchStatus, { bg: string; color: string; border: string }> = {
+  CANCELLED: { bg: "#EBF5FF", color: "#0066CC", border: "#C4E1FF" },
+  CLOSED: { bg: "#FDE8E8", color: "#C81E1E", border: "#F8B4B4" },
+  PENDING: { bg: "#FEF08A", color: "#854D0E", border: "#FDE047" },
+  "IN PROGRESS": { bg: "#F3F4F6", color: "#374151", border: "#E5E7EB" },
+};
+
+export function AllOrderDetails() {
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
+  const [page, setPage] = useState(1);
+  const [searched, setSearched] = useState(true);
+  const [showAlert, setShowAlert] = useState(true);
+
+  function set(key: keyof Filters, val: string) {
+    setFilters((prev) => ({ ...prev, [key]: val }));
+  }
+
+  function handleSearch() {
+    setApplied(filters);
+    setPage(1);
+    setSearched(true);
+    setShowAlert(true);
+  }
+
+  function handleReset() {
+    setFilters(EMPTY_FILTERS);
+    setApplied(EMPTY_FILTERS);
+    setPage(1);
+    setSearched(true);
+    setShowAlert(true);
+  }
+
+  const perPage = parseInt(applied.perPage || "20");
+
+  const filtered = ORDERS.filter((o) => {
+    if (applied.searchId && !o.searchId.toLowerCase().includes(applied.searchId.toLowerCase())) return false;
+    if (applied.reportId && !o.reportId.toLowerCase().includes(applied.reportId.toLowerCase())) return false;
+    if (applied.status && o.status !== applied.status) return false;
+    if (applied.searchType && o.verificationType !== applied.searchType) return false;
+    if (applied.firstName && !o.applicantName.split(" ")[0].toLowerCase().includes(applied.firstName.toLowerCase())) return false;
+    if (applied.lastName && !o.applicantName.split(" ").slice(-1)[0].toLowerCase().includes(applied.lastName.toLowerCase())) return false;
+    if (applied.state && o.state && !o.state.toLowerCase().includes(applied.state.toLowerCase())) return false;
+    if (applied.county && o.county && !o.county.toLowerCase().includes(applied.county.toLowerCase())) return false;
+    if (applied.orderedBy && !o.orderedBy.toLowerCase().includes(applied.orderedBy.toLowerCase())) return false;
+    if (applied.orderDateFrom && o.orderDate < applied.orderDateFrom) return false;
+    if (applied.orderDateTo && o.orderDate > applied.orderDateTo) return false;
+    
+    // New fields filtering:
+    if (applied.applicantEmail && o.applicantEmail && !o.applicantEmail.toLowerCase().includes(applied.applicantEmail.toLowerCase())) return false;
+    if (applied.criminalRecordsFound) {
+      const hasRecords = o.criminalRecordsFound && o.criminalRecordsFound !== "None";
+      if (applied.criminalRecordsFound === "yes" && !hasRecords) return false;
+      if (applied.criminalRecordsFound === "no" && hasRecords) return false;
+    }
+    if (applied.age) {
+      if (!o.dob) return false;
+      const birthYear = new Date(o.dob).getFullYear();
+      const age = new Date().getFullYear() - birthYear;
+      if (applied.age === "Under 25" && age >= 25) return false;
+      if (applied.age === "25 - 40" && (age < 25 || age > 40)) return false;
+      if (applied.age === "Over 40" && age <= 40) return false;
+    }
+    return true;
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (applied.sortOrder === "Status") {
+      return a.status.localeCompare(b.status);
+    } else if (applied.sortOrder === "Search ID") {
+      return b.searchId.localeCompare(a.searchId);
+    } else if (applied.sortOrder === "Order Date") {
+      return b.orderDate.localeCompare(a.orderDate);
+    }
+    return b.searchId.localeCompare(a.searchId);
+  });
+
+  const totalPages = Math.ceil(sorted.length / perPage);
+  const paginated = sorted.slice((page - 1) * perPage, page * perPage);
+
+  return (
+    <div
+      style={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        minHeight: 0,
+        fontFamily: '"Segoe UI", Arial, sans-serif',
+      }}
+    >
+      <div
+        style={{
+          flex: 1,
+          padding: "16px 20px",
+          background: "#F5F5F5",
+          overflowY: "auto",
+        }}
+      >
+        {/* Page Title */}
+        <h1
+          style={{
+            fontSize: "20px",
+            fontWeight: 500,
+            color: "rgb(199, 0, 57)",
+            marginBottom: "14px",
+            fontFamily: '"Segoe UI", Arial, sans-serif',
+          }}
+        >
+          All Order Details
+        </h1>
+
+        {/* ── Filters Grid ───────────────────────────────────────────── */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(6, 1fr)",
+            gap: "10px",
+            marginBottom: "16px",
+          }}
+        >
+          {/* Row 1 */}
+          <Field label="Search ID">
+            <input
+              style={FIELD_INPUT_STYLE}
+              value={filters.searchId}
+              onChange={(e) => set("searchId", e.target.value)}
+            />
+          </Field>
+          <Field label="Report ID">
+            <input
+              style={FIELD_INPUT_STYLE}
+              value={filters.reportId}
+              onChange={(e) => set("reportId", e.target.value)}
+            />
+          </Field>
+          <Field label="Status">
+            <select
+              style={FIELD_SELECT_STYLE}
+              value={filters.status}
+              onChange={(e) => set("status", e.target.value)}
+            >
+              <option value="">Any Status</option>
+              <option value="CLOSED">CLOSED</option>
+              <option value="CANCELLED">CANCELLED</option>
+              <option value="PENDING">PENDING</option>
+              <option value="IN PROGRESS">IN PROGRESS</option>
+            </select>
+          </Field>
+          <Field label="Search Type / Name">
+            <select
+              style={FIELD_SELECT_STYLE}
+              value={filters.searchType}
+              onChange={(e) => set("searchType", e.target.value)}
+            >
+              <option value="">All Searches</option>
+              {VERIFICATION_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="First Name">
+            <input
+              style={FIELD_INPUT_STYLE}
+              value={filters.firstName}
+              onChange={(e) => set("firstName", e.target.value)}
+            />
+          </Field>
+          <Field label="Last Name">
+            <input
+              style={FIELD_INPUT_STYLE}
+              value={filters.lastName}
+              onChange={(e) => set("lastName", e.target.value)}
+            />
+          </Field>
+
+          {/* Row 2 */}
+          <Field label="SSN">
+            <input
+              style={FIELD_INPUT_STYLE}
+              value={filters.ssn}
+              onChange={(e) => set("ssn", e.target.value)}
+            />
+          </Field>
+          <Field label="DOB">
+            <input
+              style={FIELD_INPUT_STYLE}
+              value={filters.dob}
+              onChange={(e) => set("dob", e.target.value)}
+            />
+          </Field>
+          <Field label="County">
+            <input
+              style={FIELD_INPUT_STYLE}
+              value={filters.county}
+              onChange={(e) => set("county", e.target.value)}
+            />
+          </Field>
+          <Field label="State">
+            <input
+              style={FIELD_INPUT_STYLE}
+              value={filters.state}
+              onChange={(e) => set("state", e.target.value)}
+            />
+          </Field>
+          <Field label="Order Reference">
+            <input
+              style={FIELD_INPUT_STYLE}
+              value={filters.orderReference}
+              onChange={(e) => set("orderReference", e.target.value)}
+            />
+          </Field>
+          <Field label="Order Date From">
+            <input
+              style={FIELD_INPUT_STYLE}
+              value={filters.orderDateFrom}
+              onChange={(e) => set("orderDateFrom", e.target.value)}
+            />
+          </Field>
+
+          {/* Row 3 */}
+          <Field label="Order Date To">
+            <input
+              style={FIELD_INPUT_STYLE}
+              value={filters.orderDateTo}
+              onChange={(e) => set("orderDateTo", e.target.value)}
+            />
+          </Field>
+          <Field label="Sort Order">
+            <select
+              style={FIELD_SELECT_STYLE}
+              value={filters.sortOrder}
+              onChange={(e) => set("sortOrder", e.target.value)}
+            >
+              <option value="Status">Status</option>
+              <option value="Search ID">Search ID</option>
+              <option value="Order Date">Order Date</option>
+            </select>
+          </Field>
+          <Field label="Searches per page">
+            <select
+              style={FIELD_SELECT_STYLE}
+              value={filters.perPage}
+              onChange={(e) => set("perPage", e.target.value)}
+            >
+              <option value="20">20 Searches</option>
+              <option value="10">10 Searches</option>
+              <option value="50">50 Searches</option>
+              <option value="100">100 Searches</option>
+            </select>
+          </Field>
+          <Field label="Age">
+            <select
+              style={FIELD_SELECT_STYLE}
+              value={filters.age}
+              onChange={(e) => set("age", e.target.value)}
+            >
+              <option value="">All</option>
+              <option value="Under 25">Under 25</option>
+              <option value="25 - 40">25 - 40</option>
+              <option value="Over 40">Over 40</option>
+            </select>
+          </Field>
+          <Field label="Applicant Email">
+            <input
+              style={FIELD_INPUT_STYLE}
+              value={filters.applicantEmail}
+              onChange={(e) => set("applicantEmail", e.target.value)}
+            />
+          </Field>
+          <Field label="Criminal Records Found">
+            <select
+              style={FIELD_SELECT_STYLE}
+              value={filters.criminalRecordsFound}
+              onChange={(e) => set("criminalRecordsFound", e.target.value)}
+            >
+              <option value="">All</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </Field>
+
+          {/* Row 4 */}
+          <Field label="Ordered By">
+            <select
+              style={FIELD_SELECT_STYLE}
+              value={filters.orderedBy}
+              onChange={(e) => set("orderedBy", e.target.value)}
+            >
+              <option value="">All Users</option>
+              <option value="Suresh Ramakoti">Suresh Ramakoti</option>
+              <option value="Admin User">Admin User</option>
+            </select>
+          </Field>
+        </div>
+
+        {/* ── Buttons ────────────────────────────────────────────────── */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "10px",
+            marginBottom: "16px",
+          }}
+        >
+          <button
+            onClick={handleSearch}
+            style={{
+              background: "#C70039",
+              color: "#FFFFFF",
+              border: "none",
+              borderRadius: "4px",
+              padding: "8px 24px",
+              fontSize: "13px",
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: '"Segoe UI", Arial, sans-serif',
+            }}
+          >
+            Search
+          </button>
+          <button
+            onClick={handleReset}
+            style={{
+              background: "#1D1B68",
+              color: "#FFFFFF",
+              border: "none",
+              borderRadius: "4px",
+              padding: "8px 24px",
+              fontSize: "13px",
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: '"Segoe UI", Arial, sans-serif',
+            }}
+          >
+            Reset
+          </button>
+        </div>
+
+        {/* ── Green success alert banner ─────────────────────────────── */}
+        {searched && showAlert && (
+          <div
+            style={{
+              background: "#E8F5E9",
+              border: "1px solid #C8E6C9",
+              borderRadius: "4px",
+              padding: "8px 16px",
+              color: "#2E7D32",
+              fontSize: "12px",
+              fontWeight: 500,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "16px",
+              fontFamily: '"Segoe UI", Arial, sans-serif',
+            }}
+          >
+            <div style={{ flex: 1, textAlign: "center" }}>
+              {sorted.length} Records Found. Page {page} of {Math.max(1, totalPages)}
+            </div>
+            <button
+              onClick={() => setShowAlert(false)}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#2E7D32",
+                cursor: "pointer",
+                fontSize: "14px",
+                fontWeight: "bold",
+                padding: "0",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* ── Search Results Card ─────────────────────────────────────── */}
+        {searched && (
+          <div
+            style={{
+              background: "#FFFFFF",
+              border: "1px solid #E5E7EB",
+              borderRadius: "4px",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+              marginBottom: "20px",
+            }}
+          >
+            {/* Card Header */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "8px 16px",
+                background: "#F5F5F5",
+                borderBottom: "1px solid #E5E7EB",
+                borderTopLeftRadius: "4px",
+                borderTopRightRadius: "4px",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  color: "#333333",
+                  fontFamily: '"Segoe UI", Arial, sans-serif',
+                }}
+              >
+                Search Results
+              </span>
+
+              {/* Page select dropdown */}
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ fontSize: "11px", color: "#6C7589", fontFamily: '"Segoe UI", Arial, sans-serif' }}>Page:</span>
+                <select
+                  value={page}
+                  onChange={(e) => setPage(parseInt(e.target.value))}
+                  style={{
+                    background: "#FFFFFF",
+                    border: "1px solid #D1D5DB",
+                    borderRadius: "4px",
+                    fontSize: "11px",
+                    fontWeight: 500,
+                    padding: "2px 20px 2px 8px",
+                    color: "#333333",
+                    outline: "none",
+                    cursor: "pointer",
+                    fontFamily: '"Segoe UI", Arial, sans-serif',
+                    appearance: "none",
+                    backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%23555555' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 6px center",
+                  }}
+                >
+                  {Array.from({ length: Math.max(1, totalPages) }, (_, i) => i + 1).map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* List Body */}
+            <div>
+              {paginated.length === 0 ? (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "40px",
+                    fontSize: "12px",
+                    color: "#6C7589",
+                  }}
+                >
+                  No records match your filters.
+                </div>
+              ) : (
+                paginated.map((o) => (
+                  <div
+                    key={o.searchId}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "10px 16px",
+                      borderBottom: "1px solid #E5E7EB",
+                      background: "#FFFFFF",
+                      fontFamily: '"Segoe UI", Arial, sans-serif',
+                    }}
+                  >
+                    {/* Left: Search ID */}
+                    <div style={{ fontSize: "12px", width: "150px" }}>
+                      <span style={{ color: "#888888", fontWeight: 400 }}>Search ID: </span>
+                      <span style={{ color: "#333333", fontWeight: 600 }}>{o.searchId}</span>
+                    </div>
+
+                    {/* Center: Applicant name + Verification type */}
+                    <div style={{ fontSize: "12px", flex: 1, textAlign: "left", paddingLeft: "20px" }}>
+                      <span style={{ color: "#333333", fontWeight: 600 }}>{o.applicantName}</span>
+                      <span style={{ color: "#555555" }}>: {o.verificationType}</span>
+                    </div>
+
+                    {/* Right: Status badge */}
+                    <div>
+                      <StatusBadge status={o.status} />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <Footer />
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: SearchStatus }) {
+  const s = BADGE_STYLES[status] || { bg: "#F3F4F6", color: "#374151", border: "#E5E7EB" };
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        padding: "2px 8px",
+        borderRadius: "3px",
+        fontSize: "10px",
+        fontWeight: 600,
+        background: s.bg,
+        color: s.color,
+        border: `1px solid ${s.border}`,
+        whiteSpace: "nowrap",
+        fontFamily: '"Segoe UI", Arial, sans-serif',
+        letterSpacing: "0.02em",
+      }}
+    >
+      {status}
+    </span>
+  );
+}
