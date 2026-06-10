@@ -48,7 +48,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
         display: "flex",
         flexDirection: "column",
         minHeight: 0,
-        fontFamily: "Segoe UI, Arial, sans-serif",
+
       }}
     >
       <div
@@ -64,9 +64,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             fontSize: "20px",
             fontWeight: 500,
             color: "rgb(199, 0, 57)",
-            marginBottom: "0px",
-            fontFamily: "\"Segoe UI\", Arial, sans-serif",
+            marginBottom: "18px",
+
           }}
+
+
         >
           {isInvitation ? "Order /w Invitation" : "Order"}
         </h1>
@@ -75,14 +77,15 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
         {showInvitationBanner && bannerVisible && (
           <div
             style={{
+              position: "relative",
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
+              justifyContent: "center",
               background: "#EFF6FF",
               border: "1px solid #BFDBFE",
               borderRadius: "4px",
-              padding: "8px 16px",
-              marginBottom: "16px",
+              padding: "10px 40px",
+              marginBottom: "25px",
               fontSize: "13px",
               color: "#1D4ED8",
             }}
@@ -94,6 +97,10 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             <button
               onClick={() => setBannerVisible(false)}
               style={{
+                position: "absolute",
+                right: "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
                 color: "#93C5FD",
                 fontSize: "18px",
                 lineHeight: 1,
@@ -136,11 +143,12 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             style={{
               display: "grid",
               gridTemplateColumns: "1fr 1fr 1fr",
-              padding: "8px 12px 10px 12px",
-              gap: "4px 0",
+              padding: "12px 12px 12px 12px",
+              gap: "0",
+              alignItems: "start",
             }}
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {col1.map((pkg) => (
                 <PackageRow
                   key={pkg.id}
@@ -150,7 +158,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 />
               ))}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {col2.map((pkg) => (
                 <PackageRow
                   key={pkg.id}
@@ -160,7 +168,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 />
               ))}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {col3.map((pkg) => (
                 <PackageRow
                   key={pkg.id}
@@ -277,7 +285,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             fontSize: "14px",
             color: "#555555",
             cursor: "pointer",
-            fontFamily: "Segoe UI, Arial, sans-serif",
+
             justifyContent: "center",
           }}
         >
@@ -300,7 +308,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             fontSize: "14px",
             color: "#FFFFFF",
             cursor: "pointer",
-            fontFamily: "Segoe UI, Arial, sans-serif",
+
             fontWeight: 500,
             justifyContent: "center",
           }}
@@ -354,7 +362,7 @@ function PackageRow({
           padding: "1px 5px",
           cursor: "pointer",
           whiteSpace: "nowrap",
-          fontFamily: "\"Segoe UI\", Arial, sans-serif",
+
         }}
       >
         {pkg.whatsIncluded}

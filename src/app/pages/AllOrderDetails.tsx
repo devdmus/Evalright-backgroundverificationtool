@@ -49,7 +49,6 @@ const FIELD_LABEL_STYLE: React.CSSProperties = {
   fontSize: "10px",
   color: "#777777",
   fontWeight: 500,
-  fontFamily: '"Segoe UI", Arial, sans-serif',
   lineHeight: "1.2",
   textTransform: "none",
 };
@@ -61,7 +60,7 @@ const FIELD_INPUT_STYLE: React.CSSProperties = {
   background: "transparent",
   fontSize: "12px",
   color: "#333333",
-  fontFamily: '"Segoe UI", Arial, sans-serif',
+
   padding: "0",
   height: "20px",
 };
@@ -73,7 +72,7 @@ const FIELD_SELECT_STYLE: React.CSSProperties = {
   background: "transparent",
   fontSize: "12px",
   color: "#333333",
-  fontFamily: '"Segoe UI", Arial, sans-serif',
+
   padding: "0",
   height: "20px",
   appearance: "none",
@@ -142,7 +141,7 @@ export function AllOrderDetails() {
     if (applied.orderedBy && !o.orderedBy.toLowerCase().includes(applied.orderedBy.toLowerCase())) return false;
     if (applied.orderDateFrom && o.orderDate < applied.orderDateFrom) return false;
     if (applied.orderDateTo && o.orderDate > applied.orderDateTo) return false;
-    
+
     // New fields filtering:
     if (applied.applicantEmail && o.applicantEmail && !o.applicantEmail.toLowerCase().includes(applied.applicantEmail.toLowerCase())) return false;
     if (applied.criminalRecordsFound) {
@@ -182,7 +181,7 @@ export function AllOrderDetails() {
         display: "flex",
         flexDirection: "column",
         minHeight: 0,
-        fontFamily: '"Segoe UI", Arial, sans-serif',
+
       }}
     >
       <div
@@ -200,7 +199,7 @@ export function AllOrderDetails() {
             fontWeight: 500,
             color: "rgb(199, 0, 57)",
             marginBottom: "14px",
-            fontFamily: '"Segoe UI", Arial, sans-serif',
+
           }}
         >
           All Order Details
@@ -412,7 +411,7 @@ export function AllOrderDetails() {
               fontSize: "13px",
               fontWeight: 600,
               cursor: "pointer",
-              fontFamily: '"Segoe UI", Arial, sans-serif',
+
             }}
           >
             Search
@@ -428,7 +427,7 @@ export function AllOrderDetails() {
               fontSize: "13px",
               fontWeight: 600,
               cursor: "pointer",
-              fontFamily: '"Segoe UI", Arial, sans-serif',
+
             }}
           >
             Reset
@@ -450,7 +449,7 @@ export function AllOrderDetails() {
               justifyContent: "space-between",
               alignItems: "center",
               marginBottom: "16px",
-              fontFamily: '"Segoe UI", Arial, sans-serif',
+
             }}
           >
             <div style={{ flex: 1, textAlign: "center" }}>
@@ -504,7 +503,7 @@ export function AllOrderDetails() {
                   fontSize: "12px",
                   fontWeight: 600,
                   color: "#333333",
-                  fontFamily: '"Segoe UI", Arial, sans-serif',
+
                 }}
               >
                 Search Results
@@ -512,7 +511,7 @@ export function AllOrderDetails() {
 
               {/* Page select dropdown */}
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ fontSize: "11px", color: "#6C7589", fontFamily: '"Segoe UI", Arial, sans-serif' }}>Page:</span>
+                <span style={{ fontSize: "11px", color: "#6C7589", }}>Page:</span>
                 <select
                   value={page}
                   onChange={(e) => setPage(parseInt(e.target.value))}
@@ -526,7 +525,7 @@ export function AllOrderDetails() {
                     color: "#333333",
                     outline: "none",
                     cursor: "pointer",
-                    fontFamily: '"Segoe UI", Arial, sans-serif',
+
                     appearance: "none",
                     backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%23555555' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
                     backgroundRepeat: "no-repeat",
@@ -566,7 +565,7 @@ export function AllOrderDetails() {
                       padding: "10px 16px",
                       borderBottom: "1px solid #E5E7EB",
                       background: "#FFFFFF",
-                      fontFamily: '"Segoe UI", Arial, sans-serif',
+
                     }}
                   >
                     {/* Left: Search ID */}
@@ -612,7 +611,7 @@ function StatusBadge({ status }: { status: SearchStatus }) {
         color: s.color,
         border: `1px solid ${s.border}`,
         whiteSpace: "nowrap",
-        fontFamily: '"Segoe UI", Arial, sans-serif',
+
         letterSpacing: "0.02em",
       }}
     >

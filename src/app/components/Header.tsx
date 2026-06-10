@@ -17,7 +17,7 @@ export function Header({ userName, onMenuToggle }: HeaderProps) {
         alignItems: "center",
         background: "rgb(255, 255, 255)",
         borderBottom: "1px solid rgb(229, 231, 235)",
-        fontFamily: "\"Segoe UI\", Arial, sans-serif",
+
         position: "sticky",
         top: "0px",
         zIndex: 20,
@@ -27,13 +27,13 @@ export function Header({ userName, onMenuToggle }: HeaderProps) {
       {/* Logo area – matches sidebar width */}
       <div
         style={{
-          width: "180px",
-          minWidth: "180px",
+          width: "220px",
+          minWidth: "220px",
           display: "flex",
           alignItems: "center",
           paddingLeft: "14px",
           height: "100%",
-          borderRight: "1px solid #E5E7EB",
+
         }}
       >
         <img
@@ -92,7 +92,7 @@ export function Header({ userName, onMenuToggle }: HeaderProps) {
             fontSize: "13px",
             color: "#9CA3AF",
             width: "100%",
-            fontFamily: "Segoe UI, Arial, sans-serif",
+
           }}
           placeholder="Search..."
         />
@@ -139,7 +139,7 @@ export function Header({ userName, onMenuToggle }: HeaderProps) {
             color: "#333333",
             fontWeight: 500,
             whiteSpace: "nowrap",
-            fontFamily: "Segoe UI, Arial, sans-serif",
+
             flex: 1,
           }}
         >

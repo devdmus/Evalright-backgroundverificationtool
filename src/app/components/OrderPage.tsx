@@ -43,19 +43,32 @@ export function OrderPage({
 
   return (
     <main className="flex-1 flex flex-col min-h-0">
-      <div className="flex-1 p-6">
-        <h1 style={{ fontSize: "20px", fontWeight: 500, color: "rgb(199, 0, 57)", marginBottom: "0px", fontFamily: "\"Segoe UI\", Arial, sans-serif" }}>{title}</h1>
+      <div className="flex-1" style={{ padding: "24px 28px" }}>
+        <h1 style={{ fontSize: "20px", fontWeight: 500, color: "rgb(199, 0, 57)", marginBottom: "16px", marginTop: "0px", }}>{title}</h1>
 
         {/* Invitation banner */}
         {showInvitationBanner && bannerVisible && (
-          <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded px-4 py-2 mb-4 text-blue-700 text-xs">
-            <div className="flex items-center gap-2">
-              <span className="text-blue-500">ⓘ</span>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: "#EFF6FF",
+              border: "1px solid #BFDBFE",
+              borderRadius: "4px",
+              padding: "10px 16px",
+              marginBottom: "16px",
+              fontSize: "12px",
+              color: "#1D4ED8",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ color: "#3B82F6" }}>ⓘ</span>
               <span>This is an applicant invitation order.</span>
             </div>
             <button
               onClick={() => setBannerVisible(false)}
-              className="text-blue-400 hover:text-blue-600 text-base leading-none"
+              style={{ background: "none", border: "none", cursor: "pointer", color: "#93C5FD", fontSize: "16px", lineHeight: 1, padding: "0 2px" }}
             >
               ×
             </button>
@@ -63,14 +76,28 @@ export function OrderPage({
         )}
 
         {/* Packages section */}
-        <div className="border border-gray-200 rounded">
-          <div className="bg-gray-100 px-4 py-2 text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">
+        <div style={{ border: "1px solid #E5E7EB", borderRadius: "4px" }}>
+          {/* Header */}
+          <div
+            style={{
+              background: "#F3F4F6",
+              padding: "8px 16px",
+              fontSize: "11px",
+              fontWeight: 600,
+              color: "#6B7280",
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              borderBottom: "1px solid #E5E7EB",
+            }}
+          >
             Packages
           </div>
-          <div className="p-4">
-            <div className="grid grid-cols-3 gap-x-8 gap-y-2">
+
+          {/* Package grid */}
+          <div style={{ padding: "16px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px 32px" }}>
               {/* Column 1 */}
-              <div className="flex flex-col gap-2">
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 {col1.map((pkg) => (
                   <PackageRow
                     key={pkg.id}
@@ -81,7 +108,7 @@ export function OrderPage({
                 ))}
               </div>
               {/* Column 2 */}
-              <div className="flex flex-col gap-2">
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 {col2.map((pkg) => (
                   <PackageRow
                     key={pkg.id}
@@ -92,7 +119,7 @@ export function OrderPage({
                 ))}
               </div>
               {/* Column 3 */}
-              <div className="flex flex-col gap-2">
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 {col3.map((pkg) => (
                   <PackageRow
                     key={pkg.id}
@@ -106,8 +133,22 @@ export function OrderPage({
           </div>
 
           {/* A la carte */}
-          <div className="border-t border-gray-200 px-4 py-2">
-            <button className="text-xs text-red-600 hover:text-red-700 font-semibold flex items-center gap-1">
+          <div style={{ borderTop: "1px solid #E5E7EB", padding: "8px 16px" }}>
+            <button
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "11px",
+                fontWeight: 700,
+                color: "#C70039",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                padding: 0,
+
+              }}
+            >
               {aLaCarteLabel}
             </button>
           </div>
@@ -115,24 +156,68 @@ export function OrderPage({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-center gap-4 py-6">
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "16px",
+          padding: "32px 0",
+        }}
+      >
         <button
           onClick={startOver}
-          className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-800"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "12px",
+            color: "#555555",
+
+          }}
         >
           <RotateCcw size={13} />
           Start Over
         </button>
-        <button className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-xs">
+        <button
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            background: "#C70039",
+            border: "none",
+            cursor: "pointer",
+            color: "#ffffff",
+            padding: "8px 18px",
+            borderRadius: "4px",
+            fontSize: "12px",
+            fontWeight: 500,
+
+          }}
+        >
           Next
           <ArrowRight size={13} />
         </button>
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 px-6 py-3 flex items-center justify-between text-[10px] text-gray-400">
+      <footer
+        style={{
+          borderTop: "1px solid #E5E7EB",
+          padding: "10px 28px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          fontSize: "10px",
+          color: "#9CA3AF",
+
+        }}
+      >
         <span>© 2026 EvalRight</span>
-        <div className="flex items-center gap-4">
+        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
           <span>📞 1-800-935-9025</span>
           <span>✉ support@evalright.com</span>
         </div>

@@ -12,7 +12,6 @@ export function Footer() {
         justifyContent: "space-between",
         flexShrink: 0,
         background: "#FFFFFF",
-        fontFamily: "Segoe UI, Arial, sans-serif",
         fontSize: "14px",
         color: "#777777",
       }}
