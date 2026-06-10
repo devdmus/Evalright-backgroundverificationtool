@@ -7,6 +7,11 @@ import { AllOrderDetails } from "./pages/AllOrderDetails";
 import { OrderList } from "./pages/OrderList";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
 import { HomePage } from "./pages/HomePage";
+import { ApplicantManager } from "./pages/ApplicantManager";
+import { ManageAccount } from "./pages/ManageAccount";
+import { ManageUsers } from "./pages/ManageUsers";
+import { BulkOrderRequests } from "./pages/BulkOrderRequests";
+// import { ChatWidget } from "./components/ChatWidget";
 
 const USER_NAME = "Suresh Ramakoti";
 
@@ -25,15 +30,21 @@ const PAGE_TITLES: Record<PageKey, string> = {
   "reports-analytics": "Analytics",
   "reports-hr": "HR Software Integrations",
   "reports-disputes": "Disputes List",
-  applicants: "Applicants",
-  "account-settings": "Account Settings",
+  applicants: "Applicant Manager",
+  "applicant-invite-templates": "Applicant Invite Templates",
+  "applicant-statistics": "Applicant Statistics",
+  "account-settings": "Manage Account",
+  "manage-users": "Manage Users",
+  "manage-branches": "Manage Branches",
   "drug-screening": "Drug Screening",
   invoices: "Invoices",
-  "support-center": "Support Center",
+  "support-center": "Bulk Order Requests",
+  "forms-documents": "Forms & Documents",
+  "email-activity": "Email Activity Log",
 };
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<PageKey>("order");
+  const [currentPage, setCurrentPage] = useState<PageKey>("home");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Dynamically update browser tab title
@@ -56,6 +67,14 @@ export default function App() {
         return <AllOrderDetails />;
       case "reports-orders-list":
         return <ReportsOrders />;
+      case "applicants":
+        return <ApplicantManager />;
+      case "account-settings":
+        return <ManageAccount />;
+      case "manage-users":
+        return <ManageUsers />;
+      case "support-center":
+        return <BulkOrderRequests />;
       default:
         return <PlaceholderPage title={PAGE_TITLES[currentPage] ?? currentPage} />;
     }
@@ -81,6 +100,9 @@ export default function App() {
           {renderPage()}
         </div>
       </div>
+
+      {/* Floating Chat Widget */}
+      {/* <ChatWidget /> */}
     </div>
   );
 }
