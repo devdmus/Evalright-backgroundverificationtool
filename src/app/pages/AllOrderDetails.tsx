@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Eye, Upload } from "lucide-react";
 import { ORDERS, type SearchStatus, type OrderRecord, VERIFICATION_TYPES } from "../data/mockData";
 import { Footer } from "../components/Footer";
 
@@ -107,6 +108,7 @@ export function AllOrderDetails() {
   const [page, setPage] = useState(1);
   const [searched, setSearched] = useState(true);
   const [showAlert, setShowAlert] = useState(true);
+  const [expandedSearchId, setExpandedSearchId] = useState<string | null>(null);
 
   function set(key: keyof Filters, val: string) {
     setFilters((prev) => ({ ...prev, [key]: val }));
@@ -556,34 +558,107 @@ export function AllOrderDetails() {
                 </div>
               ) : (
                 paginated.map((o) => (
-                  <div
-                    key={o.searchId}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "10px 16px",
-                      borderBottom: "1px solid #E5E7EB",
-                      background: "#FFFFFF",
+                  <div key={o.searchId} style={{ display: "flex", flexDirection: "column" }}>
+                    <div
+                      onClick={() => setExpandedSearchId(expandedSearchId === o.searchId ? null : o.searchId)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "10px 16px",
+                        borderBottom: "1px solid #E5E7EB",
+                        background: "#FFFFFF",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {/* Left: Search ID */}
+                      <div style={{ fontSize: "12px", width: "150px" }}>
+                        <span style={{ color: "#888888", fontWeight: 400 }}>Search ID: </span>
+                        <span style={{ color: "#333333", fontWeight: 600 }}>{o.searchId}</span>
+                      </div>
 
-                    }}
-                  >
-                    {/* Left: Search ID */}
-                    <div style={{ fontSize: "12px", width: "150px" }}>
-                      <span style={{ color: "#888888", fontWeight: 400 }}>Search ID: </span>
-                      <span style={{ color: "#333333", fontWeight: 600 }}>{o.searchId}</span>
-                    </div>
+                      {/* Center: Applicant name + Verification type */}
+                      <div style={{ fontSize: "12px", flex: 1, textAlign: "left", paddingLeft: "20px" }}>
+                        <span style={{ color: "#333333", fontWeight: 600 }}>{o.applicantName}</span>
+                        <span style={{ color: "#555555" }}> : {o.verificationType}</span>
+                      </div>
 
-                    {/* Center: Applicant name + Verification type */}
-                    <div style={{ fontSize: "12px", flex: 1, textAlign: "left", paddingLeft: "20px" }}>
-                      <span style={{ color: "#333333", fontWeight: 600 }}>{o.applicantName}</span>
-                      <span style={{ color: "#555555" }}>: {o.verificationType}</span>
+                      {/* Right: Status badge */}
+                      <div>
+                        <StatusBadge status={o.status} />
+                      </div>
                     </div>
+                    {expandedSearchId === o.searchId && (
+                      <div style={{ padding: "16px 20px", background: "#FFFFFF", borderBottom: "1px solid #E5E7EB", fontSize: "12px" }}>
+                        {/* Row 1: Order Details */}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "10px", background: "#F5F5F5", padding: "10px", marginBottom: "16px", color: "#555" }}>
+                          <div><strong style={{ fontWeight: 600 }}>Order Date:</strong> {o.orderDate}</div>
+                          <div><strong style={{ fontWeight: 600 }}>DOB:</strong> {o.dob || "05/17/1996"}</div>
+                          <div><strong style={{ fontWeight: 600 }}>SSN:</strong> {o.ssn || "111-11-1111"}</div>
+                          <div><strong style={{ fontWeight: 600 }}>Location:</strong> {o.county ? `${o.county}, ` : ""}{o.state || "El Paso, TX 79999"}</div>
+                        </div>
 
-                    {/* Right: Status badge */}
-                    <div>
-                      <StatusBadge status={o.status} />
-                    </div>
+                        {/* Row 2: Links */}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "10px", marginBottom: "12px" }}>
+                          <div style={{ color: "#555" }}>Order by: {o.orderedBy}</div>
+                          <div style={{ color: "rgb(199, 0, 57)", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <Eye size={13} /> View Report #{o.reportId}
+                          </div>
+                          <div style={{ color: "rgb(199, 0, 57)", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <Eye size={13} /> View Search #{o.searchId}
+                          </div>
+                          <div style={{ color: "rgb(199, 0, 57)", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <Eye size={13} /> View Pricing
+                          </div>
+                        </div>
+
+                        {/* Row 3: Links */}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "10px", marginBottom: "24px" }}>
+                          <div style={{ color: "rgb(199, 0, 57)", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <Upload size={13} /> Upload Document
+                          </div>
+                          <div style={{ color: "rgb(199, 0, 57)", cursor: "pointer" }}>+ Add Search to this Report</div>
+                          <div style={{ gridColumn: "3 / 5", color: "rgb(199, 0, 57)", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <Eye size={13} /> View Employment Verification Info
+                          </div>
+                        </div>
+
+                        {/* Files Uploaded Section */}
+                        <div style={{ background: "#D9D9D9", padding: "6px 12px", fontWeight: 600, color: "#555", marginBottom: "12px" }}>
+                          FILES UPLOADED
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px", paddingLeft: "12px", color: "#555" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between" }}>
+                            <span>#1 Authorization_Disclosure_Form_{o.applicantName.replace(" ", "_")}_07-15-2025.pdf</span>
+                            <span style={{ color: "#888" }}>Type: PDF | E-Signed on: 2025-07-15 13:54:18 - Online (Order /w Invite)</span>
+                          </div>
+                          <div style={{ display: "flex", justifyContent: "space-between" }}>
+                            <span>#2 Authorization_Disclosure_Form_Suresh_Kumar_01-18-2024.pdf</span>
+                            <span style={{ color: "#888" }}>Type: PDF | E-Signed on: 2024-01-18 14:12:51 - Online (Order /w Invite Process)</span>
+                          </div>
+                        </div>
+
+                        {/* Upload File Section */}
+                        <div style={{ background: "#D9D9D9", padding: "6px 12px", fontWeight: 600, color: "#555", marginBottom: "12px" }}>
+                          SELECT A FILE TO UPLOAD
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "12px", paddingLeft: "12px" }}>
+                          <div>
+                            <input type="file" id={`upload-${o.searchId}`} style={{ display: "none" }} />
+                            <label htmlFor={`upload-${o.searchId}`} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "12px" }}>
+                              <div style={{ padding: "6px 16px", border: "1px solid #D1D5DB", background: "#FFFFFF", borderRadius: "3px", color: "#333" }}>Choose File</div>
+                              <span style={{ color: "#888" }}>No file chosen</span>
+                            </label>
+                            <div style={{ fontSize: "11px", color: "#888", marginTop: "8px" }}>Allowed File Extensions: jpg/jpeg, png, doc/docx, pdf</div>
+                          </div>
+                          <div>
+                            <button style={{ background: "rgb(199, 0, 57)", color: "white", border: "none", padding: "8px 16px", borderRadius: "4px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontWeight: 500 }}>
+                              Upload File <Upload size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))
               )}

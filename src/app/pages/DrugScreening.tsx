@@ -1,28 +1,29 @@
 import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, ArrowUpDown, Eye, UserPlus, MoreVertical } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, ArrowUpDown } from "lucide-react";
 import { Footer } from "../components/Footer";
 
-interface Applicant {
-  inviteId: string;
-  name: string;
-  email: string;
-  dateCreated: string;
-  status: "Active" | "Complete" | "Expired/Other";
-  emailActivity: string;
+interface DrugScreen {
+  orderId: string;
+  applicant: string;
+  search: string;
+  orderDate: string;
+  regId: string;
+  status: string;
+  findLabs: string;
 }
 
-export function ApplicantManager() {
-  const [activeTab, setActiveTab] = useState<"Active" | "Complete" | "Expired/Other">("Active");
+export function DrugScreening() {
+  const [activeTab, setActiveTab] = useState<"Pending Drug Screens" | "Completed Drug Screens">("Pending Drug Screens");
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
-  const [applicants] = useState<Applicant[]>([]); // Initially empty to match screenshot
+  const [drugScreens] = useState<DrugScreen[]>([]); // Initially empty to match screenshot
 
   // Sorting state
-  const [sortField, setSortField] = useState<keyof Applicant | null>(null);
+  const [sortField, setSortField] = useState<keyof DrugScreen | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
 
-  const handleSort = (field: keyof Applicant) => {
+  const handleSort = (field: keyof DrugScreen) => {
     if (sortField === field) {
       setSortAsc(!sortAsc);
     } else {
@@ -32,24 +33,23 @@ export function ApplicantManager() {
   };
 
   // Filter and sort logic
-  const processedApplicants = useMemo(() => {
-    // 1. Filter by Tab
-    let result = applicants.filter((a) => a.status === activeTab);
+  const processedScreens = useMemo(() => {
+    let result = [...drugScreens];
 
-    // 2. Filter by Search Query
+    // Filter by Search Query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
         (a) =>
-          a.inviteId.toLowerCase().includes(query) ||
-          a.name.toLowerCase().includes(query) ||
-          a.email.toLowerCase().includes(query) ||
-          a.dateCreated.toLowerCase().includes(query) ||
+          a.orderId.toLowerCase().includes(query) ||
+          a.applicant.toLowerCase().includes(query) ||
+          a.search.toLowerCase().includes(query) ||
+          a.orderDate.toLowerCase().includes(query) ||
           a.status.toLowerCase().includes(query)
       );
     }
 
-    // 3. Sort
+    // Sort
     if (sortField) {
       result = [...result].sort((a, b) => {
         const valA = a[sortField];
@@ -61,23 +61,22 @@ export function ApplicantManager() {
     }
 
     return result;
-  }, [applicants, activeTab, searchQuery, sortField, sortAsc]);
+  }, [drugScreens, searchQuery, sortField, sortAsc]);
 
   // Pagination calculations
-  const totalEntries = processedApplicants.length;
+  const totalEntries = processedScreens.length;
   const totalPages = Math.max(1, Math.ceil(totalEntries / pageSize));
   const startIndex = totalEntries === 0 ? 0 : (page - 1) * pageSize + 1;
   const endIndex = Math.min(page * pageSize, totalEntries);
 
-  const paginatedApplicants = useMemo(() => {
-    return processedApplicants.slice((page - 1) * pageSize, page * pageSize);
-  }, [processedApplicants, page, pageSize]);
+  const paginatedScreens = useMemo(() => {
+    return processedScreens.slice((page - 1) * pageSize, page * pageSize);
+  }, [processedScreens, page, pageSize]);
 
   return (
     <div
       className="flex-1 flex flex-col min-h-0"
       style={{
-
         background: "#F6F6F6",
       }}
     >
@@ -96,7 +95,7 @@ export function ApplicantManager() {
             marginBottom: "20px",
           }}
         >
-          Applicant Manager
+          Drug Screen Dashboard
         </h1>
 
         {/* Tab Navigation */}
@@ -104,10 +103,10 @@ export function ApplicantManager() {
           style={{
             display: "flex",
             borderBottom: "1px solid #E0E0E0",
-            marginBottom: "16px",
+            marginBottom: "20px",
           }}
         >
-          {(["Active", "Complete", "Expired/Other"] as const).map((tab) => {
+          {(["Pending Drug Screens", "Completed Drug Screens"] as const).map((tab) => {
             const isActive = activeTab === tab;
             return (
               <button
@@ -141,16 +140,17 @@ export function ApplicantManager() {
           })}
         </div>
 
-        {/* Subtitle Description */}
+        {/* Tab Content Title */}
         <p
           style={{
-            fontSize: "12px",
-            color: "#8A8A8A",
-            marginBottom: "20px",
+            fontSize: "14px",
+            fontWeight: 500,
+            color: "#555555",
+            marginBottom: "16px",
             marginTop: "0",
           }}
         >
-          Manage your applicants efficiently with status-based tabs.
+          {activeTab}
         </p>
 
         {/* Table Container Card */}
@@ -230,7 +230,6 @@ export function ApplicantManager() {
                   fontSize: "12px",
                   color: "#333333",
                   width: "100%",
-
                 }}
               />
             </div>
@@ -254,13 +253,13 @@ export function ApplicantManager() {
                   }}
                 >
                   {[
-                    { label: "Invite ID", field: "inviteId" as keyof Applicant, sortable: true },
-                    { label: "Applicant Name", field: "name" as keyof Applicant, sortable: true },
-                    { label: "Email", field: "email" as keyof Applicant, sortable: true },
-                    { label: "Date Created", field: "dateCreated" as keyof Applicant, sortable: true },
-                    { label: "Status", field: "status" as keyof Applicant, sortable: true },
-                    { label: "Email Activity", field: null, sortable: false },
-                    { label: "Actions", field: null, sortable: false },
+                    { label: "Order ID", field: "orderId" as keyof DrugScreen, sortable: true },
+                    { label: "Applicant", field: "applicant" as keyof DrugScreen, sortable: true },
+                    { label: "Search", field: "search" as keyof DrugScreen, sortable: true },
+                    { label: "Order Date", field: "orderDate" as keyof DrugScreen, sortable: true },
+                    { label: "Reg. ID", field: "regId" as keyof DrugScreen, sortable: true },
+                    { label: "Status", field: "status" as keyof DrugScreen, sortable: true },
+                    { label: "Find Labs", field: "findLabs" as keyof DrugScreen, sortable: true },
                   ].map((col, idx) => (
                     <th
                       key={idx}
@@ -275,10 +274,10 @@ export function ApplicantManager() {
                         userSelect: "none",
                       }}
                       onMouseEnter={(e) => {
-                        if (col.sortable) e.currentTarget.style.background = "#F3F4F6";
+                         if (col.sortable) e.currentTarget.style.background = "#F3F4F6";
                       }}
                       onMouseLeave={(e) => {
-                        if (col.sortable) e.currentTarget.style.background = "transparent";
+                         if (col.sortable) e.currentTarget.style.background = "transparent";
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px" }}>
@@ -297,12 +296,12 @@ export function ApplicantManager() {
                 </tr>
               </thead>
               <tbody>
-                {paginatedApplicants.length === 0 ? (
+                {paginatedScreens.length === 0 ? (
                   <tr>
                     <td
                       colSpan={7}
                       style={{
-                        padding: "16px",
+                        padding: "24px 16px",
                         textAlign: "center",
                         fontSize: "12px",
                         color: "#8A8A8A",
@@ -313,9 +312,9 @@ export function ApplicantManager() {
                     </td>
                   </tr>
                 ) : (
-                  paginatedApplicants.map((applicant, idx) => (
+                  paginatedScreens.map((screen, idx) => (
                     <tr
-                      key={applicant.inviteId}
+                      key={idx}
                       style={{
                         background: idx % 2 === 0 ? "#FFFFFF" : "#FAFAFA",
                         borderBottom: "1px solid #F3F4F6",
@@ -325,102 +324,25 @@ export function ApplicantManager() {
                       onMouseLeave={(e) => (e.currentTarget.style.background = idx % 2 === 0 ? "#FFFFFF" : "#FAFAFA")}
                     >
                       <td style={{ padding: "10px 14px", fontSize: "12px", color: "rgb(199, 0, 57)", fontWeight: 500 }}>
-                        {applicant.inviteId}
+                        {screen.orderId}
                       </td>
                       <td style={{ padding: "10px 14px", fontSize: "12px", color: "#333333", fontWeight: 500 }}>
-                        {applicant.name}
+                        {screen.applicant}
                       </td>
                       <td style={{ padding: "10px 14px", fontSize: "12px", color: "#555555" }}>
-                        {applicant.email}
+                        {screen.search}
                       </td>
                       <td style={{ padding: "10px 14px", fontSize: "12px", color: "#555555" }}>
-                        {applicant.dateCreated}
+                        {screen.orderDate}
                       </td>
-                      <td style={{ padding: "10px 14px" }}>
-                        <span
-                          style={{
-                            display: "inline-block",
-                            padding: "2px 8px",
-                            borderRadius: "12px",
-                            fontSize: "10px",
-                            fontWeight: 600,
-                            background:
-                              applicant.status === "Complete"
-                                ? "#E6F4EA"
-                                : applicant.status === "Active"
-                                  ? "#E8F0FE"
-                                  : "#FCE8E6",
-                            color:
-                              applicant.status === "Complete"
-                                ? "#137333"
-                                : applicant.status === "Active"
-                                  ? "#1A73E8"
-                                  : "#C5221F",
-                            border: `1px solid ${applicant.status === "Complete"
-                                ? "#CEEAD6"
-                                : applicant.status === "Active"
-                                  ? "#D2E3FC"
-                                  : "#FAD2CF"
-                              }`,
-                          }}
-                        >
-                          {applicant.status}
-                        </span>
+                      <td style={{ padding: "10px 14px", fontSize: "12px", color: "#555555" }}>
+                        {screen.regId}
+                      </td>
+                      <td style={{ padding: "10px 14px", fontSize: "12px", color: "#555555" }}>
+                        {screen.status}
                       </td>
                       <td style={{ padding: "10px 14px", fontSize: "12px", color: "#666666" }}>
-                        {applicant.emailActivity}
-                      </td>
-                      <td style={{ padding: "10px 14px" }}>
-                        <div style={{ display: "flex", gap: "8px" }}>
-                          <button
-                            title="View Applicant"
-                            style={{
-                              background: "none",
-                              border: "none",
-                              cursor: "pointer",
-                              color: "#666666",
-                              padding: "2px",
-                              display: "flex",
-                              alignItems: "center",
-                            }}
-                            onMouseEnter={(e) => (e.currentTarget.style.color = "rgb(199, 0, 57)")}
-                            onMouseLeave={(e) => (e.currentTarget.style.color = "#666666")}
-                          >
-                            <Eye size={14} />
-                          </button>
-                          <button
-                            title="Resend Invite"
-                            style={{
-                              background: "none",
-                              border: "none",
-                              cursor: "pointer",
-                              color: "#666666",
-                              padding: "2px",
-                              display: "flex",
-                              alignItems: "center",
-                            }}
-                            onMouseEnter={(e) => (e.currentTarget.style.color = "rgb(199, 0, 57)")}
-                            onMouseLeave={(e) => (e.currentTarget.style.color = "#666666")}
-                          >
-                            <UserPlus size={14} />
-                          </button>
-                          <button
-                            title="More Actions"
-                            style={{
-                              background: "none",
-                              border: "none",
-                              cursor: "pointer",
-                              color: "#666666",
-                              padding: "2px",
-                              display: "flex",
-                              alignItems: "center",
-                            }}
-                            onMouseEnter={(e) => (e.currentTarget.style.color = "rgb(199, 0, 57)")}
-                            onMouseLeave={(e) => (e.currentTarget.style.color = "#666666")}
-                          >
-                            <MoreVertical size={14} />
-                          </button>
-                        </div>
+                        {screen.findLabs}
                       </td>
                     </tr>
                   ))
@@ -487,7 +409,6 @@ export function ApplicantManager() {
 
               {/* Page Number Button */}
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
-                // Only render pages near current page for cleaner paginator if totalPages is large
                 if (totalPages > 5 && Math.abs(p - page) > 1 && p !== 1 && p !== totalPages) {
                   if (p === 2 || p === totalPages - 1) {
                     return <span key={p} style={{ padding: "2px 6px", fontSize: "11px", color: "#9CA3AF" }}>...</span>;

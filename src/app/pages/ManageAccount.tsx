@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, CheckCircle2 } from "lucide-react";
+import { ChevronDown, CheckCircle2, Eye, Circle } from "lucide-react";
 import { Footer } from "../components/Footer";
 
 const US_STATES = [
@@ -22,6 +22,14 @@ export function ManageAccount() {
   const [country, setCountry] = useState("United States of America");
   const [zipCode, setZipCode] = useState("60504");
 
+  // Password State
+  const [existingPassword, setExistingPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showExisting, setShowExisting] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   // Submission State
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -37,7 +45,7 @@ export function ManageAccount() {
     <div
       className="flex-1 flex flex-col min-h-0"
       style={{
-        fontFamily: "'Segoe UI', Arial, sans-serif",
+
         background: "#F6F6F6",
       }}
     >
@@ -311,7 +319,7 @@ export function ManageAccount() {
           </div>
         )}
 
-        {/* Account Security Placeholder Tab */}
+        {/* Account Security Tab */}
         {activeTab === "Security" && (
           <div
             style={{
@@ -319,11 +327,113 @@ export function ManageAccount() {
               border: "1px solid #E5E7EB",
               borderRadius: "4px",
               padding: "24px",
-              color: "#555555",
-              fontSize: "13px",
             }}
           >
-            Security controls and login parameters can be configured here.
+            <h3 style={{ fontSize: "14px", fontWeight: 500, color: "#555555", margin: "0 0 4px 0" }}>
+              Change Login Password
+            </h3>
+            <p style={{ fontSize: "12px", color: "#777777", margin: "0 0 24px 0" }}>
+              Login password is used to log in to your account.
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "20px", maxWidth: "480px" }}>
+              {/* Existing Password */}
+              <div style={inputContainerStyle}>
+                <label style={{ ...labelStyle, display: existingPassword ? "block" : "none" }}>Existing Password</label>
+                <div style={{ position: "relative", display: "flex", alignItems: "center", width: "100%" }}>
+                  <input
+                    type={showExisting ? "text" : "password"}
+                    placeholder={existingPassword ? "" : "Existing Password"}
+                    value={existingPassword}
+                    onChange={(e) => setExistingPassword(e.target.value)}
+                    style={{ ...inputStyle, width: "100%", paddingRight: "30px" }}
+                  />
+                  <button
+                    onClick={() => setShowExisting(!showExisting)}
+                    style={{ position: "absolute", right: 0, background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 0, display: "flex" }}
+                  >
+                    <Eye size={16} />
+                  </button>
+                </div>
+              </div>
+
+              {/* New Password */}
+              <div style={inputContainerStyle}>
+                <label style={{ ...labelStyle, display: newPassword ? "block" : "none" }}>New Password</label>
+                <div style={{ position: "relative", display: "flex", alignItems: "center", width: "100%" }}>
+                  <input
+                    type={showNew ? "text" : "password"}
+                    placeholder={newPassword ? "" : "New Password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    style={{ ...inputStyle, width: "100%", paddingRight: "30px" }}
+                  />
+                  <button
+                    onClick={() => setShowNew(!showNew)}
+                    style={{ position: "absolute", right: 0, background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 0, display: "flex" }}
+                  >
+                    <Eye size={16} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Password Rules */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#9CA3AF", fontSize: "12px" }}>
+                  <Circle size={12} strokeWidth={2} /> <span>At least 8 characters</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#9CA3AF", fontSize: "12px" }}>
+                  <Circle size={12} strokeWidth={2} /> <span>At least 1 number</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#9CA3AF", fontSize: "12px" }}>
+                  <Circle size={12} strokeWidth={2} /> <span>At least 1 upper case letter</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#9CA3AF", fontSize: "12px" }}>
+                  <Circle size={12} strokeWidth={2} /> <span>At least 1 special character</span>
+                </div>
+              </div>
+
+              {/* Confirm New Password */}
+              <div style={inputContainerStyle}>
+                <label style={{ ...labelStyle, display: confirmPassword ? "block" : "none" }}>Confirm New Password</label>
+                <div style={{ position: "relative", display: "flex", alignItems: "center", width: "100%" }}>
+                  <input
+                    type={showConfirm ? "text" : "password"}
+                    placeholder={confirmPassword ? "" : "Confirm New Password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    style={{ ...inputStyle, width: "100%", paddingRight: "30px" }}
+                  />
+                  <button
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    style={{ position: "absolute", right: 0, background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 0, display: "flex" }}
+                  >
+                    <Eye size={16} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Update Password Button */}
+              <button
+                style={{
+                  background: "rgb(199, 0, 57)",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: "3px",
+                  padding: "10px 24px",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  width: "max-content",
+                  marginTop: "4px",
+                  transition: "background 0.2s ease",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#A0002C")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "rgb(199, 0, 57)")}
+              >
+                Update Password
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -358,7 +468,7 @@ const labelStyle: React.CSSProperties = {
   fontSize: "9px",
   color: "#9CA3AF",
   marginBottom: "1px",
-  fontFamily: "'Segoe UI', Arial, sans-serif",
+
   textTransform: "capitalize",
   userSelect: "none",
 };
@@ -373,5 +483,5 @@ const inputStyle: React.CSSProperties = {
   padding: "0",
   margin: "0",
   height: "18px",
-  fontFamily: "'Segoe UI', Arial, sans-serif",
+
 };

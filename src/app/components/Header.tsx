@@ -27,8 +27,8 @@ export function Header({ userName, onMenuToggle }: HeaderProps) {
       {/* Logo area – matches sidebar width */}
       <div
         style={{
-          width: "220px",
-          minWidth: "220px",
+          width: "260px",
+          minWidth: "260px",
           display: "flex",
           alignItems: "center",
           paddingLeft: "14px",

@@ -65,7 +65,7 @@ export function ManageUsers() {
     };
 
     setUsers((prev) => [...prev, newUser]);
-    
+
     // Reset form & close modal
     setNewUsername("");
     setNewName("");
@@ -122,7 +122,7 @@ export function ManageUsers() {
     <div
       className="flex-1 flex flex-col min-h-0"
       style={{
-        fontFamily: "'Segoe UI', Arial, sans-serif",
+
         background: "#F6F6F6",
       }}
     >
@@ -264,7 +264,7 @@ export function ManageUsers() {
                   fontSize: "12px",
                   color: "#333333",
                   width: "100%",
-                  fontFamily: "'Segoe UI', Arial, sans-serif",
+
                 }}
               />
             </div>
@@ -596,7 +596,7 @@ export function ManageUsers() {
               width: "420px",
               maxWidth: "90%",
               overflow: "hidden",
-              fontFamily: "'Segoe UI', Arial, sans-serif",
+
             }}
           >
             {/* Modal Header */}
@@ -762,7 +762,7 @@ const formInputStyle: React.CSSProperties = {
   fontSize: "12px",
   outline: "none",
   color: "#374151",
-  fontFamily: "'Segoe UI', Arial, sans-serif",
+
 };
 
 const formSelectStyle: React.CSSProperties = {

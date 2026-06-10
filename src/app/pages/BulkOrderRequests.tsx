@@ -103,7 +103,7 @@ export function BulkOrderRequests() {
     <div
       className="flex-1 flex flex-col min-h-0"
       style={{
-        fontFamily: "'Segoe UI', Arial, sans-serif",
+
         background: "#F6F6F6",
       }}
     >
@@ -245,7 +245,7 @@ export function BulkOrderRequests() {
                   fontSize: "12px",
                   color: "#333333",
                   width: "100%",
-                  fontFamily: "'Segoe UI', Arial, sans-serif",
+
                 }}
               />
             </div>
@@ -358,27 +358,26 @@ export function BulkOrderRequests() {
                               request.status === "RESOLVED"
                                 ? "#F3E8FF"
                                 : request.status === "PENDING"
-                                ? "#EFF6FF"
-                                : request.status === "IN PROGRESS"
-                                ? "#FFFBEB"
-                                : "#FCE8E6",
+                                  ? "#EFF6FF"
+                                  : request.status === "IN PROGRESS"
+                                    ? "#FFFBEB"
+                                    : "#FCE8E6",
                             color:
                               request.status === "RESOLVED"
                                 ? "#6B21A8"
                                 : request.status === "PENDING"
-                                ? "#1D4ED8"
-                                : request.status === "IN PROGRESS"
-                                ? "#92400E"
-                                : "#C5221F",
-                            border: `1px solid ${
-                              request.status === "RESOLVED"
+                                  ? "#1D4ED8"
+                                  : request.status === "IN PROGRESS"
+                                    ? "#92400E"
+                                    : "#C5221F",
+                            border: `1px solid ${request.status === "RESOLVED"
                                 ? "#E9D5FF"
                                 : request.status === "PENDING"
-                                ? "#BFDBFE"
-                                : request.status === "IN PROGRESS"
-                                ? "#FDE68A"
-                                : "#FAD2CF"
-                            }`,
+                                  ? "#BFDBFE"
+                                  : request.status === "IN PROGRESS"
+                                    ? "#FDE68A"
+                                    : "#FAD2CF"
+                              }`,
                           }}
                         >
                           {request.status}
@@ -566,7 +565,7 @@ export function BulkOrderRequests() {
               width: "420px",
               maxWidth: "90%",
               overflow: "hidden",
-              fontFamily: "'Segoe UI', Arial, sans-serif",
+
             }}
           >
             {/* Modal Header */}
@@ -723,7 +722,7 @@ const formInputStyle: React.CSSProperties = {
   fontSize: "12px",
   outline: "none",
   color: "#374151",
-  fontFamily: "'Segoe UI', Arial, sans-serif",
+
 };
 
 const formSelectStyle: React.CSSProperties = {

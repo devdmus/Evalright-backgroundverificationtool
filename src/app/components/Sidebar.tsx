@@ -34,6 +34,7 @@ export type PageKey =
   | "manage-users"
   | "manage-branches"
   | "drug-screening"
+  | "setup-random-drug-checks"
   | "invoices"
   | "support-center"
   | "forms-documents"
@@ -101,7 +102,14 @@ const navGroups: NavGroup[] = [
       { label: "Manage Branches", page: "manage-branches" },
     ],
   },
-  { label: "Drug Screening", icon: <FlaskConical size={18} />, page: "drug-screening" },
+  {
+    label: "Drug Screening",
+    icon: <FlaskConical size={18} />,
+    children: [
+      { label: "Drug Screening Dashboard", page: "drug-screening" },
+      { label: "Setup Random Drug Checks", page: "setup-random-drug-checks" },
+    ],
+  },
   { label: "Invoices", icon: <Receipt size={18} />, page: "invoices" },
   {
     label: "Support Center",
@@ -126,6 +134,9 @@ const applicantsPages = new Set<PageKey>([
 const accountSettingsPages = new Set<PageKey>([
   "account-settings", "manage-users", "manage-branches",
 ]);
+const drugScreeningPages = new Set<PageKey>([
+  "drug-screening", "setup-random-drug-checks",
+]);
 const supportPages = new Set<PageKey>([
   "support-center", "forms-documents", "email-activity",
 ]);
@@ -136,6 +147,7 @@ export function Sidebar({ currentPage, onNavigate, isOpen = true }: SidebarProps
     "Reports & Orders": reportsPages.has(currentPage),
     Applicants: applicantsPages.has(currentPage),
     "Account Settings": accountSettingsPages.has(currentPage),
+    "Drug Screening": drugScreeningPages.has(currentPage),
     "Support Center": supportPages.has(currentPage),
   });
 
@@ -152,8 +164,8 @@ export function Sidebar({ currentPage, onNavigate, isOpen = true }: SidebarProps
   return (
     <aside
       style={{
-        width: isOpen ? "220px" : "0px",
-        minWidth: isOpen ? "220px" : "0px",
+        width: isOpen ? "260px" : "0px",
+        minWidth: isOpen ? "260px" : "0px",
         height: "100%",
         display: "flex",
         flexDirection: "column",
@@ -227,7 +239,7 @@ export function Sidebar({ currentPage, onNavigate, isOpen = true }: SidebarProps
                 </button>
 
                 {isExpanded && (
-                  <div style={{ paddingLeft: "46px", borderLeft: "none", paddingTop: "4px", paddingBottom: "8px" }}>
+                  <div style={{ borderLeft: "none", paddingTop: "4px", paddingBottom: "8px" }}>
                     {group.children.map((child) => {
                       const childActive = currentPage === child.page;
                       return (
@@ -237,12 +249,12 @@ export function Sidebar({ currentPage, onNavigate, isOpen = true }: SidebarProps
                           style={{
                             width: "100%",
                             textAlign: "left",
-                            padding: "0px",
-                            height: "25px",
+                            padding: "0px 16px 0px 46px",
+                            height: "36px",
                             fontSize: "12px",
                             color: childActive ? "rgb(199, 0, 57)" : "#555555",
                             fontWeight: childActive ? 600 : 400,
-                            background: childActive ? "rgb(247, 215, 221)" : "transparent",
+                            background: "transparent",
                             borderWidth: "medium",
                             borderStyle: "none",
                             borderColor: "currentcolor",

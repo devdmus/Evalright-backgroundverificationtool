@@ -28,7 +28,7 @@ export function ChatWidget() {
   };
 
   return (
-    <div style={{ position: "fixed", bottom: "24px", right: "24px", zIndex: 9999, fontFamily: "Segoe UI, Arial, sans-serif" }}>
+    <div style={{ position: "fixed", bottom: "24px", right: "24px", zIndex: 9999,  }}>
       {isOpen && (
         <div
           style={{
@@ -141,7 +141,7 @@ export function ChatWidget() {
                 padding: "8px 14px",
                 fontSize: "12px",
                 outline: "none",
-                fontFamily: "Segoe UI, Arial, sans-serif",
+                ,
               }}
             />
             <button

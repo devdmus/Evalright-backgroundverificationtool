@@ -11,6 +11,8 @@ import { ApplicantManager } from "./pages/ApplicantManager";
 import { ManageAccount } from "./pages/ManageAccount";
 import { ManageUsers } from "./pages/ManageUsers";
 import { BulkOrderRequests } from "./pages/BulkOrderRequests";
+import { DrugScreening } from "./pages/DrugScreening";
+import { ApplicantInviteTemplates } from "./pages/ApplicantInviteTemplates";
 // import { ChatWidget } from "./components/ChatWidget";
 
 const USER_NAME = "Suresh Ramakoti";
@@ -36,7 +38,8 @@ const PAGE_TITLES: Record<PageKey, string> = {
   "account-settings": "Manage Account",
   "manage-users": "Manage Users",
   "manage-branches": "Manage Branches",
-  "drug-screening": "Drug Screening",
+  "drug-screening": "Drug Screening Dashboard",
+  "setup-random-drug-checks": "Setup Random Drug Checks",
   invoices: "Invoices",
   "support-center": "Bulk Order Requests",
   "forms-documents": "Forms & Documents",
@@ -69,10 +72,16 @@ export default function App() {
         return <ReportsOrders />;
       case "applicants":
         return <ApplicantManager />;
+      case "applicant-invite-templates":
+        return <ApplicantInviteTemplates />;
       case "account-settings":
         return <ManageAccount />;
       case "manage-users":
         return <ManageUsers />;
+      case "drug-screening":
+        return <DrugScreening />;
+      case "setup-random-drug-checks":
+        return <PlaceholderPage title="Setup Random Drug Checks" />;
       case "support-center":
         return <BulkOrderRequests />;
       default:
