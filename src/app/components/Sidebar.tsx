@@ -36,6 +36,7 @@ export type PageKey =
 interface SidebarProps {
   currentPage: PageKey;
   onNavigate: (page: PageKey) => void;
+  isOpen?: boolean;
 }
 
 interface SubItem {
@@ -90,7 +91,7 @@ const reportsPages = new Set<PageKey>([
   "reports-adverse-log", "reports-analytics", "reports-hr", "reports-disputes",
 ]);
 
-export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
+export function Sidebar({ currentPage, onNavigate, isOpen = true }: SidebarProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     Order: orderPages.has(currentPage),
     "Reports & Orders": reportsPages.has(currentPage),
@@ -109,15 +110,17 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
   return (
     <aside
       style={{
-        width: "180px",
-        minWidth: "180px",
-        minHeight: "100%",
+        width: isOpen ? "220px" : "0px",
+        minWidth: isOpen ? "220px" : "0px",
+        height: "100%",
         display: "flex",
         flexDirection: "column",
         background: "#F5F5F5",
-        borderRight: "1px solid #E5E7EB",
-        fontFamily: "Segoe UI, Arial, sans-serif",
+        borderRight: isOpen ? "1px solid #E5E7EB" : "none",
+
         flexShrink: 0,
+        overflow: "hidden",
+        transition: "width 0.25s ease, min-width 0.25s ease",
       }}
     >
       {/* MAIN label */}
@@ -151,18 +154,18 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
                     alignItems: "center",
                     justifyContent: "space-between",
                     padding: "0px 16px",
-                    height: "42px",
+                    height: "44px",
                     textAlign: "left",
                     background: active ? "#F7D7DD" : "transparent",
                     color: active ? "#C70039" : "rgb(85, 85, 85)",
-                    fontSize: "12px",
+                    fontSize: "13px",
                     fontWeight: 500,
                     borderWidth: "medium",
                     borderStyle: "none",
                     borderColor: "currentcolor",
                     borderImage: "initial",
                     cursor: "pointer",
-                    fontFamily: "\"Segoe UI\", Arial, sans-serif",
+
                   }}
                 >
                   <span style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -177,7 +180,7 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
                 </button>
 
                 {isExpanded && (
-                  <div style={{ paddingLeft: "25px", borderLeft: "none", paddingTop: "4px", paddingBottom: "4px" }}>
+                  <div style={{ paddingLeft: "46px", borderLeft: "none", paddingTop: "4px", paddingBottom: "8px" }}>
                     {group.children.map((child) => {
                       const childActive = currentPage === child.page;
                       return (
@@ -185,23 +188,23 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
                           key={child.page}
                           onClick={() => onNavigate(child.page)}
                           style={{
-                            width: "80%",
+                            width: "100%",
                             textAlign: "left",
-                            padding: "0px",
-                            height: "20px",
+                            padding: "0px 0px",
+                            height: "28px",
                             fontSize: "12px",
                             color: childActive ? "#C70039" : "#555555",
                             fontWeight: childActive ? 600 : 400,
-                            background: childActive ? "#F7D7DD" : "transparent",
+                            background: "transparent",
                             borderWidth: "medium",
                             borderStyle: "none",
                             borderColor: "currentcolor",
                             borderImage: "initial",
                             cursor: "pointer",
-                            fontFamily: "\"Segoe UI\", Arial, sans-serif",
+
                             display: "flex",
                             alignItems: "center",
-                            marginBottom: "6px",
+                            marginBottom: "2px",
                           }}
                         >
                           {child.label}
@@ -224,17 +227,17 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "0px 16px",
-                height: "42px",
+                height: "44px",
                 background: active ? "#F7D7DD" : "transparent",
                 color: active ? "#C70039" : "rgb(85, 85, 85)",
-                fontSize: "12px",
+                fontSize: "13px",
                 fontWeight: 500,
                 borderWidth: "medium",
                 borderStyle: "none",
                 borderColor: "currentcolor",
                 borderImage: "initial",
                 cursor: "pointer",
-                fontFamily: "\"Segoe UI\", Arial, sans-serif",
+
                 textAlign: "left",
               }}
             >
@@ -242,7 +245,9 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
                 <span style={{ color: active ? "#C70039" : "#555555", display: "flex" }}>{group.icon}</span>
                 <span>{group.label}</span>
               </span>
-              <ChevronRight size={14} style={{ color: active ? "#C70039" : "#888" }} />
+              {group.page !== "home" && (
+                <ChevronRight size={14} style={{ color: active ? "#C70039" : "#888" }} />
+              )}
             </button>
           );
         })}

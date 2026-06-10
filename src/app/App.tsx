@@ -34,6 +34,7 @@ const PAGE_TITLES: Record<PageKey, string> = {
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageKey>("order");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Dynamically update browser tab title
   useEffect(() => {
@@ -63,19 +64,19 @@ export default function App() {
   return (
     <div
       style={{
-        minHeight: "100vh",
+        height: "100vh",
         display: "flex",
         flexDirection: "column",
-        fontFamily: "Segoe UI, Arial, sans-serif",
         background: "#F4F4F4",
+        overflow: "hidden",
       }}
     >
       {/* Fixed top header */}
-      <Header userName={USER_NAME} />
+      <Header userName={USER_NAME} onMenuToggle={() => setSidebarOpen((o) => !o)} />
 
       {/* Body: sidebar + content */}
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
+        <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} isOpen={sidebarOpen} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "auto" }}>
           {renderPage()}
         </div>

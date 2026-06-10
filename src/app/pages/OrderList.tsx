@@ -13,7 +13,7 @@ export function OrderList() {
   return (
     <div className="flex-1 flex flex-col min-h-0" style={{ fontFamily: "'Wix Madefor Display', sans-serif" }}>
       <div className="flex-1 p-6" style={{ background: "#F6F6F6" }}>
-        <h1 style={{ fontSize: "20px", fontWeight: 500, color: "rgb(199, 0, 57)", marginBottom: "0px", fontFamily: "\"Segoe UI\", Arial, sans-serif" }}>
+        <h1 style={{ fontSize: "20px", fontWeight: 500, color: "rgb(199, 0, 57)", marginBottom: "0px", }}>
           Order List
         </h1>
         <div className="rounded overflow-hidden" style={{ background: "#FFFFFF", border: "1px solid #E0E0E0", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>

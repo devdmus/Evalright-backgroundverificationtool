@@ -56,7 +56,7 @@ const fieldLabel: React.CSSProperties = {
   fontSize: "11px",
   color: "#555555",
   marginBottom: "3px",
-  fontFamily: '"Segoe UI", Arial, sans-serif',
+
 };
 
 const fieldInput: React.CSSProperties = {
@@ -68,7 +68,7 @@ const fieldInput: React.CSSProperties = {
   fontSize: "12px",
   color: "#333333",
   outline: "none",
-  fontFamily: '"Segoe UI", Arial, sans-serif',
+
   boxSizing: "border-box",
   background: "#fff",
 };
@@ -82,7 +82,7 @@ const fieldSelect: React.CSSProperties = {
   fontSize: "12px",
   color: "#555555",
   outline: "none",
-  fontFamily: '"Segoe UI", Arial, sans-serif',
+
   background: "#fff",
   cursor: "pointer",
   boxSizing: "border-box",
@@ -106,7 +106,7 @@ export function HomePage() {
         display: "flex",
         flexDirection: "column",
         minHeight: 0,
-        fontFamily: '"Segoe UI", Arial, sans-serif',
+
       }}
     >
       <div
@@ -124,7 +124,7 @@ export function HomePage() {
             fontWeight: 500,
             color: "rgb(199, 0, 57)",
             marginBottom: "14px",
-            fontFamily: '"Segoe UI", Arial, sans-serif',
+
           }}
         >
           Client Home
@@ -250,7 +250,7 @@ export function HomePage() {
                 fontWeight: 600,
                 color: "#333333",
                 marginBottom: "14px",
-                fontFamily: '"Segoe UI", Arial, sans-serif',
+
               }}
             >
               Rapid Invitation
@@ -372,7 +372,7 @@ export function HomePage() {
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
-                  fontFamily: '"Segoe UI", Arial, sans-serif',
+
                 }}
               >
                 Send Invitation <Mail size={13} />
@@ -403,7 +403,7 @@ export function HomePage() {
                   fontSize: "13px",
                   fontWeight: 600,
                   color: "#333333",
-                  fontFamily: '"Segoe UI", Arial, sans-serif',
+
                 }}
               >
                 Due Invoices (4)
@@ -421,7 +421,7 @@ export function HomePage() {
                   display: "flex",
                   alignItems: "center",
                   gap: "4px",
-                  fontFamily: '"Segoe UI", Arial, sans-serif',
+
                 }}
               >
                 <Plus size={11} /> View All Invoices
@@ -446,7 +446,7 @@ export function HomePage() {
                           fontSize: "11px",
                           color: "#555555",
                           fontWeight: 600,
-                          fontFamily: '"Segoe UI", Arial, sans-serif',
+
                         }}
                       >
                         {col}

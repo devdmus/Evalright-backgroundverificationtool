@@ -127,7 +127,7 @@ export function ReportsOrders() {
             fontWeight: 500,
             color: "rgb(199, 0, 57)",
             marginBottom: "0px",
-            fontFamily: "\"Segoe UI\", Arial, sans-serif",
+
           }}
         >
           All Order Details
