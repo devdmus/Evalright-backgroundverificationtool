@@ -357,10 +357,10 @@ export function ApplicantManager() {
                                   ? "#1A73E8"
                                   : "#C5221F",
                             border: `1px solid ${applicant.status === "Complete"
-                                ? "#CEEAD6"
-                                : applicant.status === "Active"
-                                  ? "#D2E3FC"
-                                  : "#FAD2CF"
+                              ? "#CEEAD6"
+                              : applicant.status === "Active"
+                                ? "#D2E3FC"
+                                : "#FAD2CF"
                               }`,
                           }}
                         >

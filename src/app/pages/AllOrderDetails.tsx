@@ -36,22 +36,24 @@ const EMPTY_FILTERS: Filters = {
 
 const FIELD_CONTAINER_STYLE: React.CSSProperties = {
   background: "#FFFFFF",
-  border: "1px solid #E5E7EB",
-  borderRadius: "4px",
-  padding: "4px 8px",
+  border: "1px solid #F3F4F6", // very faint border matching screenshot
+  borderRadius: "2px",
+  padding: "6px 12px",
   display: "flex",
   flexDirection: "column",
-  justifyContent: "space-between",
-  height: "46px",
+  justifyContent: "center",
+  height: "56px",
   boxSizing: "border-box",
+  boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
 };
 
 const FIELD_LABEL_STYLE: React.CSSProperties = {
-  fontSize: "10px",
-  color: "#777777",
-  fontWeight: 500,
+  fontSize: "12px",
+  color: "#9CA3AF",
+  fontWeight: 400,
   lineHeight: "1.2",
   textTransform: "none",
+  marginBottom: "2px",
 };
 
 const FIELD_INPUT_STYLE: React.CSSProperties = {
@@ -59,11 +61,11 @@ const FIELD_INPUT_STYLE: React.CSSProperties = {
   border: "none",
   outline: "none",
   background: "transparent",
-  fontSize: "12px",
-  color: "#333333",
+  fontSize: "14px",
+  color: "#4B5563",
 
   padding: "0",
-  height: "20px",
+  height: "22px",
 };
 
 const FIELD_SELECT_STYLE: React.CSSProperties = {
@@ -71,11 +73,11 @@ const FIELD_SELECT_STYLE: React.CSSProperties = {
   border: "none",
   outline: "none",
   background: "transparent",
-  fontSize: "12px",
-  color: "#333333",
+  fontSize: "14px",
+  color: "#4B5563",
 
   padding: "0",
-  height: "20px",
+  height: "22px",
   appearance: "none",
   backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
   backgroundRepeat: "no-repeat",
@@ -398,8 +400,8 @@ export function AllOrderDetails() {
           style={{
             display: "flex",
             justifyContent: "center",
-            gap: "10px",
-            marginBottom: "16px",
+            gap: "12px",
+            marginBottom: "24px",
           }}
         >
           <button
@@ -409,9 +411,9 @@ export function AllOrderDetails() {
               color: "#FFFFFF",
               border: "none",
               borderRadius: "4px",
-              padding: "8px 24px",
-              fontSize: "13px",
-              fontWeight: 600,
+              padding: "10px 24px",
+              fontSize: "14px",
+              fontWeight: 500,
               cursor: "pointer",
 
             }}
@@ -421,13 +423,13 @@ export function AllOrderDetails() {
           <button
             onClick={handleReset}
             style={{
-              background: "#1D1B68",
+              background: "#312E81",
               color: "#FFFFFF",
               border: "none",
               borderRadius: "4px",
-              padding: "8px 24px",
-              fontSize: "13px",
-              fontWeight: 600,
+              padding: "10px 24px",
+              fontSize: "14px",
+              fontWeight: 500,
               cursor: "pointer",
 
             }}
@@ -440,12 +442,12 @@ export function AllOrderDetails() {
         {searched && showAlert && (
           <div
             style={{
-              background: "#E8F5E9",
-              border: "1px solid #C8E6C9",
+              background: "#E6F0CD", // Olive-ish light green from screenshot
+              border: "1px solid #D4E0B6",
               borderRadius: "4px",
-              padding: "8px 16px",
-              color: "#2E7D32",
-              fontSize: "12px",
+              padding: "10px 16px",
+              color: "#5B7A38",
+              fontSize: "13px",
               fontWeight: 500,
               display: "flex",
               justifyContent: "space-between",
@@ -502,9 +504,9 @@ export function AllOrderDetails() {
             >
               <span
                 style={{
-                  fontSize: "12px",
+                  fontSize: "14px",
                   fontWeight: 600,
-                  color: "#333333",
+                  color: "#6B7280",
 
                 }}
               >
@@ -513,7 +515,7 @@ export function AllOrderDetails() {
 
               {/* Page select dropdown */}
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ fontSize: "11px", color: "#6C7589", }}>Page:</span>
+                <span style={{ fontSize: "13px", color: "#6C7589", }}>Page:</span>
                 <select
                   value={page}
                   onChange={(e) => setPage(parseInt(e.target.value))}
@@ -572,15 +574,15 @@ export function AllOrderDetails() {
                       }}
                     >
                       {/* Left: Search ID */}
-                      <div style={{ fontSize: "12px", width: "150px" }}>
-                        <span style={{ color: "#888888", fontWeight: 400 }}>Search ID: </span>
-                        <span style={{ color: "#333333", fontWeight: 600 }}>{o.searchId}</span>
+                      <div style={{ fontSize: "13px", width: "160px" }}>
+                        <span style={{ color: "#9CA3AF", fontWeight: 400 }}>Search ID: </span>
+                        <span style={{ color: "#4B5563", fontWeight: 600 }}>{o.searchId}</span>
                       </div>
 
                       {/* Center: Applicant name + Verification type */}
-                      <div style={{ fontSize: "12px", flex: 1, textAlign: "left", paddingLeft: "20px" }}>
-                        <span style={{ color: "#333333", fontWeight: 600 }}>{o.applicantName}</span>
-                        <span style={{ color: "#555555" }}> : {o.verificationType}</span>
+                      <div style={{ fontSize: "13px", flex: 1, textAlign: "left", paddingLeft: "20px" }}>
+                        <span style={{ color: "#4B5563", fontWeight: 600 }}>{o.applicantName}</span>
+                        <span style={{ color: "#9CA3AF" }}> : {o.verificationType}</span>
                       </div>
 
                       {/* Right: Status badge */}

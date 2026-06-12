@@ -58,17 +58,13 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
           background: "#F5F5F5",
         }}
       >
-        {/* Page title */}
         <h1
           style={{
-            fontSize: "20px",
+            fontSize: "22px",
             fontWeight: 500,
-            color: "rgb(199, 0, 57)",
-            marginBottom: "18px",
-
+            color: "#C70039",
+            marginBottom: "24px",
           }}
-
-
         >
           {isInvitation ? "Order /w Invitation" : "Order"}
         </h1>
@@ -118,21 +114,19 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
         <div
           style={{
             background: "#FFFFFF",
-            border: "1px solid #E5E7EB",
           }}
         >
           {/* PACKAGES header bar */}
           <div
             style={{
-              height: "30px",
-              background: "#D9D9D9",
+              height: "40px",
+              background: "#E5E7EB",
               display: "flex",
               alignItems: "center",
-              paddingLeft: "10px",
-              fontSize: "11px",
+              paddingLeft: "20px",
+              fontSize: "14px",
               fontWeight: 500,
-              color: "#666666",
-              letterSpacing: "0.06em",
+              color: "#6B7280",
             }}
           >
             PACKAGES
@@ -143,12 +137,12 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             style={{
               display: "grid",
               gridTemplateColumns: "1fr 1fr 1fr",
-              padding: "12px 12px 12px 12px",
-              gap: "0",
+              padding: "24px 20px",
+              background: "#FFFFFF",
               alignItems: "start",
             }}
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               {col1.map((pkg) => (
                 <PackageRow
                   key={pkg.id}
@@ -158,7 +152,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 />
               ))}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               {col2.map((pkg) => (
                 <PackageRow
                   key={pkg.id}
@@ -168,7 +162,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 />
               ))}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               {col3.map((pkg) => (
                 <PackageRow
                   key={pkg.id}
@@ -184,20 +178,19 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
           <div
             onClick={() => setALaCarteOpen((p) => !p)}
             style={{
-              height: "30px",
-              background: "#D9D9D9",
+              height: "40px",
+              background: "#E5E7EB",
               display: "flex",
               alignItems: "center",
-              paddingLeft: "10px",
+              paddingLeft: "20px",
               cursor: "pointer",
-              gap: "0",
               userSelect: "none",
             }}
           >
             <span
               style={{
                 color: "#C70039",
-                fontSize: "11px",
+                fontSize: "14px",
                 fontWeight: 500,
                 marginRight: "6px",
               }}
@@ -206,17 +199,12 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             </span>
             <span
               style={{
-                color: "#666666",
-                fontSize: "11px",
+                color: "#6B7280",
+                fontSize: "14px",
                 fontWeight: 500,
               }}
             >
               A LA CARTE SEARCHES
-            </span>
-            <span style={{ marginLeft: "auto", marginRight: "12px", display: "flex", alignItems: "center" }}>
-              {aLaCarteOpen
-                ? <ChevronUp size={12} style={{ color: "#666" }} />
-                : <ChevronDown size={12} style={{ color: "#666" }} />}
             </span>
           </div>
 
@@ -265,8 +253,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
           alignItems: "center",
           justifyContent: "center",
           gap: "16px",
-          padding: "20px 0",
-          background: "#F5F5F5",
+          padding: "60px 0",
         }}
       >
         {/* Start Over */}
@@ -275,21 +262,19 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "6px",
-            height: "36px",
-            width: "120px",
-            padding: "0 16px",
-            background: "#FFFFFF",
-            border: "1px solid #E5E7EB",
-            borderRadius: "2px",
+            gap: "8px",
+            height: "40px",
+            padding: "0 20px",
+            background: "#F3F4F6",
+            border: "none",
+            borderRadius: "4px",
             fontSize: "14px",
-            color: "#555555",
+            color: "#4B5563",
             cursor: "pointer",
-
-            justifyContent: "center",
+            fontWeight: 500,
           }}
         >
-          <RotateCcw size={14} />
+          <RotateCcw size={16} />
           Start Over
         </button>
 
@@ -298,23 +283,20 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "6px",
-            height: "36px",
-            width: "80px",
-            padding: "0 12px",
+            gap: "8px",
+            height: "40px",
+            padding: "0 24px",
             background: "#C70039",
             border: "none",
-            borderRadius: "2px",
+            borderRadius: "4px",
             fontSize: "14px",
             color: "#FFFFFF",
             cursor: "pointer",
-
             fontWeight: 500,
-            justifyContent: "center",
           }}
         >
           Next
-          <ArrowRight size={14} />
+          <ArrowRight size={16} />
         </button>
       </div>
 
@@ -337,11 +319,10 @@ function PackageRow({
       style={{
         display: "flex",
         alignItems: "center",
-        gap: "5px",
+        gap: "8px",
         cursor: "pointer",
         userSelect: "none",
-        fontSize: "11px",
-        color: "#333333",
+        color: "#4B5563",
       }}
     >
       <input
@@ -349,23 +330,22 @@ function PackageRow({
         name="package-selection"
         checked={checked}
         onChange={onToggle}
-        style={{ accentColor: "#C70039", width: "11px", height: "11px", cursor: "pointer", flexShrink: 0 }}
+        style={{ accentColor: "#C70039", width: "16px", height: "16px", cursor: "pointer", flexShrink: 0 }}
       />
-      <span style={{ fontSize: "11px", color: "#333" }}>{pkg.name}</span>
+      <span style={{ fontSize: "14px" }}>{pkg.name}</span>
       <span
         onClick={(e) => e.preventDefault()}
         style={{
-          fontSize: "10px",
-          color: "#2563EB",
+          fontSize: "12px",
+          color: "#3B82F6",
           background: "#DBEAFE",
-          borderRadius: "3px",
-          padding: "1px 5px",
+          borderRadius: "4px",
+          padding: "2px 6px",
           cursor: "pointer",
           whiteSpace: "nowrap",
-
         }}
       >
-        {pkg.whatsIncluded}
+        What's Included?
       </span>
     </label>
   );

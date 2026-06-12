@@ -228,7 +228,7 @@ export function ManageAccount() {
                       style={{
                         position: "absolute",
                         right: "0px",
-                        color: "#9CA3AF",
+                        color: "#777777",
                         pointerEvents: "none",
                       }}
                     />
@@ -259,7 +259,7 @@ export function ManageAccount() {
                       style={{
                         position: "absolute",
                         right: "0px",
-                        color: "#9CA3AF",
+                        color: "#777777",
                         pointerEvents: "none",
                       }}
                     />
@@ -350,7 +350,7 @@ export function ManageAccount() {
                   />
                   <button
                     onClick={() => setShowExisting(!showExisting)}
-                    style={{ position: "absolute", right: 0, background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 0, display: "flex" }}
+                    style={{ position: "absolute", right: 0, background: "none", border: "none", cursor: "pointer", color: "#777777", padding: 0, display: "flex" }}
                   >
                     <Eye size={16} />
                   </button>
@@ -370,7 +370,7 @@ export function ManageAccount() {
                   />
                   <button
                     onClick={() => setShowNew(!showNew)}
-                    style={{ position: "absolute", right: 0, background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 0, display: "flex" }}
+                    style={{ position: "absolute", right: 0, background: "none", border: "none", cursor: "pointer", color: "#777777", padding: 0, display: "flex" }}
                   >
                     <Eye size={16} />
                   </button>
@@ -379,16 +379,16 @@ export function ManageAccount() {
 
               {/* Password Rules */}
               <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#9CA3AF", fontSize: "12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#777777", fontSize: "12px" }}>
                   <Circle size={12} strokeWidth={2} /> <span>At least 8 characters</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#9CA3AF", fontSize: "12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#777777", fontSize: "12px" }}>
                   <Circle size={12} strokeWidth={2} /> <span>At least 1 number</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#9CA3AF", fontSize: "12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#777777", fontSize: "12px" }}>
                   <Circle size={12} strokeWidth={2} /> <span>At least 1 upper case letter</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#9CA3AF", fontSize: "12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#777777", fontSize: "12px" }}>
                   <Circle size={12} strokeWidth={2} /> <span>At least 1 special character</span>
                 </div>
               </div>
@@ -406,7 +406,7 @@ export function ManageAccount() {
                   />
                   <button
                     onClick={() => setShowConfirm(!showConfirm)}
-                    style={{ position: "absolute", right: 0, background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 0, display: "flex" }}
+                    style={{ position: "absolute", right: 0, background: "none", border: "none", cursor: "pointer", color: "#777777", padding: 0, display: "flex" }}
                   >
                     <Eye size={16} />
                   </button>
@@ -466,7 +466,7 @@ const inputContainerStyle: React.CSSProperties = {
 
 const labelStyle: React.CSSProperties = {
   fontSize: "9px",
-  color: "#9CA3AF",
+  color: "#777777",
   marginBottom: "1px",
 
   textTransform: "capitalize",
