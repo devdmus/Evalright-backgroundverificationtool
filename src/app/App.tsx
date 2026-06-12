@@ -2,9 +2,13 @@ import { useState, useEffect } from "react";
 import { Header } from "./components/Header";
 import { Sidebar, PageKey } from "./components/Sidebar";
 import { OrderCreation } from "./pages/OrderCreation";
-import { ReportsOrders } from "./pages/ReportsOrders";
 import { AllOrderDetails } from "./pages/AllOrderDetails";
 import { OrderList } from "./pages/OrderList";
+import { DraftOrderList } from "./pages/DraftOrderList";
+import { OrderSummaryReport } from "./pages/OrderSummaryReport";
+import { ElectronicConsents } from "./pages/ElectronicConsents";
+import { AdverseWorksheets } from "./pages/AdverseWorksheets";
+import { AdverseActionLog } from "./pages/AdverseActionLog";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
 import { HomePage } from "./pages/HomePage";
 import { ApplicantManager } from "./pages/ApplicantManager";
@@ -13,6 +17,9 @@ import { ManageUsers } from "./pages/ManageUsers";
 import { BulkOrderRequests } from "./pages/BulkOrderRequests";
 import { DrugScreening } from "./pages/DrugScreening";
 import { ApplicantInviteTemplates } from "./pages/ApplicantInviteTemplates";
+import { AnalyticsDashboard } from "./pages/AnalyticsDashboard";
+import { HRSoftwareIntegrations } from "./pages/HRSoftwareIntegrations";
+import { DisputesList } from "./pages/DisputesList";
 // import { ChatWidget } from "./components/ChatWidget";
 
 const USER_NAME = "Suresh Ramakoti";
@@ -59,17 +66,33 @@ export default function App() {
   function renderPage() {
     switch (currentPage) {
       case "home":
-        return <HomePage />;
+        return <HomePage onNavigate={setCurrentPage} />;
       case "order":
         return <OrderCreation />;
       case "order-invitation":
-        return <OrderCreation isInvitation showInvitationBanner />;
+        return <OrderCreation isInvitation showInvitationBanner onNavigate={setCurrentPage} />;
       case "order-list":
         return <OrderList />;
       case "reports-all-order-details":
         return <AllOrderDetails />;
       case "reports-orders-list":
-        return <ReportsOrders />;
+        return <OrderList />;
+      case "reports-draft-orders":
+        return <DraftOrderList />;
+      case "reports-summary":
+        return <OrderSummaryReport />;
+      case "reports-consents":
+        return <ElectronicConsents />;
+      case "reports-adverse-worksheets":
+        return <AdverseWorksheets />;
+      case "reports-adverse-log":
+        return <AdverseActionLog />;
+      case "reports-analytics":
+        return <AnalyticsDashboard />;
+      case "reports-hr":
+        return <HRSoftwareIntegrations />;
+      case "reports-disputes":
+        return <DisputesList />;
       case "applicants":
         return <ApplicantManager />;
       case "applicant-invite-templates":
