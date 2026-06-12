@@ -20,6 +20,7 @@ import { ApplicantInviteTemplates } from "./pages/ApplicantInviteTemplates";
 import { AnalyticsDashboard } from "./pages/AnalyticsDashboard";
 import { HRSoftwareIntegrations } from "./pages/HRSoftwareIntegrations";
 import { DisputesList } from "./pages/DisputesList";
+import { Invoices } from "./pages/Invoices";
 // import { ChatWidget } from "./components/ChatWidget";
 
 const USER_NAME = "Suresh Ramakoti";
@@ -105,6 +106,8 @@ export default function App() {
         return <DrugScreening />;
       case "setup-random-drug-checks":
         return <PlaceholderPage title="Setup Random Drug Checks" />;
+      case "invoices":
+        return <Invoices />;
       case "support-center":
         return <BulkOrderRequests />;
       default:
