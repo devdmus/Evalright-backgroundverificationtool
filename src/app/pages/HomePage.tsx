@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCheck, Clock3, FilePen, UserCheck2, Mail, Plus, ArrowRight } from "lucide-react";
+import { CheckCheck, Clock3, FilePen, UserCheck2, Mail, Plus, ArrowRight, Eye } from "lucide-react";
 import { Footer } from "../components/Footer";
 
 // ── Static data ──────────────────────────────────────────────────────────────
@@ -53,40 +53,149 @@ const PACKAGES = ["Basic Screening", "Demo3", "New", "DEMO_3", "Evalright_BGV", 
 
 const fieldLabel: React.CSSProperties = {
   display: "block",
-  fontSize: "11px",
-  color: "#555555",
-  marginBottom: "3px",
-
+  fontSize: "14px",
+  color: "#4B5563",
+  marginBottom: "6px",
 };
 
 const fieldInput: React.CSSProperties = {
   width: "100%",
-  height: "30px",
+  height: "38px",
   border: "1px solid #D1D5DB",
-  borderRadius: "3px",
-  padding: "0 8px",
-  fontSize: "12px",
+  borderRadius: "4px",
+  padding: "0 16px",
+  fontSize: "14px",
   color: "#333333",
   outline: "none",
-
   boxSizing: "border-box",
   background: "#fff",
 };
 
 const fieldSelect: React.CSSProperties = {
   width: "100%",
-  height: "30px",
+  height: "38px",
   border: "1px solid #D1D5DB",
-  borderRadius: "3px",
-  padding: "0 6px",
-  fontSize: "12px",
-  color: "#555555",
+  borderRadius: "4px",
+  padding: "0 16px",
+  fontSize: "14px",
+  color: "#4B5563",
   outline: "none",
-
   background: "#fff",
   cursor: "pointer",
   boxSizing: "border-box",
+  appearance: "none",
+  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234B5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+  backgroundRepeat: "no-repeat",
+  backgroundPosition: "right 12px center",
 };
+
+// ── Floating Field Component ───────────────────────────────────────────────────
+
+function FloatingField({ label, required, value, onChange, type = "text", isSelect, options, placeholder }: any) {
+  const [focused, setFocused] = useState(false);
+  const isFloating = focused || value || isSelect;
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        border: "1px solid #F3F4F6",
+        height: "54px",
+        boxSizing: "border-box",
+        background: "#fff",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        padding: "0 14px",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: "14px",
+          top: isFloating ? "10px" : "18px",
+          fontSize: isFloating ? "11px" : "14px",
+          color: "#9CA3AF",
+          transition: "all 0.2s ease",
+          pointerEvents: "none",
+          display: "flex",
+          gap: "4px",
+        }}
+      >
+        {label} {required && <span style={{ color: "#EF4444" }}>*</span>}
+      </div>
+
+      {isSelect ? (
+        <select
+          value={value}
+          onChange={onChange}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          style={{
+            border: "none",
+            outline: "none",
+            background: "transparent",
+            fontSize: "14px",
+            color: "#4B5563",
+            padding: 0,
+            marginTop: "16px",
+            appearance: "none",
+            width: "100%",
+            cursor: "pointer",
+          }}
+        >
+          {placeholder && (
+            <option value="" disabled hidden>
+              {placeholder}
+            </option>
+          )}
+          {options?.map((o: any) => (
+            <option key={o.value || o} value={o.value || o}>
+              {o.label || o}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <input
+          type={type}
+          value={value}
+          onChange={onChange}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          style={{
+            border: "none",
+            outline: "none",
+            background: "transparent",
+            fontSize: "14px",
+            color: "#333333",
+            padding: 0,
+            marginTop: isFloating ? "16px" : "0px",
+            width: "100%",
+            opacity: isFloating ? 1 : 0,
+          }}
+        />
+      )}
+
+      {isSelect && (
+        <div style={{ position: "absolute", right: "14px", top: "18px", pointerEvents: "none" }}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#4B5563"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -241,141 +350,96 @@ export function HomePage() {
               background: "#fff",
               border: "1px solid #E5E7EB",
               borderRadius: "4px",
-              padding: "16px",
+              padding: "24px",
             }}
           >
             <h2
               style={{
-                fontSize: "13px",
-                fontWeight: 600,
-                color: "#333333",
-                marginBottom: "14px",
-
+                fontSize: "16px",
+                fontWeight: 500,
+                color: "#4B5563",
+                marginBottom: "16px",
               }}
             >
               Rapid Invitation
             </h2>
+            <div style={{ margin: "0 -24px 24px -24px", borderBottom: "1px solid #E5E7EB" }} />
 
-            {/* Package + Template */}
             <div
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-                marginBottom: "10px",
+                gap: "16px",
+                marginBottom: "32px",
               }}
             >
-              <div>
-                <label style={fieldLabel}>Package *</label>
-                <select
-                  value={pkg}
-                  onChange={(e) => setPkg(e.target.value)}
-                  style={fieldSelect}
-                >
-                  <option value="">Please Select a package</option>
-                  {PACKAGES.map((p) => (
-                    <option key={p} value={p}>
-                      {p}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label style={fieldLabel}>Invitation Template *</label>
-                <select
-                  value={template}
-                  onChange={(e) => setTemplate(e.target.value)}
-                  style={fieldSelect}
-                >
-                  <option value="">Select Template</option>
-                </select>
-              </div>
-            </div>
-
-            {/* First + Last name */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-                marginBottom: "10px",
-              }}
-            >
-              <div>
-                <label style={fieldLabel}>First Name *</label>
-                <input
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  style={fieldInput}
-                />
-              </div>
-              <div>
-                <label style={fieldLabel}>Last Name *</label>
-                <input
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  style={fieldInput}
-                />
-              </div>
-            </div>
-
-            {/* Middle + Email */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-                marginBottom: "10px",
-              }}
-            >
-              <div>
-                <label style={fieldLabel}>Middle Name</label>
-                <input
-                  value={middleName}
-                  onChange={(e) => setMiddleName(e.target.value)}
-                  style={fieldInput}
-                />
-              </div>
-              <div>
-                <label style={fieldLabel}>Email Address *</label>
-                <input
-                  type="email"
-                  value={emailAddr}
-                  onChange={(e) => setEmailAddr(e.target.value)}
-                  style={fieldInput}
-                />
-              </div>
-            </div>
-
-            {/* Reference */}
-            <div style={{ marginBottom: "20px" }}>
-              <label style={fieldLabel}>Reference</label>
-              <input
+              <FloatingField
+                label="Package"
+                required
+                isSelect
+                value={pkg}
+                onChange={(e: any) => setPkg(e.target.value)}
+                placeholder="Please Select a package"
+                options={PACKAGES}
+              />
+              <FloatingField
+                label="Invitation Template"
+                required
+                isSelect
+                value={template}
+                onChange={(e: any) => setTemplate(e.target.value)}
+                placeholder="Select Template"
+                options={[]}
+              />
+              <FloatingField
+                label="First Name"
+                required
+                value={firstName}
+                onChange={(e: any) => setFirstName(e.target.value)}
+              />
+              <FloatingField
+                label="Last Name"
+                required
+                value={lastName}
+                onChange={(e: any) => setLastName(e.target.value)}
+              />
+              <FloatingField
+                label="Middle Name"
+                value={middleName}
+                onChange={(e: any) => setMiddleName(e.target.value)}
+              />
+              <FloatingField
+                label="Email Address"
+                required
+                type="email"
+                value={emailAddr}
+                onChange={(e: any) => setEmailAddr(e.target.value)}
+              />
+              <FloatingField
+                label="Reference"
                 value={reference}
-                onChange={(e) => setReference(e.target.value)}
-                style={fieldInput}
+                onChange={(e: any) => setReference(e.target.value)}
               />
             </div>
 
             {/* Send Invitation button */}
-            <div style={{ display: "flex", justifyContent: "center" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
               <button
                 style={{
                   background: "#C70039",
                   color: "#fff",
                   border: "none",
-                  borderRadius: "3px",
-                  padding: "7px 20px",
-                  fontSize: "12px",
+                  borderRadius: "4px",
+                  padding: "10px 24px",
+                  fontSize: "14px",
                   fontWeight: 500,
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
-                  gap: "6px",
-
+                  gap: "8px",
                 }}
               >
-                Send Invitation <Mail size={13} />
+                Send Invitation <Mail size={16} />
               </button>
             </div>
           </div>
@@ -429,112 +493,106 @@ export function HomePage() {
             </div>
 
             {/* Table */}
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr
-                  style={{
-                    borderBottom: "2px solid #E5E7EB",
-                  }}
-                >
-                  {["Invoice #", "Invoice Date", "Due Date", "Total", "Status"].map(
-                    (col) => (
-                      <th
-                        key={col}
-                        style={{
-                          textAlign: "left",
-                          padding: "6px 8px",
-                          fontSize: "11px",
-                          color: "#555555",
-                          fontWeight: 600,
-
-                        }}
-                      >
-                        {col}
-                      </th>
-                    )
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {DUE_INVOICES.map((inv) => (
+            <div style={{ margin: "0 -16px" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
                   <tr
-                    key={inv.id}
-                    style={{ borderBottom: "1px solid #F3F4F6" }}
+                    style={{
+                      background: "#F9FAFB",
+                      borderBottom: "1px solid #E5E7EB",
+                      borderTop: "1px solid #E5E7EB",
+                    }}
                   >
-                    <td
-                      style={{
-                        padding: "8px",
-                        fontSize: "12px",
-                        color: "#C70039",
-                        fontWeight: 500,
-                      }}
+                    {["Invoice #", "Invoice Date", "Due Date", "Total", "Status"].map(
+                      (col) => (
+                        <th
+                          key={col}
+                          style={{
+                            textAlign: "left",
+                            padding: "12px 16px",
+                            fontSize: "13px",
+                            color: "#4B5563",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {col}
+                        </th>
+                      )
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {DUE_INVOICES.map((inv) => (
+                    <tr
+                      key={inv.id}
+                      style={{ borderBottom: "1px solid #E5E7EB" }}
                     >
-                      <span
+                      <td
                         style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "5px",
+                          padding: "12px 16px",
+                          fontSize: "13px",
+                          color: "#C70039",
+                          fontWeight: 500,
                         }}
                       >
                         <span
                           style={{
-                            width: "8px",
-                            height: "8px",
-                            borderRadius: "50%",
-                            background: "#C70039",
-                            flexShrink: 0,
-                            display: "inline-block",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "8px",
                           }}
-                        />
-                        {inv.id}
-                      </span>
-                    </td>
-                    <td
-                      style={{
-                        padding: "8px",
-                        fontSize: "12px",
-                        color: "#333333",
-                      }}
-                    >
-                      {inv.invoiceDate}
-                    </td>
-                    <td
-                      style={{
-                        padding: "8px",
-                        fontSize: "12px",
-                        color: "#333333",
-                      }}
-                    >
-                      {inv.dueDate}
-                    </td>
-                    <td
-                      style={{
-                        padding: "8px",
-                        fontSize: "12px",
-                        color: "#333333",
-                      }}
-                    >
-                      {inv.total}
-                    </td>
-                    <td style={{ padding: "8px" }}>
-                      <span
+                        >
+                          <Eye size={14} color="#C70039" />
+                          {inv.id}
+                        </span>
+                      </td>
+                      <td
                         style={{
-                          background: "#FEE2E2",
-                          color: "#C70039",
-                          fontSize: "10px",
-                          fontWeight: 700,
-                          padding: "2px 8px",
-                          borderRadius: "3px",
-                          letterSpacing: "0.02em",
+                          padding: "12px 16px",
+                          fontSize: "13px",
+                          color: "#4B5563",
                         }}
                       >
-                        UNPAID
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        {inv.invoiceDate}
+                      </td>
+                      <td
+                        style={{
+                          padding: "12px 16px",
+                          fontSize: "13px",
+                          color: "#4B5563",
+                        }}
+                      >
+                        {inv.dueDate}
+                      </td>
+                      <td
+                        style={{
+                          padding: "12px 16px",
+                          fontSize: "13px",
+                          color: "#4B5563",
+                        }}
+                      >
+                        {inv.total}
+                      </td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <span
+                          style={{
+                            background: "#FEE2E2",
+                            color: "#C70039",
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            padding: "3px 10px",
+                            borderRadius: "4px",
+                            letterSpacing: "0.02em",
+                          }}
+                        >
+                          UNPAID
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
