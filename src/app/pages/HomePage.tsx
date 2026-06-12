@@ -199,7 +199,11 @@ function FloatingField({ label, required, value, onChange, type = "text", isSele
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function HomePage() {
+interface HomePageProps {
+  onNavigate?: (page: any) => void;
+}
+
+export function HomePage({ onNavigate }: HomePageProps) {
   const [pkg, setPkg] = useState("");
   const [template, setTemplate] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -325,7 +329,18 @@ export function HomePage() {
                       alignItems: "center",
                       gap: "3px",
                     }}
-                    onClick={(e) => e.preventDefault()}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (onNavigate) {
+                        if (card.id === "pending") {
+                          onNavigate("reports-all-order-details");
+                        } else if (card.id === "draft") {
+                          onNavigate("reports-draft-orders");
+                        } else if (card.id === "invitation") {
+                          onNavigate("applicants");
+                        }
+                      }
+                    }}
                   >
                     {card.link} <ArrowRight size={11} />
                   </a>

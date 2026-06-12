@@ -1,23 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Search, ChevronDown } from "lucide-react";
-import { ORDERS, STATUS_STYLES } from "../data/mockData";
 import { Footer } from "../components/Footer";
 
-function getAmountVal(verificationType: string): number {
-  switch (verificationType) {
-    case "I-9 Verifications (E-Verify)": return 29.00;
-    case "Military Service Verification": return 35.00;
-    case "SSN Trace/Address History": return 15.00;
-    case "Federal Search": return 45.00;
-    case "Global Watch List": return 20.00;
-    case "Reference Verification": return 30.00;
-    case "SSN Trace": return 12.00;
-    case "Employment Verification": return 40.00;
-    case "Criminal Search": return 45.00;
-    case "Education Verification": return 40.00;
-    default: return 25.00;
-  }
+interface LogRecord {
+  num: number;
+  orderId: string;
+  applicantName: string;
+  letterType: string;
+  dateSent: string;
 }
+
+const MOCK_LOGS: LogRecord[] = [];
 
 function SortIcon({ active, direction }: { active: boolean; direction: "asc" | "desc" }) {
   return (
@@ -38,17 +31,10 @@ interface CalendarDay {
 
 function getCalendarGrid(year: number, month: number): CalendarDay[] {
   const grid: CalendarDay[] = [];
-  
-  // First day of current month (0-6)
   const firstDayIndex = new Date(year, month, 1).getDay();
-  
-  // Days in current month
   const daysInCurrent = new Date(year, month + 1, 0).getDate();
-  
-  // Days in previous month
   const daysInPrev = new Date(year, month, 0).getDate();
   
-  // 1. Previous month padding days
   const prevMonth = month === 0 ? 11 : month - 1;
   const prevYear = month === 0 ? year - 1 : year;
   for (let i = firstDayIndex - 1; i >= 0; i--) {
@@ -63,7 +49,6 @@ function getCalendarGrid(year: number, month: number): CalendarDay[] {
     });
   }
   
-  // 2. Current month days
   for (let i = 1; i <= daysInCurrent; i++) {
     const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
     grid.push({
@@ -75,7 +60,6 @@ function getCalendarGrid(year: number, month: number): CalendarDay[] {
     });
   }
   
-  // 3. Next month padding days
   const nextMonth = month === 11 ? 0 : month + 1;
   const nextYear = month === 11 ? year + 1 : year;
   const remaining = 42 - grid.length;
@@ -103,13 +87,11 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Parse current selected start & end dates
   const parts = value.split(" to ");
   const startDateStr = parts[0]?.trim() || "";
   const endDateStr = parts[1]?.trim() || "";
 
-  // View calendar state defaulting to March 2026 as shown in screenshot
-  const [viewMonth, setViewMonth] = useState(2); // 0 = Jan, 1 = Feb, 2 = Mar
+  const [viewMonth, setViewMonth] = useState(2); // March
   const [viewYear, setViewYear] = useState(2026);
 
   useEffect(() => {
@@ -164,7 +146,6 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
 
   return (
     <div ref={containerRef} style={{ position: "relative", display: "flex", alignItems: "center", gap: "12px" }}>
-      {/* Box Input Wrapper */}
       <div
         onClick={() => setIsOpen(!isOpen)}
         style={{
@@ -183,7 +164,7 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
         }}
       >
         <label style={{ fontSize: "12px", color: "#9CA3AF", fontWeight: 400, marginBottom: "2px", cursor: "pointer" }}>
-          Order Date Range
+          Date Range
         </label>
         <div style={{ fontSize: "14px", color: "#333", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {value}
@@ -205,7 +186,7 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
           alignSelf: "center",
         }}
       >
-        Load By Range
+        Update Range
       </button>
 
       {isOpen && (
@@ -224,7 +205,6 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
             paddingBottom: "8px",
           }}
         >
-          {/* Top Triangle Pointer matching header background */}
           <div
             style={{
               position: "absolute",
@@ -238,7 +218,6 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
             }}
           />
 
-          {/* Month/Year Selection Header */}
           <div
             style={{
               background: "#C70039",
@@ -253,14 +232,7 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
           >
             <button
               onClick={handlePrevMonth}
-              style={{
-                background: "none",
-                border: "none",
-                color: "#FFFFFF",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-              }}
+              style={{ background: "none", border: "none", color: "#FFFFFF", cursor: "pointer", display: "flex", alignItems: "center" }}
             >
               <ChevronLeft size={16} />
             </button>
@@ -271,20 +243,12 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
             </div>
             <button
               onClick={handleNextMonth}
-              style={{
-                background: "none",
-                border: "none",
-                color: "#FFFFFF",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-              }}
+              style={{ background: "none", border: "none", color: "#FFFFFF", cursor: "pointer", display: "flex", alignItems: "center" }}
             >
               <ChevronRight size={16} />
             </button>
           </div>
 
-          {/* Calendar Weekdays labels */}
           <div
             style={{
               display: "grid",
@@ -301,7 +265,6 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
             ))}
           </div>
 
-          {/* Calendar Days grid */}
           <div
             style={{
               display: "grid",
@@ -322,7 +285,6 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
                 dateStr > startDateStr &&
                 dateStr < endDateStr;
 
-              // Styles for range background highlight
               let cellBg = "transparent";
               if (inRange) {
                 cellBg = "#EAEAEA";
@@ -332,7 +294,6 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
                 cellBg = "linear-gradient(90deg, #EAEAEA 50%, transparent 50%)";
               }
 
-              // Styles for the day circle indicator
               let dayBg = "transparent";
               let dayColor = "#374151";
               let dayWeight = "normal";
@@ -387,16 +348,16 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
   );
 }
 
-export function OrderList() {
+export function AdverseActionLog() {
   const [dateRangeInput, setDateRangeInput] = useState("2026-03-12 to 2026-06-12");
   const [appliedDateRange, setAppliedDateRange] = useState({ startDate: "2026-03-12", endDate: "2026-03-12" });
   const [perPage, setPerPage] = useState(10);
   const [search, setSearch] = useState("");
-  const [sortField, setSortField] = useState("orderDate");
+  const [sortField, setSortField] = useState("dateSent");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
 
-  function handleLoadByRange() {
+  function handleUpdateRange() {
     const parts = dateRangeInput.split(" to ");
     const start = parts[0]?.trim() || "";
     const end = parts[1]?.trim() || "";
@@ -414,43 +375,42 @@ export function OrderList() {
     setPage(1);
   }
 
-  // Filter orders
-  const filtered = ORDERS.filter((o) => {
-    // Date range
-    if (appliedDateRange.startDate && o.orderDate < appliedDateRange.startDate) return false;
-    if (appliedDateRange.endDate && o.orderDate > appliedDateRange.endDate) return false;
+  // Filter logs
+  const filtered = MOCK_LOGS.filter((l) => {
+    if (appliedDateRange.startDate && l.dateSent < appliedDateRange.startDate) return false;
+    if (appliedDateRange.endDate && l.dateSent > appliedDateRange.endDate) return false;
 
-    // Live search
     if (search.trim()) {
       const q = search.toLowerCase();
-      const matchId = o.searchId.toLowerCase().includes(q);
-      const matchName = o.applicantName.toLowerCase().includes(q);
-      if (!matchId && !matchName) return false;
+      return (
+        l.orderId.toLowerCase().includes(q) ||
+        l.applicantName.toLowerCase().includes(q) ||
+        l.letterType.toLowerCase().includes(q)
+      );
     }
-
     return true;
   });
 
-  // Sort orders
+  // Sort logs
   const sorted = [...filtered].sort((a, b) => {
     let valA: any = "";
     let valB: any = "";
 
-    if (sortField === "searchId") {
-      valA = a.searchId;
-      valB = b.searchId;
+    if (sortField === "num") {
+      valA = a.num;
+      valB = b.num;
+    } else if (sortField === "orderId") {
+      valA = a.orderId;
+      valB = b.orderId;
     } else if (sortField === "applicantName") {
       valA = a.applicantName;
       valB = b.applicantName;
-    } else if (sortField === "orderDate") {
-      valA = a.orderDate;
-      valB = b.orderDate;
-    } else if (sortField === "status") {
-      valA = a.status;
-      valB = b.status;
-    } else if (sortField === "amount") {
-      valA = getAmountVal(a.verificationType);
-      valB = getAmountVal(b.verificationType);
+    } else if (sortField === "letterType") {
+      valA = a.letterType;
+      valB = b.letterType;
+    } else if (sortField === "dateSent") {
+      valA = a.dateSent;
+      valB = b.dateSent;
     }
 
     if (typeof valA === "number" && typeof valB === "number") {
@@ -474,18 +434,23 @@ export function OrderList() {
         
         {/* Page Title */}
         <h1 style={{ fontSize: "20px", fontWeight: 500, color: "rgb(199, 0, 57)", marginBottom: "14px" }}>
-          Orders List
+          Adverse Action Log
         </h1>
 
         {/* Card Container */}
         <div style={{ background: "#FFFFFF", border: "1px solid #E5E7EB", borderRadius: "4px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
           
+          {/* Top Description */}
+          <div style={{ fontSize: "14px", color: "#6B7280", marginBottom: "20px", lineHeight: "1.5" }}>
+            Track Adverse Actions up to 3 months old. To access older records, please adjust the date range accordingly.
+          </div>
+
           {/* Date Range Row */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
             <DateRangePicker
               value={dateRangeInput}
               onChange={setDateRangeInput}
-              onLoad={handleLoadByRange}
+              onLoad={handleUpdateRange}
             />
           </div>
 
@@ -544,20 +509,20 @@ export function OrderList() {
             <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
               <thead>
                 <tr style={{ background: "#F3F4F6", borderBottom: "2px solid #E5E7EB" }}>
-                  <th onClick={() => handleSort("searchId")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Order ID <SortIcon active={sortField === "searchId"} direction={sortDirection} />
+                  <th onClick={() => handleSort("num")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
+                    # <SortIcon active={sortField === "num"} direction={sortDirection} />
+                  </th>
+                  <th onClick={() => handleSort("orderId")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
+                    Order ID <SortIcon active={sortField === "orderId"} direction={sortDirection} />
                   </th>
                   <th onClick={() => handleSort("applicantName")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
                     Applicant Name <SortIcon active={sortField === "applicantName"} direction={sortDirection} />
                   </th>
-                  <th onClick={() => handleSort("orderDate")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Order Date <SortIcon active={sortField === "orderDate"} direction={sortDirection} />
+                  <th onClick={() => handleSort("letterType")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
+                    Letter Type <SortIcon active={sortField === "letterType"} direction={sortDirection} />
                   </th>
-                  <th onClick={() => handleSort("amount")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Amount <SortIcon active={sortField === "amount"} direction={sortDirection} />
-                  </th>
-                  <th onClick={() => handleSort("status")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Order Status <SortIcon active={sortField === "status"} direction={sortDirection} />
+                  <th onClick={() => handleSort("dateSent")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
+                    Date Sent <SortIcon active={sortField === "dateSent"} direction={sortDirection} />
                   </th>
                   <th style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563" }}>
                     Actions
@@ -572,36 +537,20 @@ export function OrderList() {
                     </td>
                   </tr>
                 ) : (
-                  paginated.map((o, idx) => {
-                    const amount = getAmountVal(o.verificationType);
-                    return (
-                      <tr key={o.searchId} style={{ borderBottom: "1px solid #F3F4F6", background: idx % 2 === 0 ? "#FFFFFF" : "#F9FAFB" }}>
-                        <td style={{ padding: "12px 16px", fontSize: "13px", color: "#3B1D7D", fontWeight: 600 }}>{o.searchId}</td>
-                        <td style={{ padding: "12px 16px", fontSize: "13px", color: "#111827" }}>{o.applicantName}</td>
-                        <td style={{ padding: "12px 16px", fontSize: "13px", color: "#4B5563" }}>{o.orderDate}</td>
-                        <td style={{ padding: "12px 16px", fontSize: "13px", color: "#111827" }}>${amount.toFixed(2)}</td>
-                        <td style={{ padding: "12px 16px" }}>
-                          <span style={{
-                            display: "inline-block",
-                            padding: "2px 8px",
-                            borderRadius: "3px",
-                            fontSize: "10px",
-                            fontWeight: 600,
-                            background: STATUS_STYLES[o.status].bg,
-                            color: STATUS_STYLES[o.status].color,
-                            border: `1px solid ${STATUS_STYLES[o.status].border}`,
-                          }}>
-                            {o.status}
-                          </span>
-                        </td>
-                        <td style={{ padding: "12px 16px" }}>
-                          <button style={{ background: "none", border: "none", color: "#C70039", fontWeight: 500, fontSize: "13px", cursor: "pointer" }}>
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
+                  paginated.map((l, idx) => (
+                    <tr key={l.orderId} style={{ borderBottom: "1px solid #F3F4F6", background: idx % 2 === 0 ? "#FFFFFF" : "#F9FAFB" }}>
+                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#4B5563" }}>{l.num}</td>
+                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#3B1D7D", fontWeight: 600 }}>{l.orderId}</td>
+                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#111827" }}>{l.applicantName}</td>
+                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#4B5563" }}>{l.letterType}</td>
+                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#4B5563" }}>{l.dateSent}</td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <button style={{ background: "none", border: "none", color: "#C70039", fontWeight: 500, fontSize: "13px", cursor: "pointer" }}>
+                          View Letter
+                        </button>
+                      </td>
+                    </tr>
+                  ))
                 )}
               </tbody>
             </table>
