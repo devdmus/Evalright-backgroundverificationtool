@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
 import { Footer } from "../components/Footer";
 
 interface DraftRecord {
@@ -9,8 +9,33 @@ interface DraftRecord {
   dateCreated: string;
 }
 
-// Default to empty to match screenshot exactly
-const MOCK_DRAFTS: DraftRecord[] = [];
+// Default mock drafts matching the screenshot exactly
+const MOCK_DRAFTS: DraftRecord[] = [
+  {
+    id: "draft-1",
+    applicantName: "N/A (invitation draft)",
+    searchesOrdered: "Social Media Search",
+    dateCreated: "06/15/2026 01:46 AM",
+  },
+  {
+    id: "draft-2",
+    applicantName: "N/A (invitation draft)",
+    searchesOrdered: "SSN Trace/Address History",
+    dateCreated: "06/15/2026 01:15 AM",
+  },
+  {
+    id: "draft-3",
+    applicantName: "N/A (invitation draft)",
+    searchesOrdered: "SSN Trace/Address History",
+    dateCreated: "06/15/2026 01:14 AM",
+  },
+  {
+    id: "draft-4",
+    applicantName: "N/A (invitation draft)",
+    searchesOrdered: "SSN Trace/Address History",
+    dateCreated: "06/15/2026 01:13 AM",
+  },
+];
 
 function SortIcon({ active, direction }: { active: boolean; direction: "asc" | "desc" }) {
   return (
@@ -28,6 +53,10 @@ export function DraftOrderList() {
   const [sortField, setSortField] = useState("dateCreated");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
+
+  function deleteDraft(id: string) {
+    setDrafts((prev) => prev.filter((d) => d.id !== id));
+  }
 
   function handleSort(field: string) {
     if (sortField === field) {
@@ -166,18 +195,24 @@ export function DraftOrderList() {
                     </td>
                   </tr>
                 ) : (
-                  paginated.map((d, idx) => (
-                    <tr key={d.id} style={{ borderBottom: "1px solid #F3F4F6", background: idx % 2 === 0 ? "#FFFFFF" : "#F9FAFB" }}>
-                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#111827" }}>{d.applicantName}</td>
-                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#4B5563" }}>{d.searchesOrdered}</td>
-                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#4B5563" }}>{d.dateCreated}</td>
-                      <td style={{ padding: "12px 16px" }}>
-                        <button style={{ background: "none", border: "none", color: "#C70039", fontWeight: 500, fontSize: "13px", cursor: "pointer" }}>
-                          Continue
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                  paginated.map((d, idx) => {
+                    const isInvitationDraft = d.applicantName === "N/A (invitation draft)";
+                    return (
+                      <tr key={d.id} style={{ borderBottom: "1px solid #F3F4F6", background: idx % 2 === 0 ? "#FFFFFF" : "#F9FAFB" }}>
+                        <td style={{ padding: "12px 16px", fontSize: "13px", color: isInvitationDraft ? "#C70039" : "#111827" }}>{d.applicantName}</td>
+                        <td style={{ padding: "12px 16px", fontSize: "13px", color: "#4B5563" }}>{d.searchesOrdered}</td>
+                        <td style={{ padding: "12px 16px", fontSize: "13px", color: "#4B5563" }}>{d.dateCreated}</td>
+                        <td style={{ padding: "12px 16px" }}>
+                          <button
+                            onClick={() => deleteDraft(d.id)}
+                            style={{ background: "none", border: "none", color: "#C70039", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "4px" }}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

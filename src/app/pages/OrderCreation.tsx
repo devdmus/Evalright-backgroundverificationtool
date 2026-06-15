@@ -1,5 +1,5 @@
-﻿import { useState, useRef, useEffect } from "react";
-import { RotateCcw, ArrowRight, Search, Save, ChevronLeft, ChevronRight, ChevronDown, X } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { RotateCcw, ArrowRight, Search, Save, ChevronLeft, ChevronRight, ChevronDown, X, Edit, Mail } from "lucide-react";
 import { Footer } from "../components/Footer";
 
 interface OrderCreationProps {
@@ -217,6 +217,29 @@ const STATES_LIST = [
 
 const GENERATION_LIST = ["None", "Jr", "Sr", "II", "III", "IV"];
 
+const allSearchItems = [
+  ...COL1_CATEGORIES.flatMap((cat) => cat.items),
+  ...COL2_CATEGORIES.flatMap((cat) => cat.items),
+];
+const itemMap = new Map(allSearchItems.map((item) => [item.id, item]));
+
+function maskSSN(val: string) {
+  if (!val) return "";
+  if (val.includes("X") || val.includes("x")) return val;
+  const clean = val.replace(/\D/g, "");
+  if (clean.length >= 4) {
+    return `XXX-XX-${clean.slice(-4)}`;
+  }
+  return val;
+}
+
+function getSearchDisplayName(itemId: string, name: string) {
+  if (itemId === "ssn-trace-address") {
+    return "SSN Trace/Address History (SSN Trace)";
+  }
+  return name;
+}
+
 export function OrderCreation({ isInvitation = false, showInvitationBanner = false, isDarkMode = false, onNavigate }: OrderCreationProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bannerVisible, setBannerVisible] = useState(true);
@@ -224,8 +247,10 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
 
-  // Step state: 1 = Searches Selection, 2 = Enter Applicant Info, 3 = Success
+  // Step state: 1 = Searches Selection, 2 = Enter Applicant Info, 3 = Order Review, 4 = Success
   const [step, setStep] = useState(1);
+  const [afterOrderAction, setAfterOrderAction] = useState("view-results");
+  const [invitationTemplate, setInvitationTemplate] = useState("Select Template");
 
   // Form states
   const [firstName, setFirstName] = useState("");
@@ -235,6 +260,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
   const [generation, setGeneration] = useState("None");
   const [dob, setDob] = useState("");
   const [showMinorModal, setShowMinorModal] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [minorAgreementChecked, setMinorAgreementChecked] = useState(true);
   const [ssn, setSsn] = useState("");
   const [streetAddress, setStreetAddress] = useState("");
@@ -295,6 +321,9 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
     setApplicantEmail("");
     setEmailReport(false);
     setRushOrder(false);
+    setAfterOrderAction("view-results");
+    setShowSubmitModal(false);
+    setInvitationTemplate("Select Template");
   }
 
   function handleStep1Next() {
@@ -350,6 +379,21 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
     }
   }
 
+  function handleSendInvitation() {
+    const isMiddleNameValid = middleNameDisabled || middleName.trim() !== "";
+    if (
+      invitationTemplate === "Select Template" ||
+      !firstName.trim() ||
+      !isMiddleNameValid ||
+      !lastName.trim() ||
+      !applicantEmail.trim()
+    ) {
+      triggerToast("Please fill in all required fields (marked with *).", true);
+      return;
+    }
+    setStep(4);
+  }
+
   function handleSaveOrder() {
     triggerToast("Order draft saved successfully!");
   }
@@ -371,27 +415,108 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
   const filteredCol1 = filterCategories(COL1_CATEGORIES);
   const filteredCol2 = filterCategories(COL2_CATEGORIES);
 
-  // Success view (Step 3)
-  if (step === 3) {
+  // Success view (Step 4)
+  if (step === 4) {
+    const successTitle = isInvitation ? "Invitation Sent Successfully!" : "Order Placed Successfully!";
+    
     return (
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
         <div style={{ flex: 1, padding: "40px 20px", background: "#F5F5F5", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ background: "#FFFFFF", padding: "40px", borderRadius: "8px", boxShadow: "0 4px 6px rgba(0,0,0,0.05)", textAlign: "center", maxWidth: "500px", width: "100%" }}>
             <div style={{ width: "64px", height: "64px", background: "#D1FAE5", color: "#059669", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "32px", margin: "0 auto 20px auto" }}>
-              Γ£ô
+              ✓
             </div>
             <h2 style={{ fontSize: "20px", fontWeight: "600", color: "#111827", marginBottom: "12px" }}>
-              Order Placed Successfully!
+              {successTitle}
             </h2>
             <p style={{ fontSize: "14px", color: "#6B7280", marginBottom: "30px", lineHeight: "1.5" }}>
-              The order for <strong>{firstName} {lastName}</strong> has been submitted. We have sent a confirmation email to <strong>{applicantEmail}</strong>.
+              {isInvitation ? (
+                <>
+                  The invitation for <strong>{firstName} {lastName}</strong> has been sent. We have sent the invitation email to <strong>{applicantEmail}</strong>.
+                </>
+              ) : (
+                <>
+                  The order for <strong>{firstName} {lastName}</strong> has been submitted. We have sent a confirmation email to <strong>{applicantEmail}</strong>.
+                </>
+              )}
             </p>
-            <button
-              onClick={startOver}
-              style={{ padding: "0 24px", height: "40px", background: "#C70039", color: "#FFFFFF", border: "none", borderRadius: "4px", fontSize: "14px", fontWeight: 500, cursor: "pointer" }}
-            >
-              Create Another Order
-            </button>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {isInvitation ? (
+                <>
+                  <button
+                    onClick={() => {
+                      // Reset applicant fields but keep selected searches
+                      setFirstName("");
+                      setMiddleName("");
+                      setMiddleNameDisabled(false);
+                      setLastName("");
+                      setGeneration("None");
+                      setDob("");
+                      setSsn("");
+                      setStreetAddress("");
+                      setZipCode("");
+                      setReference("");
+                      setJobState("Select State");
+                      setApplicantEmail("");
+                      setEmailReport(false);
+                      setRushOrder(false);
+                      setStep(3); // Go to simplified applicant details directly
+                    }}
+                    style={{ width: "100%", height: "40px", background: "#C70039", color: "#FFFFFF", border: "none", borderRadius: "4px", fontSize: "14px", fontWeight: 500, cursor: "pointer" }}
+                  >
+                    Create Another Invitation
+                  </button>
+                  <button
+                    onClick={startOver}
+                    style={{ width: "100%", height: "40px", background: "#2E1B85", color: "#FFFFFF", border: "none", borderRadius: "4px", fontSize: "14px", fontWeight: 500, cursor: "pointer" }}
+                  >
+                    Go to Order Menu
+                  </button>
+                </>
+              ) : (
+                <>
+                  {afterOrderAction === "view-results" && (
+                    <button
+                      onClick={() => onNavigate?.("reports-all-order-details")}
+                      style={{ width: "100%", height: "40px", background: "#C70039", color: "#FFFFFF", border: "none", borderRadius: "4px", fontSize: "14px", fontWeight: 500, cursor: "pointer" }}
+                    >
+                      View Results
+                    </button>
+                  )}
+                  {afterOrderAction === "order-same-new" && (
+                    <button
+                      onClick={() => {
+                        // Reset applicant fields but keep selected searches
+                        setFirstName("");
+                        setMiddleName("");
+                        setMiddleNameDisabled(false);
+                        setLastName("");
+                        setGeneration("None");
+                        setDob("");
+                        setSsn("");
+                        setStreetAddress("");
+                        setZipCode("");
+                        setReference("");
+                        setJobState("Select State");
+                        setApplicantEmail("");
+                        setEmailReport(false);
+                        setRushOrder(false);
+                        setStep(2);
+                      }}
+                      style={{ width: "100%", height: "40px", background: "#C70039", color: "#FFFFFF", border: "none", borderRadius: "4px", fontSize: "14px", fontWeight: 500, cursor: "pointer" }}
+                    >
+                      Order Same Searches on New Individual
+                    </button>
+                  )}
+                  <button
+                    onClick={startOver}
+                    style={{ width: "100%", height: "40px", background: "#2E1B85", color: "#FFFFFF", border: "none", borderRadius: "4px", fontSize: "14px", fontWeight: 500, cursor: "pointer" }}
+                  >
+                    Go to Order Menu
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
         <Footer />
@@ -425,7 +550,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             marginBottom: "24px",
           }}
         >
-          {isInvitation ? "Order /w Invitation" : "Order"}
+          {isInvitation ? (step === 3 ? "Invite Applicant" : "Order /w Invitation") : "Order"}
         </h4>
 
         {/* Invitation banner */}
@@ -446,7 +571,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span>Γôÿ</span>
+              <span>ⓘ</span>
               <span>This is an applicant invitation order.</span>
             </div>
             <button
@@ -464,68 +589,12 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 cursor: "pointer",
               }}
             >
-              ├ù
+              ×
             </button>
           </div>
         )}
 
-        {isInvitation ? (
-          /* Oops: No Invitation Email Template Warning Screen */
-          <div
-            style={{
-              background: "#FFFFFF",
-              border: "1px solid #E0E0E0",
-              borderRadius: "4px",
-              padding: "64px 24px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: "260px",
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "15px",
-                color: "#333333",
-                marginBottom: "24px",
-                textAlign: "center",
-                lineHeight: "1.5",
-              }}
-            >
-              Oops. You must create an <strong>Invitation Email Template</strong> before generating your first invitation order.
-            </div>
-            <div
-              style={{
-                fontSize: "13.5px",
-                color: "#65A30D",
-                marginBottom: "24px",
-                textAlign: "center",
-              }}
-            >
-              Click the link below to create your first invitation template.
-            </div>
-            <button
-              onClick={() => onNavigate?.("applicant-invite-templates")}
-              style={{
-                fontSize: "13.5px",
-                color: "rgb(199, 0, 57)",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                fontWeight: 600,
-                textDecoration: "none",
-                padding: 0,
-                fontFamily: "inherit",
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
-              onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
-            >
-              Create your first invitation email template
-            </button>
-          </div>
-        ) : step === 1 ? (
+        {step === 1 ? (
           /* Step 1: Searches Selection */
           <div style={{ background: "#FFFFFF", borderRadius: "4px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
             {/* Header Bar */}
@@ -907,9 +976,48 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               </div>
             </div>
           </div>
-        ) : (
-          /* Step 2: Enter Applicant Information */
-          <div style={{ background: "#FFFFFF", borderRadius: "4px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+        ) : step === 2 ? (
+          isInvitation ? (
+            /* Step 2 (Invitation): APPLICANT INVITATION PRODUCT ORDER REVIEW */
+            <div style={{ background: "#FFFFFF", borderRadius: "4px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "1px solid #E5E7EB" }}>
+              <div
+                style={{
+                  height: "44px",
+                  background: "#E5E7EB",
+                  display: "flex",
+                  alignItems: "center",
+                  paddingLeft: "20px",
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  color: "#4B5563",
+                  borderRadius: "4px 4px 0 0",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                }}
+              >
+                APPLICANT INVITATION PRODUCT ORDER REVIEW
+              </div>
+              
+              <div style={{ padding: "24px 20px" }}>
+                <div style={{ color: "#C70039", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>
+                  A La Carte Searches:
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "14px", color: "#374151" }}>
+                  {Array.from(selected).map((itemId) => {
+                    const item = itemMap.get(itemId);
+                    const name = item ? item.name : itemId;
+                    return (
+                      <div key={itemId} style={{ fontWeight: 500 }}>
+                        {getSearchDisplayName(itemId, name)}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Step 2 (Standard): Enter Applicant Information */
+            <div style={{ background: "#FFFFFF", borderRadius: "4px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
             {/* Enter Applicant Information Header Banner */}
             <div
               style={{
@@ -1090,7 +1198,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     userSelect: "none",
                   }}
                 >
-                  <span style={{ color: "#B7042C", fontWeight: "bold" }}>Rush this order for $25</span>
+                  <span style={{ color: "#B7042C", fontWeight: "bold" }}>Rush this order for ₹25</span>
                   <span>
                     {" "}
                     - Selecting this option means that your order will jump to the top of the queue so that we process
@@ -1101,12 +1209,423 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               </div>
             </div>
           </div>
-        )}
+        )
+      ) : (
+          isInvitation ? (
+            /* Step 3 (Invitation): Enter Applicant Information */
+            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+              {/* Card 1: Draft Order Info */}
+              <div style={{ background: "#FFFFFF", borderRadius: "4px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "1px solid #E5E7EB" }}>
+                <div
+                  style={{
+                    height: "44px",
+                    background: "#F9FAFB",
+                    borderBottom: "1px solid #E5E7EB",
+                    display: "flex",
+                    alignItems: "center",
+                    paddingLeft: "20px",
+                    fontSize: "15px",
+                    fontWeight: 600,
+                    color: "#4B5563",
+                    borderRadius: "4px 4px 0 0",
+                  }}
+                >
+                  Draft Order #2062663
+                </div>
+                <div style={{ padding: "24px 20px", display: "flex", flexDirection: "column", gap: "16px", fontSize: "14px", color: "#4B5563", lineHeight: "1.6" }}>
+                  <div>
+                    Thank you for choosing the 2 Step Checks process.
+                  </div>
+                  <div>
+                    Select your invitation template, enter your applicant's name and email address, and click "Send Invitation".
+                  </div>
+                  <div>
+                    Your applicant will open the email, click the link to review their FCRA Summary of Rights, read the instructions, and then click another link that takes them to a screen where they can enter all required information for the background check. They will electronically sign the Disclosure & Authorization form, the searches will be processed, and the final report will be emailed to you.
+                  </div>
+                  <div>
+                    Questions? Call <a href="tel:1-800-935-9025" style={{ color: "#2563EB", textDecoration: "none" }}>1-800-935-9025</a>.
+                  </div>
+                  
+                  {/* STOP AND READ SECTION */}
+                  <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div style={{ background: "#FEF3C7", color: "#92400E", padding: "4px 8px", borderRadius: "4px", fontWeight: "bold", fontSize: "12px", width: "fit-content" }}>
+                      STOP AND READ!
+                    </div>
+                    <div style={{ color: "#DC2626", fontSize: "14px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                      <div>
+                        Please make sure you enter your applicant's legal first, middle, and last name. Do not use a nickname. If you need to verify your applicant's legal name, please contact the applicant before sending this invitation.
+                      </div>
+                      <div>
+                        Entering any name other than the applicant's legal name may result in processing delays and/or inaccurate results.
+                      </div>
+                      <div>
+                        If you have not verified the applicant's legal name before sending this invitation, we cannot guarantee the highest possible accuracy, and no refunds will be issued if the legal name was not entered here.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Form Fields */}
+              <div style={{ background: "#FFFFFF", borderRadius: "4px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "1px solid #E5E7EB", padding: "24px 20px" }}>
+                {/* Email Template Select */}
+                <div style={{ marginBottom: "20px", maxWidth: "480px" }}>
+                  <FloatingSelect
+                    label="Invitation Email Template"
+                    value={invitationTemplate}
+                    options={["Select Template", "Standard Invitation Template", "Custom Template"]}
+                    onChange={setInvitationTemplate}
+                    required
+                  />
+                </div>
+
+                {/* Name Inputs Row */}
+                <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1.3fr 1.2fr 1.2fr", gap: "16px", alignItems: "center", marginBottom: "20px" }}>
+                  <FloatingInput label="First Name" value={firstName} onChange={setFirstName} required />
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <FloatingInput
+                      label="Middle Name"
+                      value={middleNameDisabled ? "" : middleName}
+                      onChange={setMiddleName}
+                      required={!middleNameDisabled}
+                      disabled={middleNameDisabled}
+                    />
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        fontSize: "13px",
+                        color: "#4B5563",
+                        cursor: "pointer",
+                        userSelect: "none",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={middleNameDisabled}
+                        onChange={(e) => {
+                          setMiddleNameDisabled(e.target.checked);
+                          if (e.target.checked) {
+                            setMiddleName("");
+                          }
+                        }}
+                        style={{ width: "16px", height: "16px", accentColor: "#C70039", cursor: "pointer" }}
+                      />
+                      None
+                    </label>
+                  </div>
+                  <FloatingInput label="Last Name" value={lastName} onChange={setLastName} required />
+                  <FloatingSelect
+                    label="Generation"
+                    value={generation}
+                    options={GENERATION_LIST}
+                    onChange={setGeneration}
+                  />
+                </div>
+
+                {/* Email & Reference Row */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "24px" }}>
+                  <div>
+                    <div style={{ fontSize: "14px", fontWeight: 500, color: "#4B5563", marginBottom: "6px" }}>Send to Email:</div>
+                    <FloatingInput
+                      label="Applicant's Email Address"
+                      value={applicantEmail}
+                      onChange={setApplicantEmail}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "14px", fontWeight: 500, color: "#4B5563", marginBottom: "6px" }}>Reference:</div>
+                    <FloatingInput
+                      label="Reference Code"
+                      value={reference}
+                      onChange={setReference}
+                    />
+                  </div>
+                </div>
+
+                {/* Additional Section */}
+                <div style={{ borderTop: "1px solid #E5E7EB", paddingTop: "20px" }}>
+                  <div style={{ fontSize: "16px", fontWeight: 600, color: "#4B5563", marginBottom: "16px" }}>Additional</div>
+                  
+                  {/* Rush Order */}
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "20px" }}>
+                    <input
+                      type="checkbox"
+                      id="rush-order-invite"
+                      checked={rushOrder}
+                      onChange={(e) => setRushOrder(e.target.checked)}
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        accentColor: "#C70039",
+                        marginTop: "4px",
+                        flexShrink: 0,
+                        cursor: "pointer",
+                      }}
+                    />
+                    <label
+                      htmlFor="rush-order-invite"
+                      style={{
+                        fontSize: "13px",
+                        color: "#555555",
+                        lineHeight: "1.5",
+                        cursor: "pointer",
+                        userSelect: "none",
+                      }}
+                    >
+                      <span style={{ color: "#B7042C", fontWeight: "bold" }}>Rush this order for ₹25</span>
+                      <span>
+                        {" "}
+                        - Selecting this option means that your order will jump to the top of the queue so that we process
+                        it before any other orders. Once the order leaves our system, we will do our best to accelerate
+                        the turnaround but some courts, employers and education institutions may not fully cooperate.
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* IP Logging Warning */}
+                  <div style={{ fontSize: "14px", color: "#D97706", fontWeight: "500", marginTop: "16px", fontStyle: "normal" }}>
+                    * For your protection, we have logged your IP Address. Your IP: 183.82.116.22 *
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Step 3 (Standard): Order Review */
+            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            
+            {/* Card 1: Applicant Information */}
+            <div style={{ background: "#FFFFFF", borderRadius: "4px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "1px solid #E5E7EB" }}>
+              <div
+                style={{
+                  height: "44px",
+                  background: "#E5E7EB",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "0 20px",
+                  borderRadius: "4px 4px 0 0",
+                }}
+              >
+                <span style={{ fontSize: "15px", fontWeight: 600, color: "#4B5563", letterSpacing: "0.5px", textTransform: "uppercase" }}>
+                  Applicant Information
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  style={{
+                    height: "30px",
+                    padding: "0 12px",
+                    background: "#C70039",
+                    color: "#FFFFFF",
+                    border: "none",
+                    borderRadius: "4px",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <Edit size={12} />
+                  Edit
+                </button>
+              </div>
+              
+              <div style={{ padding: "24px 20px" }}>
+                <p style={{ margin: "0 0 20px 0", fontSize: "14px", color: "#6B7280" }}>
+                  Please review applicant information below thoroughly.
+                </p>
+                
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "20px" }}>
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      Applicant's Full Name:
+                    </div>
+                    <div style={{ fontSize: "15px", color: "#1F2937", marginTop: "6px", fontWeight: 500 }}>
+                      {firstName} {middleNameDisabled ? "" : middleName} {lastName}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      Applicant's SSN:
+                    </div>
+                    <div style={{ fontSize: "15px", color: "#1F2937", marginTop: "6px", fontWeight: 500 }}>
+                      {maskSSN(ssn)}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      Applicant's DOB:
+                    </div>
+                    <div style={{ fontSize: "15px", color: "#1F2937", marginTop: "6px", fontWeight: 500 }}>
+                      {dob}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2: Order Review Table */}
+            <div style={{ background: "#FFFFFF", borderRadius: "4px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "1px solid #E5E7EB" }}>
+              <div
+                style={{
+                  height: "44px",
+                  background: "#E5E7EB",
+                  display: "flex",
+                  alignItems: "center",
+                  paddingLeft: "20px",
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  color: "#4B5563",
+                  borderRadius: "4px 4px 0 0",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                }}
+              >
+                Order Review
+              </div>
+              
+              <div style={{ padding: "0" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr style={{ background: "#F9FAFB", borderBottom: "1px solid #E5E7EB" }}>
+                      <th style={{ textAlign: "left", padding: "12px 20px", fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>Product Name</th>
+                      <th style={{ textAlign: "left", padding: "12px 20px", fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>Location</th>
+                      <th style={{ textAlign: "left", padding: "12px 20px", fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>Edit</th>
+                      <th style={{ textAlign: "right", padding: "12px 20px", fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>Price</th>
+                      <th style={{ width: "60px", padding: "12px 20px" }}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Array.from(selected).map((itemId) => {
+                      const item = itemMap.get(itemId);
+                      const productName = item ? item.name : itemId;
+                      const editLabel = itemId === "ssn-trace-address" ? "Show SSN Report" : "Show Report";
+                      
+                      return (
+                        <tr key={itemId} style={{ borderBottom: "1px solid #E5E7EB" }}>
+                          <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", fontWeight: 500 }}>{productName}</td>
+                          <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151" }}></td>
+                          <td style={{ padding: "16px 20px", fontSize: "14px" }}>
+                            <span 
+                              style={{ color: "#2563EB", cursor: "pointer", fontWeight: 500 }}
+                              onClick={() => setStep(1)}
+                            >
+                              {editLabel}
+                            </span>
+                          </td>
+                          <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 500 }}>₹5.00</td>
+                          <td style={{ padding: "16px 20px", textAlign: "right" }}>
+                            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "18px", height: "18px", background: "#C70039", borderRadius: "4px", color: "#FFFFFF", fontSize: "11px", fontWeight: "bold" }}>
+                              ✓
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    
+                    {rushOrder && (
+                      <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                        <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", fontWeight: 500 }}>Rush Order Fee</td>
+                        <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151" }}></td>
+                        <td style={{ padding: "16px 20px", fontSize: "14px" }}></td>
+                        <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 500 }}>₹25.00</td>
+                        <td style={{ padding: "16px 20px", textAlign: "right" }}>
+                          <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "18px", height: "18px", background: "#C70039", borderRadius: "4px", color: "#FFFFFF", fontSize: "11px", fontWeight: "bold" }}>
+                            ✓
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    
+                    {/* Total Row */}
+                    <tr style={{ background: "#F9FAFB" }}>
+                      <td style={{ padding: "16px 20px", fontSize: "15px", color: "#1F2937", fontWeight: "bold" }}>Total</td>
+                      <td style={{ padding: "16px 20px" }}></td>
+                      <td style={{ padding: "16px 20px" }}></td>
+                      <td style={{ padding: "16px 20px", fontSize: "15px", color: "#1F2937", textAlign: "right", fontWeight: "bold" }}>
+                        ₹{(selected.size * 5 + (rushOrder ? 25 : 0)).toFixed(2)}
+                      </td>
+                      <td style={{ padding: "16px 20px" }}></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Card 3: After ordering this report */}
+            <div style={{ background: "#FFFFFF", borderRadius: "4px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "1px solid #E5E7EB" }}>
+              <div
+                style={{
+                  height: "44px",
+                  background: "#F9FAFB",
+                  borderBottom: "1px solid #E5E7EB",
+                  display: "flex",
+                  alignItems: "center",
+                  paddingLeft: "20px",
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  color: "#4B5563",
+                  borderRadius: "4px 4px 0 0",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                After ordering this report:
+              </div>
+              
+              <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", color: "#374151", cursor: "pointer", userSelect: "none" }}>
+                  <input
+                    type="radio"
+                    name="afterOrderAction"
+                    value="view-results"
+                    checked={afterOrderAction === "view-results"}
+                    onChange={(e) => setAfterOrderAction(e.target.value)}
+                    style={{ width: "18px", height: "18px", accentColor: "#C70039", cursor: "pointer" }}
+                  />
+                  <span>View Results</span>
+                </label>
+                
+                <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", color: "#374151", cursor: "pointer", userSelect: "none" }}>
+                  <input
+                    type="radio"
+                    name="afterOrderAction"
+                    value="order-menu"
+                    checked={afterOrderAction === "order-menu"}
+                    onChange={(e) => setAfterOrderAction(e.target.value)}
+                    style={{ width: "18px", height: "18px", accentColor: "#C70039", cursor: "pointer" }}
+                  />
+                  <span>Go to Order Menu</span>
+                </label>
+                
+                <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", color: "#374151", cursor: "pointer", userSelect: "none" }}>
+                  <input
+                    type="radio"
+                    name="afterOrderAction"
+                    value="order-same-new"
+                    checked={afterOrderAction === "order-same-new"}
+                    onChange={(e) => setAfterOrderAction(e.target.value)}
+                    style={{ width: "18px", height: "18px", accentColor: "#C70039", cursor: "pointer" }}
+                  />
+                  <span>Order same searches on new individual</span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+        )
+      )}
       </div>
 
       {/* Action buttons */}
-      {!isInvitation && (
-        step === 1 ? (
+      {step === 1 ? (
           /* Step 1 Footer Buttons */
           <div
             style={{
@@ -1162,86 +1681,283 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               <ArrowRight size={16} />
             </button>
           </div>
+        ) : step === 2 ? (
+          isInvitation ? (
+            /* Step 2 (Invitation): APPLICANT INVITATION PRODUCT ORDER REVIEW Buttons */
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "16px",
+                padding: "40px 0",
+                background: "#F5F5F5",
+              }}
+            >
+              <button
+                onClick={startOver}
+                style={{
+                  height: "40px",
+                  padding: "0 24px",
+                  background: "#C70039",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  color: "#FFFFFF",
+                  cursor: "pointer",
+                  fontWeight: 500,
+                }}
+              >
+                Start Over
+              </button>
+              <button
+                onClick={() => setStep(3)}
+                style={{
+                  height: "40px",
+                  padding: "0 24px",
+                  background: "#C70039",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  color: "#FFFFFF",
+                  cursor: "pointer",
+                  fontWeight: 500,
+                }}
+              >
+                Continue
+              </button>
+            </div>
+          ) : (
+            /* Step 2 (Standard) Footer Buttons */
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "16px",
+                padding: "40px 0",
+                background: "#F5F5F5",
+              }}
+            >
+              {/* Start Over */}
+              <button
+                onClick={startOver}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  height: "40px",
+                  padding: "0 20px",
+                  background: "#2E1B85",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  color: "#FFFFFF",
+                  cursor: "pointer",
+                  fontWeight: 500,
+                }}
+              >
+                <RotateCcw size={16} />
+                Start Over
+              </button>
+
+              {/* Save Order */}
+              <button
+                onClick={handleSaveOrder}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  height: "40px",
+                  padding: "0 20px",
+                  background: "#2E1B85",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  color: "#FFFFFF",
+                  cursor: "pointer",
+                  fontWeight: 500,
+                }}
+              >
+                <Save size={16} />
+                Save Order
+              </button>
+
+              {/* Next */}
+              <button
+                onClick={handleStep2Next}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  height: "40px",
+                  padding: "0 24px",
+                  background: "#C70039",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  color: "#FFFFFF",
+                  cursor: "pointer",
+                  fontWeight: 500,
+                }}
+              >
+                Next
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          )
         ) : (
-          /* Step 2 Footer Buttons */
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "16px",
-              padding: "40px 0",
-              background: "#F5F5F5",
-            }}
-          >
-            {/* Start Over */}
-            <button
-              onClick={startOver}
+          isInvitation ? (
+            /* Step 3 (Invitation) Footer Buttons */
+            <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "8px",
-                height: "40px",
-                padding: "0 20px",
-                background: "#2E1B85",
-                border: "none",
-                borderRadius: "4px",
-                fontSize: "14px",
-                color: "#FFFFFF",
-                cursor: "pointer",
-                fontWeight: 500,
+                justifyContent: "center",
+                gap: "16px",
+                padding: "40px 0",
+                background: "#F5F5F5",
               }}
             >
-              <RotateCcw size={16} />
-              Start Over
-            </button>
+              {/* Cancel */}
+              <button
+                onClick={startOver}
+                style={{
+                  height: "40px",
+                  padding: "0 32px",
+                  background: "#2E1B85",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  fontWeight: 500,
+                }}
+              >
+                Cancel
+              </button>
+              {/* Send Invitation */}
+              <button
+                onClick={handleSendInvitation}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  height: "40px",
+                  padding: "0 24px",
+                  background: "#C70039",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  color: "#FFFFFF",
+                  cursor: "pointer",
+                  fontWeight: 500,
+                }}
+              >
+                Send Invitation
+                <Mail size={16} />
+              </button>
+            </div>
+          ) : (
+            /* Step 3 (Standard) Footer Buttons */
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "16px",
+                padding: "40px 0",
+                background: "#F5F5F5",
+              }}
+            >
+              {/* Start Over */}
+              <button
+                onClick={startOver}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  height: "40px",
+                  padding: "0 20px",
+                  background: "#2E1B85",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  color: "#FFFFFF",
+                  cursor: "pointer",
+                  fontWeight: 500,
+                }}
+              >
+                <RotateCcw size={16} />
+                Start Over
+              </button>
 
-            {/* Save Order */}
-            <button
-              onClick={handleSaveOrder}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                height: "40px",
-                padding: "0 20px",
-                background: "#2E1B85",
-                border: "none",
-                borderRadius: "4px",
-                fontSize: "14px",
-                color: "#FFFFFF",
-                cursor: "pointer",
-                fontWeight: 500,
-              }}
-            >
-              <Save size={16} />
-              Save Order
-            </button>
+              {/* Save Order */}
+              <button
+                onClick={handleSaveOrder}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  height: "40px",
+                  padding: "0 20px",
+                  background: "#2E1B85",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  color: "#FFFFFF",
+                  cursor: "pointer",
+                  fontWeight: 500,
+                }}
+              >
+                <Save size={16} />
+                Save Order
+              </button>
 
-            {/* Next */}
-            <button
-              onClick={handleStep2Next}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                height: "40px",
-                padding: "0 24px",
-                background: "#C70039",
-                border: "none",
-                borderRadius: "4px",
-                fontSize: "14px",
-                color: "#FFFFFF",
-                cursor: "pointer",
-                fontWeight: 500,
-              }}
-            >
-              Next
-              <ArrowRight size={16} />
-            </button>
-          </div>
-        )
-      )}
+              {/* Add Another Search */}
+              <button
+                onClick={() => setStep(1)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  height: "40px",
+                  padding: "0 24px",
+                  background: "#C70039",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  color: "#FFFFFF",
+                  cursor: "pointer",
+                  fontWeight: 500,
+                }}
+              >
+                Add Another Search
+              </button>
+
+              {/* Submit Order */}
+              <button
+                onClick={() => setShowSubmitModal(true)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  height: "40px",
+                  padding: "0 24px",
+                  background: "#C70039",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  color: "#FFFFFF",
+                  cursor: "pointer",
+                  fontWeight: 500,
+                }}
+              >
+                Submit Order
+              </button>
+            </div>
+          )
+        )}
 
       {/* Minor Applicant Authorization Modal */}
       {showMinorModal && (
@@ -1417,6 +2133,111 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               </div>
 
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Submit Confirmation Modal */}
+      {showSubmitModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0, 0, 0, 0.4)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              width: "600px",
+              maxWidth: "90%",
+              background: "#FFFFFF",
+              borderRadius: "4px",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+              padding: "24px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "16px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+            }}
+          >
+            <div style={{ fontSize: "14px", color: "#374151", lineHeight: "1.6" }}>
+              By clicking "Submit Order", you agree to the <span style={{ color: "#C70039", fontWeight: "bold" }}>₹{(selected.size * 5 + (rushOrder ? 25 : 0)).toFixed(2)}</span> charge to your credit card, and to the following certifications:
+            </div>
+
+            <div style={{ color: "#C70039", fontSize: "14px", lineHeight: "1.6", display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div style={{ fontWeight: 500 }}>
+                I agree and certify now and at the time of each order of a consumer report for employment purposes, or in accordance with the written instructions of the consumer, that:
+              </div>
+
+              <div>
+                · (1) the consumer has been provided with a disclosure, in a document consisting solely of the disclosure, and that a consumer report will be procured from a consumer reporting agency in connection with the consumer seeking to work as an employee or to perform services as an independent contractor or to serve as volunteer;
+              </div>
+
+              <div>
+                · (2) if our company / organization decides to take any adverse action against the consumer based in whole or in part on the consumer report, we will provide the consumer a copy of the consumer report along with “A Summary of Your Rights Under the Fair Credit Reporting Act” before taking any adverse action; and as part of the Adverse Action process, we will perform an Individualized Assessment on the consumer, as required by applicable laws, ordinances and EEOC Guidance;
+              </div>
+
+              <div>
+                · (3) information from the consumer report will not be used in violation of any applicable Federal or State equal employment opportunity law or regulation and;
+              </div>
+
+              <div>
+                · (4) these actions may not be legally required with respect to screening independent contractors and volunteers pursuant to their written instructions. However, to the extent these actions are not legally required, our company / organization shall exceed legal requirements and still take these actions in favor of the consumer.
+              </div>
+            </div>
+
+            <div style={{ fontSize: "14px", color: "#D97706", fontWeight: "600", marginTop: "8px" }}>
+              *For your protection, we have logged your IP Address 183.82.116.22
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "center", gap: "16px", marginTop: "16px" }}>
+              <button
+                type="button"
+                onClick={() => setShowSubmitModal(false)}
+                style={{
+                  height: "40px",
+                  padding: "0 32px",
+                  background: "#2E1B85",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSubmitModal(false);
+                  setStep(4);
+                }}
+                style={{
+                  height: "40px",
+                  padding: "0 32px",
+                  background: "#C70039",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                Submit Order
+              </button>
+            </div>
+
           </div>
         </div>
       )}
