@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import { RotateCcw, ArrowRight, Search, Save, ChevronLeft, ChevronRight, ChevronDown, X } from "lucide-react";
 import { Footer } from "../components/Footer";
 
 interface OrderCreationProps {
   isInvitation?: boolean;
   showInvitationBanner?: boolean;
+  isDarkMode?: boolean;
   onNavigate?: (page: any) => void;
 }
 
@@ -164,14 +165,14 @@ const TOOLTIP_MESSAGES: Record<string, string> = {
   "labcorp-10-panel-oxy": "Amphetamines, Barbiturates, Benzodiazepines, Cocaine, Marijuana , Methadone, Methaqualone, Opiates, Oxycodone, PCP, Propoxyphene",
   "es-audiogram": "A graph showing the results of a hearing test, plotting the softest sounds a person can hear at different pitches (frequencies), used to assess hearing ability and detect hearing loss.",
   "es-chest-xray-1-2": "A diagnostic X-ray imaging test of the chest taken from one or two angles (views) to evaluate the lungs, heart, and chest wall for conditions such as infection, fluid, or abnormalities.",
-  "es-chest-xray-2": "A chest X-ray taken from two standard angles — typically front (posteroanterior) and side (lateral) — to provide a more complete view of the lungs, heart, and chest structures for diagnostic evaluation.",
+  "es-chest-xray-2": "A chest X-ray taken from two standard angles ΓÇö typically front (posteroanterior) and side (lateral) ΓÇö to provide a more complete view of the lungs, heart, and chest structures for diagnostic evaluation.",
   "es-dot-physical": "A medical exam required by the Department of Transportation to ensure that commercial drivers are physically and mentally fit to safely operate commercial motor vehicles.",
   "education-verification": "Verification of education credentials that confirm degree received, course of study, and dates of attendance.",
   "employment-verification": "Verifies an individual's work history, such as company names and locations, dates, positions or titles held along with compensation (if requested and provided by the source), directly with former employers or their authorized agents.",
   "professional-license": "This search provides information from licensing agencies in various states across the United States. The search includes the type",
   "ssn-trace-address": "The SSN Trace creates a compilation from the credit bureaus of addresses and alias names associated with the SSN. Based on this information and your specific package, we will use this address history to determine which jurisdictions to search for court records.",
   "ssn-validation": "This service identifies if a Social Security Number (SSN) is valid using information from the Social Security Administration (SSA) and checks the SSA Death Index. Note: the SSN Validation check DOES NOT confirm that the SSN belongs to your candidate.",
-  "ssn-verification-cbsv": "This service can verify if the SSN holder’s name, date of birth, and SSN match SSA’s records by obtaining the information directly with the Social Security Administration (SSA)",
+  "ssn-verification-cbsv": "This service can verify if the SSN holderΓÇÖs name, date of birth, and SSN match SSAΓÇÖs records by obtaining the information directly with the Social Security Administration (SSA)",
 };
 
 const STATES_LIST = [
@@ -216,7 +217,7 @@ const STATES_LIST = [
 
 const GENERATION_LIST = ["None", "Jr", "Sr", "II", "III", "IV"];
 
-export function OrderCreation({ isInvitation = false, showInvitationBanner = false, onNavigate }: OrderCreationProps) {
+export function OrderCreation({ isInvitation = false, showInvitationBanner = false, isDarkMode = false, onNavigate }: OrderCreationProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bannerVisible, setBannerVisible] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -377,7 +378,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
         <div style={{ flex: 1, padding: "40px 20px", background: "#F5F5F5", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ background: "#FFFFFF", padding: "40px", borderRadius: "8px", boxShadow: "0 4px 6px rgba(0,0,0,0.05)", textAlign: "center", maxWidth: "500px", width: "100%" }}>
             <div style={{ width: "64px", height: "64px", background: "#D1FAE5", color: "#059669", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "32px", margin: "0 auto 20px auto" }}>
-              ✓
+              Γ£ô
             </div>
             <h2 style={{ fontSize: "20px", fontWeight: "600", color: "#111827", marginBottom: "12px" }}>
               Order Placed Successfully!
@@ -445,7 +446,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span>ⓘ</span>
+              <span>Γôÿ</span>
               <span>This is an applicant invitation order.</span>
             </div>
             <button
@@ -463,7 +464,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 cursor: "pointer",
               }}
             >
-              ×
+              ├ù
             </button>
           </div>
         )}

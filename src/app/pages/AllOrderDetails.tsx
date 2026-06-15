@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import { Eye, Upload, ChevronDown } from "lucide-react";
 import { ORDERS, type SearchStatus, type OrderRecord, VERIFICATION_TYPES, US_STATES } from "../data/mockData";
 import { Footer } from "../components/Footer";
@@ -363,7 +363,7 @@ const SEARCH_TYPE_OPTIONS = [
   { value: "ES - Hep A Titer", label: "ES - Hep A Titer" },
   { value: "ES - Hep A Vaccine #1", label: "ES - Hep A Vaccine #1" },
   { value: "ES - Hep A Vaccine #2", label: "ES - Hep A Vaccine #2" },
-  { value: "ES - Hep B Surface Antigen – (Screen for Acute/Chronic Disease)", label: "ES - Hep B Surface Antigen – (Screen for Acute/Chronic Disease)" },
+  { value: "ES - Hep B Surface Antigen ΓÇô (Screen for Acute/Chronic Disease)", label: "ES - Hep B Surface Antigen ΓÇô (Screen for Acute/Chronic Disease)" },
   { value: "ES - Hep B Titer", label: "ES - Hep B Titer" },
   { value: "ES - Hep B Vaccine #1", label: "ES - Hep B Vaccine #1" },
   { value: "ES - Hep B Vaccine #2", label: "ES - Hep B Vaccine #2" },
@@ -406,7 +406,7 @@ const SEARCH_TYPE_OPTIONS = [
   { value: "ES - Vision Test, Titmus", label: "ES - Vision Test, Titmus" }
 ];
 
-export function AllOrderDetails() {
+export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }) {
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
@@ -528,7 +528,7 @@ export function AllOrderDetails() {
           All Order Details
         </h1>
 
-        {/* ── Filters Grid ───────────────────────────────────────────── */}
+        {/* ΓöÇΓöÇ Filters Grid ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         <div
           style={{
             display: "grid",
@@ -567,7 +567,7 @@ export function AllOrderDetails() {
           <CustomDropdown label="Ordered By" value={filters.orderedBy} options={ORDERED_BY_OPTIONS} onChange={(val) => set("orderedBy", val)} />
         </div>
 
-        {/* ── Buttons ────────────────────────────────────────────────── */}
+        {/* ΓöÇΓöÇ Buttons ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         <div
           style={{
             display: "flex",
@@ -608,7 +608,7 @@ export function AllOrderDetails() {
           </button>
         </div>
 
-        {/* ── Green success alert banner ─────────────────────────────── */}
+        {/* ΓöÇΓöÇ Green success alert banner ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         {searched && showAlert && sorted.length > 0 && (
           <div
             style={{
@@ -642,12 +642,12 @@ export function AllOrderDetails() {
                 alignItems: "center",
               }}
             >
-              ✕
+              Γ£ò
             </button>
           </div>
         )}
 
-        {/* ── Red "No records found." Centered Banner ────────────────── */}
+        {/* ΓöÇΓöÇ Red "No records found." Centered Banner ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         {searched && sorted.length === 0 && (
           <div
             style={{
@@ -663,7 +663,7 @@ export function AllOrderDetails() {
           </div>
         )}
 
-        {/* ── Search Results Card ─────────────────────────────────────── */}
+        {/* ΓöÇΓöÇ Search Results Card ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         {searched && sorted.length > 0 && (
           <div
             style={{

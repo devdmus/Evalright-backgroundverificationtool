@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, CheckCircle2, Eye, Circle } from "lucide-react";
+import { ChevronDown, CheckCircle2, Eye, Circle, Check, X } from "lucide-react";
 import { Footer } from "../components/Footer";
 
 const US_STATES = [
@@ -11,7 +11,7 @@ const US_STATES = [
   "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
 ];
 
-export function ManageAccount() {
+export function ManageAccount({ isDarkMode = false }: { isDarkMode?: boolean }) {
   const [activeTab, setActiveTab] = useState<"Details" | "Billing" | "Security">("Details");
 
   // Form State
@@ -30,11 +30,25 @@ export function ManageAccount() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  const [city, setCity] = useState("Aurora");
+  const [phoneNumber, setPhoneNumber] = useState("");
+
   // Submission State
   const [showSuccess, setShowSuccess] = useState(false);
+  const [errorToast, setErrorToast] = useState("");
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
+    setHasSubmitted(true);
+    
+    if (!phoneNumber) {
+      setErrorToast("You did not enter your Phone Number");
+      setTimeout(() => setErrorToast(""), 5000);
+      return;
+    }
+    
+    setErrorToast("");
     setShowSuccess(true);
     setTimeout(() => {
       setShowSuccess(false);
@@ -46,7 +60,7 @@ export function ManageAccount() {
       className="flex-1 flex flex-col min-h-0"
       style={{
 
-        background: "#F6F6F6",
+        background: isDarkMode ? "#252830" : "#F6F6F6",
       }}
     >
       <div
@@ -60,7 +74,7 @@ export function ManageAccount() {
           style={{
             fontSize: "20px",
             fontWeight: 500,
-            color: "rgb(199, 0, 57)",
+            color: isDarkMode ? "#DF2A57" : "rgb(199, 0, 57)",
             marginBottom: "20px",
           }}
         >
@@ -92,7 +106,7 @@ export function ManageAccount() {
                   padding: "8px 16px",
                   fontSize: "13px",
                   fontWeight: isActive ? 600 : 400,
-                  color: isActive ? "#333333" : "#777777",
+                  color: isActive ? (isDarkMode ? "#E5E7EB" : "#333333") : (isDarkMode ? "#9CA3AF" : "#777777"),
                   cursor: "pointer",
                   transition: "all 0.15s ease",
                   marginBottom: "-1px",
@@ -101,7 +115,7 @@ export function ManageAccount() {
                   if (!isActive) e.currentTarget.style.color = "rgb(199, 0, 57)";
                 }}
                 onMouseLeave={(e) => {
-                  if (!isActive) e.currentTarget.style.color = "#777777";
+                  if (!isActive) e.currentTarget.style.color = isDarkMode ? "#9CA3AF" : "#777777";
                 }}
               >
                 {tab.label}
@@ -111,6 +125,46 @@ export function ManageAccount() {
         </div>
 
         {/* Dynamic Page Content based on Active Tab */}
+        
+        {/* Error Toast */}
+        {errorToast && (
+          <div
+            style={{
+              position: "fixed",
+              top: "24px",
+              right: "24px",
+              background: "#EF4444",
+              color: "#FFFFFF",
+              padding: "16px 24px",
+              borderRadius: "4px",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              fontSize: "14px",
+              fontWeight: 500,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              zIndex: 9999,
+              animation: "fadeIn 0.3s ease-out",
+            }}
+          >
+            {errorToast}
+            <button
+              onClick={() => setErrorToast("")}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "#FFFFFF",
+                cursor: "pointer",
+                display: "flex",
+                padding: 0,
+                opacity: 0.8,
+              }}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
         {activeTab === "Details" && (
           <div style={{ maxWidth: "1000px" }}>
             {/* Success Alert */}
@@ -140,8 +194,8 @@ export function ManageAccount() {
             <form
               onSubmit={handleUpdate}
               style={{
-                background: "#FFFFFF",
-                border: "1px solid #E5E7EB",
+                background: isDarkMode ? "#1A1C21" : "#FFFFFF",
+                border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
                 borderRadius: "4px",
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
                 padding: "24px",
@@ -155,7 +209,7 @@ export function ManageAccount() {
                 style={{
                   fontSize: "13px",
                   fontWeight: 600,
-                  color: "#555555",
+                  color: isDarkMode ? "#E5E7EB" : "#555555",
                   margin: "0 0 4px 0",
                 }}
               >
@@ -171,110 +225,148 @@ export function ManageAccount() {
                 }}
               >
                 {/* Company Name Field */}
-                <div style={inputContainerStyle}>
-                  <label style={labelStyle}>Company Name</label>
-                  <input
-                    type="text"
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
-                    style={inputStyle}
-                  />
+                <div style={getInputContainerStyle(isDarkMode, hasSubmitted && !!companyName)}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{...getLabelStyle(isDarkMode), display: companyName ? "block" : "none"}}>Company Name</label>
+                    <input
+                      type="text"
+                      placeholder={companyName ? "" : "Company Name"}
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      style={getInputStyle(isDarkMode)}
+                    />
+                  </div>
+                  {hasSubmitted && companyName && <Check style={{ color: "#79B249" }} size={20} strokeWidth={3} />}
                 </div>
 
                 {/* Address 1 Field */}
-                <div style={inputContainerStyle}>
-                  <label style={labelStyle}>Address 1</label>
-                  <input
-                    type="text"
-                    value={address1}
-                    onChange={(e) => setAddress1(e.target.value)}
-                    style={inputStyle}
-                  />
+                <div style={getInputContainerStyle(isDarkMode, hasSubmitted && !!address1)}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{...getLabelStyle(isDarkMode), display: address1 ? "block" : "none"}}>Address 1</label>
+                    <input
+                      type="text"
+                      placeholder={address1 ? "" : "Address 1"}
+                      value={address1}
+                      onChange={(e) => setAddress1(e.target.value)}
+                      style={getInputStyle(isDarkMode)}
+                    />
+                  </div>
+                  {hasSubmitted && address1 && <Check style={{ color: "#79B249" }} size={20} strokeWidth={3} />}
                 </div>
 
                 {/* Address 2 Field */}
-                <div style={inputContainerStyle}>
-                  <label style={labelStyle}>Address 2</label>
-                  <input
-                    type="text"
-                    value={address2}
-                    onChange={(e) => setAddress2(e.target.value)}
-                    style={inputStyle}
-                  />
+                <div style={getInputContainerStyle(isDarkMode, hasSubmitted && !!address2)}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{...getLabelStyle(isDarkMode), display: address2 ? "block" : "none"}}>Address 2</label>
+                    <input
+                      type="text"
+                      placeholder={address2 ? "" : "Address 2"}
+                      value={address2}
+                      onChange={(e) => setAddress2(e.target.value)}
+                      style={getInputStyle(isDarkMode)}
+                    />
+                  </div>
+                  {hasSubmitted && address2 && <Check style={{ color: "#79B249" }} size={20} strokeWidth={3} />}
+                </div>
+
+                {/* City Field */}
+                <div style={getInputContainerStyle(isDarkMode, hasSubmitted && !!city)}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{...getLabelStyle(isDarkMode), display: city ? "block" : "none"}}>City</label>
+                    <input
+                      type="text"
+                      placeholder={city ? "" : "City"}
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      style={getInputStyle(isDarkMode)}
+                    />
+                  </div>
+                  {hasSubmitted && city && <Check style={{ color: "#79B249" }} size={20} strokeWidth={3} />}
                 </div>
 
                 {/* State Select Field */}
-                <div style={inputContainerStyle}>
-                  <label style={labelStyle}>State</label>
-                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                <div style={getInputContainerStyle(isDarkMode, hasSubmitted && !!state)}>
+                  <div style={{ flex: 1, position: "relative" }}>
+                    <label style={{...getLabelStyle(isDarkMode), display: state ? "block" : "none"}}>State</label>
                     <select
                       value={state}
                       onChange={(e) => setState(e.target.value)}
                       style={{
-                        ...inputStyle,
+                        ...getInputStyle(isDarkMode),
                         appearance: "none",
-                        paddingRight: "24px",
                         cursor: "pointer",
+                        width: "100%",
                       }}
                     >
+                      <option value="" disabled>Select State</option>
                       {US_STATES.map((s) => (
                         <option key={s} value={s}>
                           {s}
                         </option>
                       ))}
                     </select>
-                    <ChevronDown
-                      size={14}
-                      style={{
-                        position: "absolute",
-                        right: "0px",
-                        color: "#777777",
-                        pointerEvents: "none",
-                      }}
-                    />
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    {hasSubmitted && state && <Check style={{ color: "#79B249" }} size={20} strokeWidth={3} />}
+                    <ChevronDown size={14} style={{ color: "#D1D5DB", pointerEvents: "none" }} />
                   </div>
                 </div>
 
                 {/* Country Select Field */}
-                <div style={inputContainerStyle}>
-                  <label style={labelStyle}>Country</label>
-                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                <div style={getInputContainerStyle(isDarkMode, hasSubmitted && !!country)}>
+                  <div style={{ flex: 1, position: "relative" }}>
+                    <label style={{...getLabelStyle(isDarkMode), display: country ? "block" : "none"}}>Country</label>
                     <select
                       value={country}
                       onChange={(e) => setCountry(e.target.value)}
                       style={{
-                        ...inputStyle,
+                        ...getInputStyle(isDarkMode),
                         appearance: "none",
-                        paddingRight: "24px",
                         cursor: "pointer",
+                        width: "100%",
                       }}
                     >
+                      <option value="" disabled>Select Country</option>
                       <option value="United States of America">United States of America</option>
                       <option value="Canada">Canada</option>
                       <option value="United Kingdom">United Kingdom</option>
                       <option value="Australia">Australia</option>
                     </select>
-                    <ChevronDown
-                      size={14}
-                      style={{
-                        position: "absolute",
-                        right: "0px",
-                        color: "#777777",
-                        pointerEvents: "none",
-                      }}
-                    />
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    {hasSubmitted && country && <Check style={{ color: "#79B249" }} size={20} strokeWidth={3} />}
+                    <ChevronDown size={14} style={{ color: "#D1D5DB", pointerEvents: "none" }} />
                   </div>
                 </div>
 
                 {/* Zip Code Field */}
-                <div style={inputContainerStyle}>
-                  <label style={labelStyle}>Zip Code</label>
-                  <input
-                    type="text"
-                    value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value)}
-                    style={inputStyle}
-                  />
+                <div style={getInputContainerStyle(isDarkMode, hasSubmitted && !!zipCode)}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{...getLabelStyle(isDarkMode), display: zipCode ? "block" : "none"}}>Zip Code</label>
+                    <input
+                      type="text"
+                      placeholder={zipCode ? "" : "Zip Code"}
+                      value={zipCode}
+                      onChange={(e) => setZipCode(e.target.value)}
+                      style={getInputStyle(isDarkMode)}
+                    />
+                  </div>
+                  {hasSubmitted && zipCode && <Check style={{ color: "#79B249" }} size={20} strokeWidth={3} />}
+                </div>
+
+                {/* Phone Number Field */}
+                <div style={getInputContainerStyle(isDarkMode, hasSubmitted && !!phoneNumber)}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{...getLabelStyle(isDarkMode), display: phoneNumber ? "block" : "none"}}>Phone Number</label>
+                    <input
+                      type="text"
+                      placeholder={phoneNumber ? "" : "Phone Number"}
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      style={getInputStyle(isDarkMode)}
+                    />
+                  </div>
+                  {hasSubmitted && phoneNumber && <Check style={{ color: "#79B249" }} size={20} strokeWidth={3} />}
                 </div>
               </div>
 
@@ -307,15 +399,35 @@ export function ManageAccount() {
         {activeTab === "Billing" && (
           <div
             style={{
-              background: "#FFFFFF",
-              border: "1px solid #E5E7EB",
+              background: isDarkMode ? "#1A1C21" : "#FFFFFF",
+              border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
               borderRadius: "4px",
               padding: "24px",
-              color: "#555555",
-              fontSize: "13px",
             }}
           >
-            Billing information is currently not configured for this account.
+            <h3 style={{ fontSize: "15px", fontWeight: 500, margin: "0 0 12px 0", color: isDarkMode ? "#E5E7EB" : "#333333" }}>
+              Your Billing Information
+            </h3>
+            <p style={{ fontSize: "14px", color: isDarkMode ? "#9CA3AF" : "#9CA3AF", margin: "0 0 24px 0" }}>
+              No Credit Card on Account!
+            </p>
+            <button
+              style={{
+                background: "rgb(199, 0, 57)",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: "3px",
+                padding: "8px 24px",
+                fontSize: "13px",
+                fontWeight: 500,
+                cursor: "pointer",
+                transition: "background 0.2s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#A0002C")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "rgb(199, 0, 57)")}
+            >
+              Update Card
+            </button>
           </div>
         )}
 
@@ -323,94 +435,97 @@ export function ManageAccount() {
         {activeTab === "Security" && (
           <div
             style={{
-              background: "#FFFFFF",
-              border: "1px solid #E5E7EB",
+              background: isDarkMode ? "#1A1C21" : "#FFFFFF",
+              border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
               borderRadius: "4px",
               padding: "24px",
             }}
           >
-            <h3 style={{ fontSize: "14px", fontWeight: 500, color: "#555555", margin: "0 0 4px 0" }}>
+            <h3 style={{ fontSize: "14px", fontWeight: 500, color: isDarkMode ? "#E5E7EB" : "#555555", margin: "0 0 4px 0" }}>
               Change Login Password
             </h3>
-            <p style={{ fontSize: "12px", color: "#777777", margin: "0 0 24px 0" }}>
+            <p style={{ fontSize: "12px", color: isDarkMode ? "#9CA3AF" : "#777777", margin: "0 0 24px 0" }}>
               Login password is used to log in to your account.
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "20px", maxWidth: "480px" }}>
               {/* Existing Password */}
-              <div style={inputContainerStyle}>
-                <label style={{ ...labelStyle, display: existingPassword ? "block" : "none" }}>Existing Password</label>
-                <div style={{ position: "relative", display: "flex", alignItems: "center", width: "100%" }}>
+              <div style={getInputContainerStyle(isDarkMode, false, true)}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ ...getLabelStyle(isDarkMode), display: existingPassword ? "block" : "none" }}>Existing Password</label>
                   <input
                     type={showExisting ? "text" : "password"}
                     placeholder={existingPassword ? "" : "Existing Password"}
                     value={existingPassword}
                     onChange={(e) => setExistingPassword(e.target.value)}
-                    style={{ ...inputStyle, width: "100%", paddingRight: "30px" }}
+                    style={{ ...getInputStyle(isDarkMode), width: "100%" }}
                   />
-                  <button
-                    onClick={() => setShowExisting(!showExisting)}
-                    style={{ position: "absolute", right: 0, background: "none", border: "none", cursor: "pointer", color: "#777777", padding: 0, display: "flex" }}
-                  >
-                    <Eye size={16} />
-                  </button>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowExisting(!showExisting)}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: "0 4px", display: "flex", alignItems: "center" }}
+                >
+                  <Eye size={16} />
+                </button>
               </div>
 
               {/* New Password */}
-              <div style={inputContainerStyle}>
-                <label style={{ ...labelStyle, display: newPassword ? "block" : "none" }}>New Password</label>
-                <div style={{ position: "relative", display: "flex", alignItems: "center", width: "100%" }}>
+              <div style={getInputContainerStyle(isDarkMode, false, true)}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ ...getLabelStyle(isDarkMode), display: newPassword ? "block" : "none" }}>New Password</label>
                   <input
                     type={showNew ? "text" : "password"}
                     placeholder={newPassword ? "" : "New Password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    style={{ ...inputStyle, width: "100%", paddingRight: "30px" }}
+                    style={{ ...getInputStyle(isDarkMode), width: "100%" }}
                   />
-                  <button
-                    onClick={() => setShowNew(!showNew)}
-                    style={{ position: "absolute", right: 0, background: "none", border: "none", cursor: "pointer", color: "#777777", padding: 0, display: "flex" }}
-                  >
-                    <Eye size={16} />
-                  </button>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowNew(!showNew)}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: "0 4px", display: "flex", alignItems: "center" }}
+                >
+                  <Eye size={16} />
+                </button>
               </div>
 
               {/* Password Rules */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#777777", fontSize: "12px" }}>
-                  <Circle size={12} strokeWidth={2} /> <span>At least 8 characters</span>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginLeft: "2px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", color: isDarkMode ? "#9CA3AF" : "#777777", fontSize: "14px" }}>
+                  <Circle size={14} strokeWidth={2} /> <span>At least 8 characters</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#777777", fontSize: "12px" }}>
-                  <Circle size={12} strokeWidth={2} /> <span>At least 1 number</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", color: isDarkMode ? "#9CA3AF" : "#777777", fontSize: "14px" }}>
+                  <Circle size={14} strokeWidth={2} /> <span>At least 1 number</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#777777", fontSize: "12px" }}>
-                  <Circle size={12} strokeWidth={2} /> <span>At least 1 upper case letter</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", color: isDarkMode ? "#9CA3AF" : "#777777", fontSize: "14px" }}>
+                  <Circle size={14} strokeWidth={2} /> <span>At least 1 upper case letter</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#777777", fontSize: "12px" }}>
-                  <Circle size={12} strokeWidth={2} /> <span>At least 1 special character</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", color: isDarkMode ? "#9CA3AF" : "#777777", fontSize: "14px" }}>
+                  <Circle size={14} strokeWidth={2} /> <span>At least 1 special character</span>
                 </div>
               </div>
 
               {/* Confirm New Password */}
-              <div style={inputContainerStyle}>
-                <label style={{ ...labelStyle, display: confirmPassword ? "block" : "none" }}>Confirm New Password</label>
-                <div style={{ position: "relative", display: "flex", alignItems: "center", width: "100%" }}>
+              <div style={getInputContainerStyle(isDarkMode, false, true)}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ ...getLabelStyle(isDarkMode), display: confirmPassword ? "block" : "none" }}>Confirm New Password</label>
                   <input
                     type={showConfirm ? "text" : "password"}
                     placeholder={confirmPassword ? "" : "Confirm New Password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    style={{ ...inputStyle, width: "100%", paddingRight: "30px" }}
+                    style={{ ...getInputStyle(isDarkMode), width: "100%" }}
                   />
-                  <button
-                    onClick={() => setShowConfirm(!showConfirm)}
-                    style={{ position: "absolute", right: 0, background: "none", border: "none", cursor: "pointer", color: "#777777", padding: 0, display: "flex" }}
-                  >
-                    <Eye size={16} />
-                  </button>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: "0 4px", display: "flex", alignItems: "center" }}
+                >
+                  <Eye size={16} />
+                </button>
               </div>
 
               {/* Update Password Button */}
@@ -452,36 +567,35 @@ export function ManageAccount() {
 }
 
 // Custom Outlined Stacked Label Input Styles
-const inputContainerStyle: React.CSSProperties = {
-  border: "1px solid rgb(229, 231, 235)",
+const getInputContainerStyle = (isDarkMode: boolean, hasValue: boolean = false, isSecurityTab: boolean = false): React.CSSProperties => ({
+  border: hasValue ? "1px solid #79B249" : (isDarkMode ? "1px solid #333333" : "1px solid rgb(229, 231, 235)"),
   borderRadius: "3px",
   padding: "6px 12px",
-  background: "#FFFFFF",
+  background: isSecurityTab ? (isDarkMode ? "#2A2D34" : "#FAFAFA") : (isDarkMode ? "#252830" : "#FFFFFF"),
   display: "flex",
-  flexDirection: "column",
-  justifyContent: "center",
-  minHeight: "46px",
+  alignItems: "center",
+  minHeight: "56px",
   boxSizing: "border-box",
-};
+});
 
-const labelStyle: React.CSSProperties = {
+const getLabelStyle = (isDarkMode: boolean): React.CSSProperties => ({
   fontSize: "9px",
-  color: "#777777",
+  color: isDarkMode ? "#9CA3AF" : "#777777",
   marginBottom: "1px",
 
   textTransform: "capitalize",
   userSelect: "none",
-};
+});
 
-const inputStyle: React.CSSProperties = {
+const getInputStyle = (isDarkMode: boolean): React.CSSProperties => ({
   border: "none",
   outline: "none",
   fontSize: "12px",
-  color: "#555555",
+  color: isDarkMode ? "#E5E7EB" : "#555555",
   background: "transparent",
   width: "100%",
   padding: "0",
   margin: "0",
   height: "18px",
 
-};
+});

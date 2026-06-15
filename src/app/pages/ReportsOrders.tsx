@@ -50,7 +50,7 @@ const cellStyle: React.CSSProperties = {
 
 const SEARCHES_PER_PAGE_OPTIONS = [10, 20, 50, 100];
 
-export function ReportsOrders() {
+export function ReportsOrders({ isDarkMode = false }: { isDarkMode?: boolean }) {
   // Search fields
   const [searchId, setSearchId] = useState("");
   const [reportId, setReportId] = useState("");
@@ -119,13 +119,13 @@ export function ReportsOrders() {
       className="flex-1 flex flex-col min-h-0"
       style={{ fontFamily: "'Wix Madefor Display', sans-serif" }}
     >
-      <div className="flex-1 overflow-auto p-5" style={{ background: "#F6F6F6" }}>
+      <div className="flex-1 overflow-auto p-5" style={{ background: isDarkMode ? "#252830" : "#F6F6F6" }}>
         {/* Page Title */}
         <h1
           style={{
             fontSize: "20px",
             fontWeight: 500,
-            color: "rgb(199, 0, 57)",
+            color: isDarkMode ? "#DF2A57" : "rgb(199, 0, 57)",
             marginBottom: "0px",
 
           }}
@@ -136,8 +136,8 @@ export function ReportsOrders() {
         {/* Search Form – bordered grid */}
         <div
           style={{
-            background: "#fff",
-            border: "1px solid #D0D5DD",
+            background: isDarkMode ? "#1A1C21" : "#fff",
+            border: isDarkMode ? "1px solid #333333" : "1px solid #D0D5DD",
             borderRadius: "4px",
             marginBottom: "14px",
             overflow: "hidden",
@@ -349,8 +349,8 @@ export function ReportsOrders() {
         {searched && (
           <div
             style={{
-              background: "#fff",
-              border: "1px solid #D0D5DD",
+              background: isDarkMode ? "#1A1C21" : "#fff",
+              border: isDarkMode ? "1px solid #333333" : "1px solid #D0D5DD",
               borderRadius: "4px",
               overflow: "hidden",
             }}
@@ -396,7 +396,7 @@ export function ReportsOrders() {
 
             {/* Result rows */}
             {paginated.length === 0 ? (
-              <div style={{ padding: "32px", textAlign: "center", fontSize: "13px", color: "#888" }}>
+              <div style={{ padding: "32px", textAlign: "center", fontSize: "13px", color: isDarkMode ? "#9CA3AF" : "#888" }}>
                 No records found.
               </div>
             ) : (
@@ -407,21 +407,21 @@ export function ReportsOrders() {
                     display: "flex",
                     alignItems: "center",
                     padding: "9px 14px",
-                    borderBottom: idx < paginated.length - 1 ? "1px solid #F0F0F0" : "none",
-                    background: idx % 2 === 0 ? "#fff" : "#FAFAFA",
+                    borderBottom: idx < paginated.length - 1 ? (isDarkMode ? "1px solid #333333" : "1px solid #F0F0F0") : "none",
+                    background: idx % 2 === 0 ? (isDarkMode ? "#1A1C21" : "#fff") : (isDarkMode ? "#252830" : "#FAFAFA"),
                     gap: "16px",
                   }}
                 >
                   {/* Search ID */}
-                  <span style={{ fontSize: "12px", color: "#444", minWidth: "120px", flexShrink: 0 }}>
+                  <span style={{ fontSize: "12px", color: isDarkMode ? "#E5E7EB" : "#444", minWidth: "120px", flexShrink: 0 }}>
                     Search ID: <span style={{ fontWeight: 600 }}>{order.searchId}</span>
                   </span>
 
                   {/* Applicant + Verification */}
-                  <span style={{ fontSize: "12px", color: "#333", flex: 1 }}>
-                    <span style={{ fontWeight: 600, color: "#1A1A2E" }}>{order.applicantName}</span>
+                  <span style={{ fontSize: "12px", color: isDarkMode ? "#E5E7EB" : "#333", flex: 1 }}>
+                    <span style={{ fontWeight: 600, color: isDarkMode ? "#F9FAFB" : "#1A1A2E" }}>{order.applicantName}</span>
                     {": "}
-                    <span style={{ color: "#555" }}>{order.verificationType}</span>
+                    <span style={{ color: isDarkMode ? "#9CA3AF" : "#555" }}>{order.verificationType}</span>
                   </span>
 
                   {/* Status Badge */}

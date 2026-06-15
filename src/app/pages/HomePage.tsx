@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCheck, Clock3, FilePen, UserCheck2, Mail, Plus, ArrowRight, Eye } from "lucide-react";
+import { Mail, Plus, ArrowRight, Eye } from "lucide-react";
 import { Footer } from "../components/Footer";
 
 // ── Static data ──────────────────────────────────────────────────────────────
@@ -9,8 +9,7 @@ const STAT_CARDS = [
     id: "completed",
     title: "COMPLETED ORDERS",
     count: 0,
-    bg: "#388E3C",
-    icon: <CheckCheck size={26} color="rgba(255,255,255,0.65)" />,
+    bg: "#4CA815",
     badge: "0.00%",
     badgeText: "Since last month",
   },
@@ -18,24 +17,21 @@ const STAT_CARDS = [
     id: "pending",
     title: "PENDING ORDERS",
     count: 0,
-    bg: "#E53935",
-    icon: <Clock3 size={26} color="rgba(255,255,255,0.65)" />,
+    bg: "#DF2A57",
     link: "View Pending Orders",
   },
   {
     id: "draft",
     title: "DRAFT ORDERS",
-    count: 5,
-    bg: "#1E88E5",
-    icon: <FilePen size={26} color="rgba(255,255,255,0.65)" />,
+    count: 0,
+    bg: "#5A9CEF",
     link: "View Draft Orders",
   },
   {
     id: "invitation",
     title: "ACTIVE INVITATION ORDERS",
     count: 0,
-    bg: "#7B1FA2",
-    icon: <UserCheck2 size={26} color="rgba(255,255,255,0.65)" />,
+    bg: "#8758D1",
     link: "View Active Invitation Orders",
   },
 ] as const;
@@ -91,7 +87,7 @@ const fieldSelect: React.CSSProperties = {
 
 // ── Floating Field Component ───────────────────────────────────────────────────
 
-function FloatingField({ label, required, value, onChange, type = "text", isSelect, options, placeholder }: any) {
+function FloatingField({ label, required, value, onChange, type = "text", isSelect, options, placeholder, isDarkMode }: any) {
   const [focused, setFocused] = useState(false);
   const isFloating = focused || value || isSelect;
 
@@ -99,14 +95,15 @@ function FloatingField({ label, required, value, onChange, type = "text", isSele
     <div
       style={{
         position: "relative",
-        border: "1px solid #F3F4F6",
+        border: isDarkMode ? "1px solid #333333" : "1px solid #F3F4F6",
         height: "54px",
         boxSizing: "border-box",
-        background: "#fff",
+        background: isDarkMode ? "transparent" : "#fff",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         padding: "0 14px",
+        borderRadius: "4px",
       }}
     >
       <div
@@ -134,9 +131,9 @@ function FloatingField({ label, required, value, onChange, type = "text", isSele
           style={{
             border: "none",
             outline: "none",
-            background: "transparent",
+            background: isDarkMode ? "#1A1C21" : "transparent",
             fontSize: "14px",
-            color: "#4B5563",
+            color: isDarkMode ? "#E5E7EB" : "#4B5563",
             padding: 0,
             marginTop: "16px",
             appearance: "none",
@@ -167,7 +164,7 @@ function FloatingField({ label, required, value, onChange, type = "text", isSele
             outline: "none",
             background: "transparent",
             fontSize: "14px",
-            color: "#333333",
+            color: isDarkMode ? "#E5E7EB" : "#333333",
             padding: 0,
             marginTop: isFloating ? "16px" : "0px",
             width: "100%",
@@ -200,10 +197,11 @@ function FloatingField({ label, required, value, onChange, type = "text", isSele
 // ── Component ─────────────────────────────────────────────────────────────────
 
 interface HomePageProps {
+  isDarkMode?: boolean;
   onNavigate?: (page: any) => void;
 }
 
-export function HomePage({ onNavigate }: HomePageProps) {
+export function HomePage({ isDarkMode = false, onNavigate }: HomePageProps) {
   const [pkg, setPkg] = useState("");
   const [template, setTemplate] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -226,7 +224,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
         style={{
           flex: 1,
           padding: "16px 20px",
-          background: "#F5F5F5",
+          background: "transparent",
           overflowY: "auto",
         }}
       >
@@ -235,7 +233,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
           style={{
             fontSize: "20px",
             fontWeight: 500,
-            color: "rgb(199, 0, 57)",
+            color: isDarkMode ? "#DF2A57" : "rgb(199, 0, 57)",
             marginBottom: "14px",
 
           }}
@@ -243,12 +241,12 @@ export function HomePage({ onNavigate }: HomePageProps) {
           Client Home
         </h1>
 
-        {/* ── Stat cards ─────────────────────────────────────────────── */}
+        {/* ── Stat cards – 2×2 grid ──────────────────────────────────── */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: "10px",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "12px",
             marginBottom: "16px",
           }}
         >
@@ -257,77 +255,73 @@ export function HomePage({ onNavigate }: HomePageProps) {
               key={card.id}
               style={{
                 background: card.bg,
-                borderRadius: "6px",
-                padding: "14px 16px",
+                borderRadius: "8px",
+                padding: "20px 24px",
                 color: "#fff",
-                minHeight: "110px",
+                minHeight: "130px",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
               }}
             >
-              {/* Title + icon row */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  gap: "8px",
-                }}
-              >
+              {/* Title row */}
+              <div>
                 <span
                   style={{
-                    fontSize: "11px",
-                    fontWeight: 600,
-                    letterSpacing: "0.03em",
-                    opacity: 0.92,
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    letterSpacing: "0.06em",
+                    opacity: 0.95,
                     lineHeight: 1.3,
                   }}
                 >
                   {card.title}
                 </span>
-                {card.icon}
               </div>
 
               {/* Count */}
               <div
                 style={{
-                  fontSize: "30px",
+                  fontSize: "38px",
                   fontWeight: 700,
                   lineHeight: 1,
-                  marginTop: "6px",
+                  marginTop: "10px",
                 }}
               >
                 {card.count}
               </div>
 
               {/* Footer row */}
-              <div style={{ marginTop: "8px", fontSize: "11px" }}>
+              <div style={{ marginTop: "10px", fontSize: "12px" }}>
                 {"badge" in card ? (
-                  <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                     <span
                       style={{
                         background: "rgba(255,255,255,0.28)",
                         borderRadius: "3px",
-                        padding: "1px 5px",
-                        fontSize: "10px",
-                        fontWeight: 600,
+                        padding: "2px 7px",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "2px",
                       }}
                     >
-                      {card.badge}
+                      ↑ {card.badge}
                     </span>
-                    <span style={{ opacity: 0.88 }}>{card.badgeText}</span>
+                    <span style={{ opacity: 0.9, fontSize: "13px" }}>{card.badgeText}</span>
                   </span>
                 ) : (
                   <a
                     href="#"
                     style={{
                       color: "#fff",
-                      opacity: 0.9,
+                      opacity: 0.92,
                       textDecoration: "none",
                       display: "flex",
                       alignItems: "center",
-                      gap: "3px",
+                      gap: "4px",
+                      fontSize: "13px",
                     }}
                     onClick={(e) => {
                       e.preventDefault();
@@ -342,7 +336,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                       }
                     }}
                   >
-                    {card.link} <ArrowRight size={11} />
+                    {card.link} <ArrowRight size={13} />
                   </a>
                 )}
               </div>
@@ -362,8 +356,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
           {/* ─ Rapid Invitation form ─────────────────────────────────── */}
           <div
             style={{
-              background: "#fff",
-              border: "1px solid #E5E7EB",
+              background: isDarkMode ? "#252830" : "#fff",
+              border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
               borderRadius: "4px",
               padding: "24px",
             }}
@@ -372,13 +366,13 @@ export function HomePage({ onNavigate }: HomePageProps) {
               style={{
                 fontSize: "16px",
                 fontWeight: 500,
-                color: "#4B5563",
+                color: isDarkMode ? "#F9FAFB" : "#4B5563",
                 marginBottom: "16px",
               }}
             >
               Rapid Invitation
             </h2>
-            <div style={{ margin: "0 -24px 24px -24px", borderBottom: "1px solid #E5E7EB" }} />
+            <div style={{ margin: "0 -24px 24px -24px", borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB" }} />
 
             <div
               style={{
@@ -396,6 +390,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 onChange={(e: any) => setPkg(e.target.value)}
                 placeholder="Please Select a package"
                 options={PACKAGES}
+                isDarkMode={isDarkMode}
               />
               <FloatingField
                 label="Invitation Template"
@@ -405,23 +400,27 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 onChange={(e: any) => setTemplate(e.target.value)}
                 placeholder="Select Template"
                 options={[]}
+                isDarkMode={isDarkMode}
               />
               <FloatingField
                 label="First Name"
                 required
                 value={firstName}
                 onChange={(e: any) => setFirstName(e.target.value)}
+                isDarkMode={isDarkMode}
               />
               <FloatingField
                 label="Last Name"
                 required
                 value={lastName}
                 onChange={(e: any) => setLastName(e.target.value)}
+                isDarkMode={isDarkMode}
               />
               <FloatingField
                 label="Middle Name"
                 value={middleName}
                 onChange={(e: any) => setMiddleName(e.target.value)}
+                isDarkMode={isDarkMode}
               />
               <FloatingField
                 label="Email Address"
@@ -429,11 +428,13 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 type="email"
                 value={emailAddr}
                 onChange={(e: any) => setEmailAddr(e.target.value)}
+                isDarkMode={isDarkMode}
               />
               <FloatingField
                 label="Reference"
                 value={reference}
                 onChange={(e: any) => setReference(e.target.value)}
+                isDarkMode={isDarkMode}
               />
             </div>
 
@@ -462,8 +463,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
           {/* ─ Due Invoices ──────────────────────────────────────────── */}
           <div
             style={{
-              background: "#fff",
-              border: "1px solid #E5E7EB",
+              background: isDarkMode ? "#252830" : "#fff",
+              border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
               borderRadius: "4px",
               padding: "16px",
             }}
@@ -481,7 +482,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 style={{
                   fontSize: "13px",
                   fontWeight: 600,
-                  color: "#333333",
+                  color: isDarkMode ? "#F9FAFB" : "#333333",
 
                 }}
               >
@@ -513,9 +514,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 <thead>
                   <tr
                     style={{
-                      background: "#F9FAFB",
-                      borderBottom: "1px solid #E5E7EB",
-                      borderTop: "1px solid #E5E7EB",
+                      background: isDarkMode ? "#1A1C21" : "#F9FAFB",
+                      borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
+                      borderTop: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
                     }}
                   >
                     {["Invoice #", "Invoice Date", "Due Date", "Total", "Status"].map(
@@ -526,7 +527,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                             textAlign: "left",
                             padding: "12px 16px",
                             fontSize: "13px",
-                            color: "#4B5563",
+                            color: isDarkMode ? "#9CA3AF" : "#4B5563",
                             fontWeight: 600,
                           }}
                         >
@@ -540,7 +541,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                   {DUE_INVOICES.map((inv) => (
                     <tr
                       key={inv.id}
-                      style={{ borderBottom: "1px solid #E5E7EB" }}
+                      style={{ borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB" }}
                     >
                       <td
                         style={{
@@ -565,7 +566,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                         style={{
                           padding: "12px 16px",
                           fontSize: "13px",
-                          color: "#4B5563",
+                          color: isDarkMode ? "#E5E7EB" : "#4B5563",
                         }}
                       >
                         {inv.invoiceDate}
@@ -574,7 +575,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                         style={{
                           padding: "12px 16px",
                           fontSize: "13px",
-                          color: "#4B5563",
+                          color: isDarkMode ? "#E5E7EB" : "#4B5563",
                         }}
                       >
                         {inv.dueDate}
@@ -583,7 +584,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                         style={{
                           padding: "12px 16px",
                           fontSize: "13px",
-                          color: "#4B5563",
+                          color: isDarkMode ? "#E5E7EB" : "#4B5563",
                         }}
                       >
                         {inv.total}
@@ -591,7 +592,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                       <td style={{ padding: "12px 16px" }}>
                         <span
                           style={{
-                            background: "#FEE2E2",
+                            background: isDarkMode ? "rgba(199, 0, 57, 0.2)" : "#FEE2E2",
                             color: "#C70039",
                             fontSize: "11px",
                             fontWeight: 600,

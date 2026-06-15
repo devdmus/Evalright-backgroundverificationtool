@@ -14,16 +14,23 @@ import { HomePage } from "./pages/HomePage";
 import { ApplicantManager } from "./pages/ApplicantManager";
 import { ManageAccount } from "./pages/ManageAccount";
 import { ManageUsers } from "./pages/ManageUsers";
+import { ManageBranches } from "./pages/ManageBranches";
 import { BulkOrderRequests } from "./pages/BulkOrderRequests";
 import { DrugScreening } from "./pages/DrugScreening";
+import { SetupRandomDrugChecks } from "./pages/SetupRandomDrugChecks";
+import { Invoices } from "./pages/Invoices";
+import { FormsDocuments } from "./pages/FormsDocuments";
+import { EmailActivityLog } from "./pages/EmailActivityLog";
 import { ApplicantInviteTemplates } from "./pages/ApplicantInviteTemplates";
+import { ApplicantStatistics } from "./pages/ApplicantStatistics";
+import { AnnouncementsPage } from "./pages/AnnouncementsPage";
+import { ActivityReportPage } from "./pages/ActivityReportPage";
 import { AnalyticsDashboard } from "./pages/AnalyticsDashboard";
 import { HRSoftwareIntegrations } from "./pages/HRSoftwareIntegrations";
 import { DisputesList } from "./pages/DisputesList";
-import { Invoices } from "./pages/Invoices";
 // import { ChatWidget } from "./components/ChatWidget";
 
-const USER_NAME = "Suresh Ramakoti";
+const USER_NAME = "Farooq Shaik";
 
 const PAGE_TITLES: Record<PageKey, string> = {
   home: "Home",
@@ -52,11 +59,14 @@ const PAGE_TITLES: Record<PageKey, string> = {
   "support-center": "Bulk Order Requests",
   "forms-documents": "Forms & Documents",
   "email-activity": "Email Activity Log",
+  announcements: "Announcements",
+  "activity-report": "Activity Report",
 };
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageKey>("home");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Dynamically update browser tab title
   useEffect(() => {
@@ -67,17 +77,24 @@ export default function App() {
   function renderPage() {
     switch (currentPage) {
       case "home":
-        return <HomePage onNavigate={setCurrentPage} />;
+        return <HomePage isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
       case "order":
-        return <OrderCreation />;
+        return <OrderCreation isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
       case "order-invitation":
-        return <OrderCreation isInvitation showInvitationBanner onNavigate={setCurrentPage} />;
+        return (
+          <OrderCreation
+            isInvitation
+            showInvitationBanner
+            isDarkMode={isDarkMode}
+            onNavigate={setCurrentPage}
+          />
+        );
       case "order-list":
-        return <OrderList />;
+        return <OrderList isDarkMode={isDarkMode} />;
       case "reports-all-order-details":
-        return <AllOrderDetails />;
+        return <AllOrderDetails isDarkMode={isDarkMode} />;
       case "reports-orders-list":
-        return <OrderList />;
+        return <OrderList isDarkMode={isDarkMode} />;
       case "reports-draft-orders":
         return <DraftOrderList />;
       case "reports-summary":
@@ -95,21 +112,33 @@ export default function App() {
       case "reports-disputes":
         return <DisputesList />;
       case "applicants":
-        return <ApplicantManager />;
+        return <ApplicantManager isDarkMode={isDarkMode} />;
       case "applicant-invite-templates":
-        return <ApplicantInviteTemplates />;
+        return <ApplicantInviteTemplates isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
+      case "applicant-statistics":
+        return <ApplicantStatistics isDarkMode={isDarkMode} />;
       case "account-settings":
-        return <ManageAccount />;
+        return <ManageAccount isDarkMode={isDarkMode} />;
       case "manage-users":
-        return <ManageUsers />;
+        return <ManageUsers isDarkMode={isDarkMode} />;
+      case "manage-branches":
+        return <ManageBranches isDarkMode={isDarkMode} />;
       case "drug-screening":
-        return <DrugScreening />;
+        return <DrugScreening isDarkMode={isDarkMode} />;
       case "setup-random-drug-checks":
-        return <PlaceholderPage title="Setup Random Drug Checks" />;
+        return <SetupRandomDrugChecks isDarkMode={isDarkMode} />;
       case "invoices":
-        return <Invoices />;
+        return <Invoices isDarkMode={isDarkMode} />;
       case "support-center":
-        return <BulkOrderRequests />;
+        return <BulkOrderRequests isDarkMode={isDarkMode} />;
+      case "forms-documents":
+        return <FormsDocuments isDarkMode={isDarkMode} />;
+      case "email-activity":
+        return <EmailActivityLog isDarkMode={isDarkMode} />;
+      case "announcements":
+        return <AnnouncementsPage isDarkMode={isDarkMode} />;
+      case "activity-report":
+        return <ActivityReportPage isDarkMode={isDarkMode} />;
       default:
         return <PlaceholderPage title={PAGE_TITLES[currentPage] ?? currentPage} />;
     }
@@ -121,16 +150,27 @@ export default function App() {
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        background: "#F4F4F4",
+        background: isDarkMode ? "#1A1C21" : "#F4F4F4",
         overflow: "hidden",
       }}
     >
       {/* Fixed top header */}
-      <Header userName={USER_NAME} onMenuToggle={() => setSidebarOpen((o) => !o)} />
+      <Header
+        userName={USER_NAME}
+        onMenuToggle={() => setSidebarOpen((o) => !o)}
+        sidebarOpen={sidebarOpen}
+        onBellClick={() => setCurrentPage("announcements")}
+        isAnnouncementsActive={currentPage === "announcements"}
+        onAnalyticsClick={() => setCurrentPage("activity-report")}
+        isActivityReportActive={currentPage === "activity-report"}
+        isDarkMode={isDarkMode}
+        onThemeToggle={() => setIsDarkMode(!isDarkMode)}
+        onNavigate={setCurrentPage}
+      />
 
       {/* Body: sidebar + content */}
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} isOpen={sidebarOpen} />
+        <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} isOpen={sidebarOpen} isDarkMode={isDarkMode} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "auto" }}>
           {renderPage()}
         </div>

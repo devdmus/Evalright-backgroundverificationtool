@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { Search } from "lucide-react";
+﻿import { useState, useMemo } from "react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, ArrowUpDown } from "lucide-react";
 import { Footer } from "../components/Footer";
 
-interface InvoiceRecord {
-  id: string;
+interface Invoice {
+  id: number;
   branch: string;
   invoiceDate: string;
   dueDate: string;
@@ -11,97 +11,94 @@ interface InvoiceRecord {
   status: string;
 }
 
-const MOCK_INVOICES: InvoiceRecord[] = [];
+const COLUMNS: { label: string; field: keyof Invoice | null; sortable: boolean }[] = [
+  { label: "#", field: "id", sortable: true },
+  { label: "Branch", field: "branch", sortable: true },
+  { label: "Invoice Date", field: "invoiceDate", sortable: true },
+  { label: "Due Date", field: "dueDate", sortable: true },
+  { label: "Total", field: "total", sortable: true },
+  { label: "Status", field: "status", sortable: true },
+  { label: "Actions", field: null, sortable: false },
+];
 
-function SortIcon({ active, direction }: { active: boolean; direction: "asc" | "desc" }) {
-  return (
-    <span style={{ marginLeft: "6px", display: "inline-flex", flexDirection: "column", verticalAlign: "middle", opacity: active ? 1 : 0.35 }}>
-      <span style={{ fontSize: "8px", height: "5px", lineHeight: "1", color: active && direction === "asc" ? "#111827" : "#A0AEC0" }}>▲</span>
-      <span style={{ fontSize: "8px", height: "5px", lineHeight: "1", color: active && direction === "desc" ? "#111827" : "#A0AEC0", marginTop: "2px" }}>▼</span>
-    </span>
-  );
-}
-
-export function Invoices() {
-  const [invoices, setInvoices] = useState<InvoiceRecord[]>(MOCK_INVOICES);
-  const [perPage, setPerPage] = useState(10);
-  const [search, setSearch] = useState("");
-  const [sortField, setSortField] = useState("invoiceDate");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+export function Invoices({ isDarkMode = false }: { isDarkMode?: boolean }) {
+  const [invoices] = useState<Invoice[]>([]);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [sortField, setSortField] = useState<keyof Invoice | null>(null);
+  const [sortAsc, setSortAsc] = useState(true);
 
-  function handleSort(field: string) {
+  const handleSort = (field: keyof Invoice) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortAsc(!sortAsc);
     } else {
       setSortField(field);
-      setSortDirection("asc");
+      setSortAsc(true);
     }
-    setPage(1);
-  }
+  };
 
-  const filtered = invoices.filter((inv) => {
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      return (
-        inv.id.toLowerCase().includes(q) ||
-        inv.branch.toLowerCase().includes(q) ||
-        inv.total.toLowerCase().includes(q) ||
-        inv.status.toLowerCase().includes(q)
+  const processedInvoices = useMemo(() => {
+    let result = [...invoices];
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((inv) =>
+        Object.values(inv).some((val) => String(val).toLowerCase().includes(query))
       );
     }
-    return true;
-  });
+    if (sortField) {
+      result = [...result].sort((a, b) => {
+        const valA = a[sortField];
+        const valB = b[sortField];
+        if (valA < valB) return sortAsc ? -1 : 1;
+        if (valA > valB) return sortAsc ? 1 : -1;
+        return 0;
+      });
+    }
+    return result;
+  }, [invoices, searchQuery, sortField, sortAsc]);
 
-  const sorted = [...filtered].sort((a, b) => {
-    let valA = a[sortField as keyof InvoiceRecord] ?? "";
-    let valB = b[sortField as keyof InvoiceRecord] ?? "";
+  const totalEntries = processedInvoices.length;
+  const totalPages = Math.max(1, Math.ceil(totalEntries / pageSize));
+  const startIndex = totalEntries === 0 ? 0 : (page - 1) * pageSize + 1;
+  const endIndex = Math.min(page * pageSize, totalEntries);
 
-    return sortDirection === "asc"
-      ? valA.toString().localeCompare(valB.toString())
-      : valB.toString().localeCompare(valA.toString());
-  });
-
-  const totalEntries = sorted.length;
-  const totalPages = Math.ceil(totalEntries / perPage);
-  const startIndex = totalEntries === 0 ? 0 : (page - 1) * perPage + 1;
-  const endIndex = Math.min(page * perPage, totalEntries);
-  const paginated = sorted.slice((page - 1) * perPage, page * perPage);
+  const paginatedInvoices = useMemo(() => {
+    return processedInvoices.slice((page - 1) * pageSize, page * pageSize);
+  }, [processedInvoices, page, pageSize]);
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, fontFamily: "'Wix Madefor Display', sans-serif" }}>
-      <div style={{ flex: 1, padding: "16px 20px", background: "#F5F5F5", overflowY: "auto" }}>
-        
-        {/* Page Title */}
-        <h1 style={{ fontSize: "20px", fontWeight: 500, color: "rgb(199, 0, 57)", marginBottom: "14px" }}>
+    <div className="flex-1 flex flex-col min-h-0" style={{ background: isDarkMode ? "#252830" : "#F6F6F6" }}>
+      <div className="flex-1 p-6" style={{ overflowY: "auto" }}>
+        <h1 style={{ fontSize: "20px", fontWeight: 500, color: isDarkMode ? "#DF2A57" : "rgb(199, 0, 57)", marginBottom: "20px" }}>
           My Invoices
         </h1>
 
-        {/* Card Container */}
-        <div style={{ background: "#FFFFFF", border: "1px solid #E5E7EB", borderRadius: "4px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-          
-          {/* Card Header Title with divider */}
-          <div style={{ borderBottom: "1px solid #E5E7EB", paddingBottom: "12px", marginBottom: "16px", fontSize: "15px", color: "#4B5563", fontWeight: 500 }}>
-            Invoice List
+        <div
+          style={{
+            background: isDarkMode ? "#1A1C21" : "#FFFFFF",
+            border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
+            borderRadius: "4px",
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
+            overflow: "hidden",
+            marginBottom: "20px",
+          }}
+        >
+          <div style={{ padding: "16px", borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB" }}>
+            <h2 style={{ fontSize: "13px", fontWeight: 600, color: isDarkMode ? "#E5E7EB" : "#555555", margin: 0 }}>
+              Invoice List
+            </h2>
           </div>
 
-          {/* Table Controls Row */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-            
-            {/* Entries Selection */}
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", color: "#4B5563" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", flexWrap: "wrap", gap: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: isDarkMode ? "#9CA3AF" : "#555555" }}>
               <select
-                value={perPage}
-                onChange={(e) => { setPerPage(parseInt(e.target.value)); setPage(1); }}
+                value={pageSize}
+                onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
                 style={{
-                  background: "#FFFFFF",
-                  border: "1px solid #cbd5e1",
-                  borderRadius: "4px",
-                  padding: "4px 8px",
-                  fontSize: "14px",
-                  color: "#333",
-                  outline: "none",
-                  cursor: "pointer",
+                  border: isDarkMode ? "1px solid #333333" : "1px solid #D1D5DB",
+                  borderRadius: "3px", padding: "3px 6px", fontSize: "12px", outline: "none",
+                  background: isDarkMode ? "#252830" : "#FFFFFF", color: isDarkMode ? "#E5E7EB" : "#333333", cursor: "pointer",
                 }}
               >
                 <option value={10}>10</option>
@@ -111,79 +108,57 @@ export function Invoices() {
               </select>
               <span>entries per page</span>
             </div>
-
-            {/* Live Search Input */}
-            <div style={{ position: "relative", width: "240px" }}>
-              <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "#9CA3AF", display: "flex", alignItems: "center" }}>
-                <Search size={15} />
-              </span>
+            <div style={{ display: "flex", alignItems: "center", background: isDarkMode ? "#252830" : "#F9FAFB", border: isDarkMode ? "1px solid #333333" : "1px solid #D1D5DB", borderRadius: "3px", padding: "0 8px", height: "28px", width: "180px" }}>
+              <Search size={13} style={{ color: "#9CA3AF", marginRight: "6px" }} />
               <input
+                type="text"
                 placeholder="Search..."
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px 8px 32px",
-                  fontSize: "14px",
-                  background: "#F2F4F6",
-                  border: "1px solid #cbd5e1",
-                  borderRadius: "4px",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
+                style={{ border: "none", background: "transparent", outline: "none", fontSize: "12px", color: isDarkMode ? "#E5E7EB" : "#333333", width: "100%" }}
               />
             </div>
           </div>
 
-          {/* Main Table */}
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
               <thead>
-                <tr style={{ background: "#F3F4F6", borderBottom: "2px solid #E5E7EB" }}>
-                  <th onClick={() => handleSort("id")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    # <SortIcon active={sortField === "id"} direction={sortDirection} />
-                  </th>
-                  <th onClick={() => handleSort("branch")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Branch <SortIcon active={sortField === "branch"} direction={sortDirection} />
-                  </th>
-                  <th onClick={() => handleSort("invoiceDate")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Invoice Date <SortIcon active={sortField === "invoiceDate"} direction={sortDirection} />
-                  </th>
-                  <th onClick={() => handleSort("dueDate")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Due Date <SortIcon active={sortField === "dueDate"} direction={sortDirection} />
-                  </th>
-                  <th onClick={() => handleSort("total")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Total <SortIcon active={sortField === "total"} direction={sortDirection} />
-                  </th>
-                  <th onClick={() => handleSort("status")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Status <SortIcon active={sortField === "status"} direction={sortDirection} />
-                  </th>
-                  <th style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563" }}>
-                    Actions
-                  </th>
+                <tr style={{ background: isDarkMode ? "#2A2D34" : "#F9FAFB", borderTop: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB", borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB" }}>
+                  {COLUMNS.map((col, idx) => (
+                    <th
+                      key={col.label}
+                      onClick={() => col.sortable && col.field && handleSort(col.field)}
+                      style={{
+                        padding: "10px 14px", fontSize: "11px", fontWeight: 600, color: isDarkMode ? "#9CA3AF" : "#555555",
+                        cursor: col.sortable ? "pointer" : "default",
+                        borderRight: idx < COLUMNS.length - 1 ? (isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB") : "none",
+                        userSelect: "none",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px" }}>
+                        <span>{col.label}</span>
+                        {col.sortable && <ArrowUpDown size={11} style={{ color: sortField === col.field ? "rgb(199, 0, 57)" : "#A0A0A0" }} />}
+                      </div>
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {paginated.length === 0 ? (
+                {paginatedInvoices.length === 0 ? (
                   <tr>
-                    <td colSpan={7} style={{ textAlign: "center", padding: "32px", fontSize: "14px", color: "#6B7280" }}>
+                    <td colSpan={7} style={{ padding: "24px 16px", textAlign: "center", fontSize: "12px", color: "#8A8A8A", background: isDarkMode ? "#1A1C21" : "#FFFFFF" }}>
                       No invoices found
                     </td>
                   </tr>
                 ) : (
-                  paginated.map((inv, idx) => (
-                    <tr key={inv.id} style={{ borderBottom: "1px solid #F3F4F6", background: idx % 2 === 0 ? "#FFFFFF" : "#F9FAFB" }}>
-                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#3B1D7D", fontWeight: 600 }}>{inv.id}</td>
-                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#111827" }}>{inv.branch}</td>
-                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#4B5563" }}>{inv.invoiceDate}</td>
-                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#4B5563" }}>{inv.dueDate}</td>
-                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#4B5563" }}>{inv.total}</td>
-                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#4B5563" }}>{inv.status}</td>
-                      <td style={{ padding: "12px 16px" }}>
-                        <button style={{ background: "none", border: "none", color: "#C70039", fontSize: "13px", fontWeight: 500, cursor: "pointer", padding: 0 }}>
-                          View
-                        </button>
-                      </td>
+                  paginatedInvoices.map((inv, idx) => (
+                    <tr key={inv.id} style={{ background: idx % 2 === 0 ? (isDarkMode ? "#1A1C21" : "#FFFFFF") : (isDarkMode ? "#252830" : "#FAFAFA"), borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #F3F4F6" }}>
+                      {COLUMNS.filter((c) => c.field).map((col) => (
+                        <td key={col.field!} style={{ padding: "12px 14px", fontSize: "12px", color: isDarkMode ? "#D1D5DB" : "#555555" }}>
+                          {inv[col.field!]}
+                        </td>
+                      ))}
+                      <td style={{ padding: "12px 14px" }} />
                     </tr>
                   ))
                 )}
@@ -191,91 +166,33 @@ export function Invoices() {
             </table>
           </div>
 
-          {/* Pagination Row */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "20px", fontSize: "14px", color: "#4B5563" }}>
-            <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderTop: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB", background: isDarkMode ? "#1A1C21" : "#FFFFFF", flexWrap: "wrap", gap: "12px" }}>
+            <span style={{ fontSize: "12px", color: isDarkMode ? "#9CA3AF" : "#777777" }}>
               Showing {startIndex} to {endIndex} of {totalEntries} entries
-            </div>
-            
-            <div style={{ display: "flex", gap: "4px" }}>
-              <button
-                disabled={page === 1}
-                onClick={() => setPage(1)}
-                style={{
-                  padding: "6px 8px",
-                  border: "none",
-                  background: "transparent",
-                  color: page === 1 ? "#D1D5DB" : "#4B5563",
-                  cursor: page === 1 ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                }}
-              >
-                «
-              </button>
-              <button
-                disabled={page === 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                style={{
-                  padding: "6px 8px",
-                  border: "none",
-                  background: "transparent",
-                  color: page === 1 ? "#D1D5DB" : "#4B5563",
-                  cursor: page === 1 ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                }}
-              >
-                &lt;
-              </button>
-
-              {totalPages > 0 && Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+              {[
+                { icon: ChevronsLeft, action: () => setPage(1), disabled: page === 1, radius: "3px 0 0 3px" },
+                { icon: ChevronLeft, action: () => setPage((p) => Math.max(1, p - 1)), disabled: page === 1 },
+                { icon: ChevronRight, action: () => setPage((p) => Math.min(totalPages, p + 1)), disabled: page === totalPages || totalEntries === 0 },
+                { icon: ChevronsRight, action: () => setPage(totalPages), disabled: page === totalPages || totalEntries === 0, radius: "0 3px 3px 0" },
+              ].map(({ icon: Icon, action, disabled, radius }, i) => (
                 <button
-                  key={p}
-                  onClick={() => setPage(p)}
+                  key={i}
+                  onClick={action}
+                  disabled={disabled}
                   style={{
-                    padding: "6px 12px",
-                    border: p === page ? "1px solid #C70039" : "1px solid #E5E7EB",
-                    background: p === page ? "#C70039" : "#FFFFFF",
-                    color: p === page ? "#FFFFFF" : "#4B5563",
-                    borderRadius: "4px",
-                    fontWeight: 500,
-                    cursor: "pointer",
+                    background: "none", border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
+                    borderLeft: i > 0 ? "none" : undefined, padding: "4px 6px",
+                    cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.35 : 1,
+                    display: "flex", alignItems: "center", borderRadius: radius,
                   }}
                 >
-                  {p}
+                  <Icon size={12} style={{ color: "#777777" }} />
                 </button>
               ))}
-
-              <button
-                disabled={page === totalPages || totalPages === 0}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                style={{
-                  padding: "6px 8px",
-                  border: "none",
-                  background: "transparent",
-                  color: (page === totalPages || totalPages === 0) ? "#D1D5DB" : "#4B5563",
-                  cursor: (page === totalPages || totalPages === 0) ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                }}
-              >
-                &gt;
-              </button>
-              <button
-                disabled={page === totalPages || totalPages === 0}
-                onClick={() => setPage(totalPages)}
-                style={{
-                  padding: "6px 8px",
-                  border: "none",
-                  background: "transparent",
-                  color: (page === totalPages || totalPages === 0) ? "#D1D5DB" : "#4B5563",
-                  cursor: (page === totalPages || totalPages === 0) ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                }}
-              >
-                »
-              </button>
             </div>
           </div>
-
         </div>
       </div>
       <Footer />

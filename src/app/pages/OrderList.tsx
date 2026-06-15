@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Search, ChevronDown } from "lucide-react";
 import { ORDERS, STATUS_STYLES } from "../data/mockData";
 import { Footer } from "../components/Footer";
@@ -22,8 +22,8 @@ function getAmountVal(verificationType: string): number {
 function SortIcon({ active, direction }: { active: boolean; direction: "asc" | "desc" }) {
   return (
     <span style={{ marginLeft: "6px", display: "inline-flex", flexDirection: "column", verticalAlign: "middle", opacity: active ? 1 : 0.35 }}>
-      <span style={{ fontSize: "8px", height: "5px", lineHeight: "1", color: active && direction === "asc" ? "#111827" : "#A0AEC0" }}>▲</span>
-      <span style={{ fontSize: "8px", height: "5px", lineHeight: "1", color: active && direction === "desc" ? "#111827" : "#A0AEC0", marginTop: "2px" }}>▼</span>
+      <span style={{ fontSize: "8px", height: "5px", lineHeight: "1", color: active && direction === "asc" ? "#111827" : "#A0AEC0" }}>Γû▓</span>
+      <span style={{ fontSize: "8px", height: "5px", lineHeight: "1", color: active && direction === "desc" ? "#111827" : "#A0AEC0", marginTop: "2px" }}>Γû╝</span>
     </span>
   );
 }
@@ -387,7 +387,7 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
   );
 }
 
-export function OrderList() {
+export function OrderList({ isDarkMode = false }: { isDarkMode?: boolean }) {
   const [dateRangeInput, setDateRangeInput] = useState("2026-03-12 to 2026-06-12");
   const [appliedDateRange, setAppliedDateRange] = useState({ startDate: "2026-03-12", endDate: "2026-03-12" });
   const [perPage, setPerPage] = useState(10);
@@ -470,15 +470,15 @@ export function OrderList() {
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, fontFamily: "'Wix Madefor Display', sans-serif" }}>
-      <div style={{ flex: 1, padding: "16px 20px", background: "#F5F5F5", overflowY: "auto" }}>
+      <div style={{ flex: 1, padding: "16px 20px", background: isDarkMode ? "#252830" : "#F5F5F5", overflowY: "auto" }}>
         
         {/* Page Title */}
-        <h1 style={{ fontSize: "20px", fontWeight: 500, color: "rgb(199, 0, 57)", marginBottom: "14px" }}>
+        <h1 style={{ fontSize: "20px", fontWeight: 500, color: isDarkMode ? "#DF2A57" : "rgb(199, 0, 57)", marginBottom: "14px" }}>
           Orders List
         </h1>
 
         {/* Card Container */}
-        <div style={{ background: "#FFFFFF", border: "1px solid #E5E7EB", borderRadius: "4px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+        <div style={{ background: isDarkMode ? "#1A1C21" : "#FFFFFF", border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB", borderRadius: "4px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
           
           {/* Date Range Row */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
@@ -626,7 +626,7 @@ export function OrderList() {
                   fontSize: "16px",
                 }}
               >
-                «
+                ┬½
               </button>
               <button
                 disabled={page === 1}
@@ -687,7 +687,7 @@ export function OrderList() {
                   fontSize: "16px",
                 }}
               >
-                »
+                ┬╗
               </button>
             </div>
           </div>

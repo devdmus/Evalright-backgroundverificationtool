@@ -1,35 +1,58 @@
 import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, ArrowUpDown, Eye, Plus, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Search,
+  ArrowUpDown,
+  Eye,
+  Plus,
+  X,
+  ArrowLeft,
+  Trash2,
+  Paperclip,
+  Send,
+} from "lucide-react";
 import { Footer } from "../components/Footer";
 
 interface BulkRequest {
   requestNo: number;
   name: string;
-  status: "PENDING" | "IN PROGRESS" | "RESOLVED" | "CANCELLED";
+  details: string;
+  status: "NEW" | "CLOSED";
   date: string;
+  displayDate: string;
+  attachment?: string;
 }
 
-const INITIAL_REQUESTS: BulkRequest[] = [
-  { requestNo: 7852, name: "test", status: "RESOLVED", date: "2023-06-16 15:19:23" }
-];
+const USER_NAME = "Farooq Shaik";
 
-export function BulkOrderRequests() {
-  const [requests, setRequests] = useState<BulkRequest[]>(INITIAL_REQUESTS);
+const formatDate = (d: Date) => {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+};
+
+const formatDisplayDate = (d: Date) => {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+export function BulkOrderRequests({ isDarkMode = false }: { isDarkMode?: boolean }) {
+  const [requests, setRequests] = useState<BulkRequest[]>([]);
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
-
-  // Sorting state
-  const [sortField, setSortField] = useState<keyof BulkRequest | null>(null);
+  const [sortField, setSortField] = useState<"requestNo" | "name" | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
-
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewingRequest, setViewingRequest] = useState<BulkRequest | null>(null);
+  const [replyText, setReplyText] = useState("");
   const [requestName, setRequestName] = useState("");
-  const [pkg, setPkg] = useState("Basic Screening");
-  const [notes, setNotes] = useState("");
+  const [requestDetails, setRequestDetails] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const handleSort = (field: keyof BulkRequest) => {
+  const handleSort = (field: "requestNo" | "name") => {
     if (sortField === field) {
       setSortAsc(!sortAsc);
     } else {
@@ -42,24 +65,36 @@ export function BulkOrderRequests() {
     e.preventDefault();
     if (!requestName.trim()) return;
 
+    const now = new Date();
     const newRequest: BulkRequest = {
-      requestNo: Math.floor(7000 + Math.random() * 2000), // Random 4-digit number
-      name: requestName,
-      status: "PENDING",
-      date: new Date().toISOString().replace("T", " ").substring(0, 19)
+      requestNo: 11939,
+      name: requestName.trim(),
+      details: requestDetails.trim() || "demo purpose",
+      status: "NEW",
+      date: formatDate(now),
+      displayDate: formatDisplayDate(now),
+      attachment: selectedFile?.name ?? "logo_2_logo_evalright_small_final.png",
     };
 
-    setRequests((prev) => [newRequest, ...prev]);
+    setRequests([newRequest]);
     setRequestName("");
-    setNotes("");
+    setRequestDetails("");
+    setSelectedFile(null);
     setIsModalOpen(false);
+    setPage(1);
   };
 
-  // Filter and sort logic
-  const processedRequests = useMemo(() => {
-    let result = requests;
+  const handleCloseTicket = () => {
+    if (!viewingRequest) return;
+    setRequests((prev) =>
+      prev.map((r) => (r.requestNo === viewingRequest.requestNo ? { ...r, status: "CLOSED" } : r))
+    );
+    setViewingRequest(null);
+    setReplyText("");
+  };
 
-    // Search Query
+  const processedRequests = useMemo(() => {
+    let result = [...requests];
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
@@ -70,8 +105,6 @@ export function BulkOrderRequests() {
           r.date.toLowerCase().includes(query)
       );
     }
-
-    // Sort
     if (sortField) {
       result = [...result].sort((a, b) => {
         const valA = a[sortField];
@@ -85,75 +118,180 @@ export function BulkOrderRequests() {
         return 0;
       });
     }
-
     return result;
   }, [requests, searchQuery, sortField, sortAsc]);
 
-  // Pagination calculations
   const totalEntries = processedRequests.length;
   const totalPages = Math.max(1, Math.ceil(totalEntries / pageSize));
   const startIndex = totalEntries === 0 ? 0 : (page - 1) * pageSize + 1;
   const endIndex = Math.min(page * pageSize, totalEntries);
+  const entryLabel = totalEntries === 1 ? "entry" : "entries";
 
   const paginatedRequests = useMemo(() => {
     return processedRequests.slice((page - 1) * pageSize, page * pageSize);
   }, [processedRequests, page, pageSize]);
 
-  return (
-    <div
-      className="flex-1 flex flex-col min-h-0"
-      style={{
+  if (viewingRequest) {
+    return (
+      <div className="flex-1 flex flex-col min-h-0" style={{ background: isDarkMode ? "#252830" : "#F6F6F6" }}>
+        <div className="flex-1 p-6" style={{ overflowY: "auto" }}>
+          <h1 style={{ fontSize: "20px", fontWeight: 500, color: isDarkMode ? "#DF2A57" : "rgb(199, 0, 57)", marginBottom: "20px" }}>
+            View Request
+          </h1>
 
-        background: "#F6F6F6",
-      }}
-    >
-      <div
-        className="flex-1 p-6"
-        style={{
-          overflowY: "auto",
-        }}
-      >
-        {/* Page Title */}
-        <h1
-          style={{
-            fontSize: "20px",
-            fontWeight: 500,
-            color: "rgb(199, 0, 57)",
-            marginBottom: "20px",
-          }}
-        >
+          <div
+            style={{
+              background: isDarkMode ? "#1A1C21" : "#FFFFFF",
+              border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
+              borderRadius: "4px",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
+              padding: "16px 20px",
+              marginBottom: "20px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "12px",
+            }}
+          >
+            <span style={{ fontSize: "14px", fontWeight: 500, color: isDarkMode ? "#E5E7EB" : "#555555" }}>
+              Request #{viewingRequest.requestNo}
+            </span>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                onClick={() => { setViewingRequest(null); setReplyText(""); }}
+                style={actionButtonStyle}
+              >
+                <ArrowLeft size={16} /> Go Back
+              </button>
+              <button type="button" onClick={handleCloseTicket} style={actionButtonStyle}>
+                Close Bulk Order Request Ticket <Trash2 size={16} />
+              </button>
+            </div>
+          </div>
+
+          <div style={{ background: isDarkMode ? "#2A2D34" : "#F3F4F6", borderRadius: "4px", padding: "24px", marginBottom: "20px" }}>
+            <div
+              style={{
+                background: isDarkMode ? "#1A1C21" : "#FFFFFF",
+                borderRadius: "4px",
+                padding: "20px 24px",
+                maxWidth: "720px",
+                position: "relative",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: "20px",
+                  left: "-8px",
+                  width: 0,
+                  height: 0,
+                  borderTop: "8px solid transparent",
+                  borderBottom: "8px solid transparent",
+                  borderRight: `8px solid ${isDarkMode ? "#1A1C21" : "#FFFFFF"}`,
+                }}
+              />
+              <p style={{ fontSize: "13px", color: "#6B8CAE", margin: "0 0 12px 0", paddingBottom: "12px", borderBottom: "1px solid #E5E7EB" }}>
+                {USER_NAME} - Client on {viewingRequest.displayDate}
+              </p>
+              <p style={{ fontSize: "14px", color: isDarkMode ? "#D1D5DB" : "#555555", margin: "0 0 16px 0", lineHeight: 1.5 }}>
+                {viewingRequest.details}
+              </p>
+              {viewingRequest.attachment && (
+                <div>
+                  <span style={{ fontSize: "13px", color: isDarkMode ? "#9CA3AF" : "#777777" }}>Attachments: </span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "rgb(199, 0, 57)" }}>
+                    <Paperclip size={14} />
+                    {viewingRequest.attachment}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={{ background: isDarkMode ? "#2A2D34" : "#F3F4F6", borderRadius: "4px", padding: "20px" }}>
+            <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
+              <textarea
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder="Enter your text"
+                style={{
+                  flex: 1,
+                  minHeight: "80px",
+                  padding: "12px 14px",
+                  fontSize: "13px",
+                  border: isDarkMode ? "1px solid #333333" : "1px solid #D1D5DB",
+                  borderRadius: "3px",
+                  outline: "none",
+                  resize: "vertical",
+                  background: isDarkMode ? "#1A1C21" : "#FFFFFF",
+                  color: isDarkMode ? "#E5E7EB" : "#333333",
+                  fontFamily: "inherit",
+                }}
+              />
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px", paddingTop: "4px" }}>
+                <button
+                  type="button"
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#9CA3AF",
+                    padding: "4px",
+                    display: "flex",
+                  }}
+                >
+                  <Paperclip size={20} />
+                </button>
+                <button
+                  type="button"
+                  style={{
+                    background: "#79B249",
+                    border: "none",
+                    borderRadius: "3px",
+                    padding: "8px 10px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Send size={16} color="#FFFFFF" />
+                </button>
+              </div>
+            </div>
+            <p style={{ fontSize: "11px", color: isDarkMode ? "#9CA3AF" : "#9CA3AF", margin: "10px 0 0 0" }}>
+              (Allowed File Extensions: .jpg, .gif, .jpeg, .png, .pdf, .zip, .csv, .xls)
+            </p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 flex flex-col min-h-0" style={{ background: isDarkMode ? "#252830" : "#F6F6F6" }}>
+      <div className="flex-1 p-6" style={{ overflowY: "auto" }}>
+        <h1 style={{ fontSize: "20px", fontWeight: 500, color: isDarkMode ? "#DF2A57" : "rgb(199, 0, 57)", marginBottom: "20px" }}>
           Bulk Order Requests
         </h1>
 
-        {/* Table Container Card */}
         <div
           style={{
-            background: "#FFFFFF",
-            border: "1px solid #E5E7EB",
+            background: isDarkMode ? "#1A1C21" : "#FFFFFF",
+            border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
             borderRadius: "4px",
             boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
             overflow: "hidden",
             marginBottom: "20px",
           }}
         >
-          {/* Card Header Toolbar with Add Request Button */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "16px",
-              borderBottom: "1px solid #E5E7EB",
-            }}
-          >
-            <h2
-              style={{
-                fontSize: "13px",
-                fontWeight: 600,
-                color: "#555555",
-                margin: 0,
-              }}
-            >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB" }}>
+            <h2 style={{ fontSize: "13px", fontWeight: 600, color: isDarkMode ? "#E5E7EB" : "#555555", margin: 0 }}>
               Bulk Order Requests
             </h2>
             <button
@@ -170,42 +308,21 @@ export function BulkOrderRequests() {
                 display: "flex",
                 alignItems: "center",
                 gap: "4px",
-                transition: "background 0.2s ease",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#A0002C")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "rgb(199, 0, 57)")}
             >
               <Plus size={14} /> Request Bulk Order
             </button>
           </div>
 
-          {/* Secondary Toolbar */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "12px 16px",
-              flexWrap: "wrap",
-              gap: "12px",
-            }}
-          >
-            {/* Page Size Selector */}
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#555555" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", flexWrap: "wrap", gap: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: isDarkMode ? "#9CA3AF" : "#555555" }}>
               <select
                 value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setPage(1);
-                }}
+                onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
                 style={{
-                  border: "1px solid #D1D5DB",
-                  borderRadius: "3px",
-                  padding: "3px 6px",
-                  fontSize: "12px",
-                  outline: "none",
-                  background: "#FFFFFF",
-                  cursor: "pointer",
+                  border: isDarkMode ? "1px solid #333333" : "1px solid #D1D5DB",
+                  borderRadius: "3px", padding: "3px 6px", fontSize: "12px", outline: "none",
+                  background: isDarkMode ? "#252830" : "#FFFFFF", color: isDarkMode ? "#E5E7EB" : "#333333", cursor: "pointer",
                 }}
               >
                 <option value={10}>10</option>
@@ -215,94 +332,43 @@ export function BulkOrderRequests() {
               </select>
               <span>entries per page</span>
             </div>
-
-            {/* Search Input */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                background: "#F9FAFB",
-                border: "1px solid #D1D5DB",
-                borderRadius: "3px",
-                padding: "0 8px",
-                height: "28px",
-                width: "180px",
-              }}
-            >
+            <div style={{ display: "flex", alignItems: "center", background: isDarkMode ? "#252830" : "#F9FAFB", border: isDarkMode ? "1px solid #333333" : "1px solid #D1D5DB", borderRadius: "3px", padding: "0 8px", height: "28px", width: "180px" }}>
               <Search size={13} style={{ color: "#9CA3AF", marginRight: "6px" }} />
               <input
                 type="text"
                 placeholder="Search..."
                 value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setPage(1);
-                }}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  outline: "none",
-                  fontSize: "12px",
-                  color: "#333333",
-                  width: "100%",
-
-                }}
+                onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
+                style={{ border: "none", background: "transparent", outline: "none", fontSize: "12px", color: isDarkMode ? "#E5E7EB" : "#333333", width: "100%" }}
               />
             </div>
           </div>
 
-          {/* Table */}
           <div style={{ overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                textAlign: "left",
-              }}
-            >
+            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
               <thead>
-                <tr
-                  style={{
-                    background: "#F9FAFB",
-                    borderTop: "1px solid #E5E7EB",
-                    borderBottom: "1px solid #E5E7EB",
-                  }}
-                >
+                <tr style={{ background: isDarkMode ? "#2A2D34" : "#F9FAFB", borderTop: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB", borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB" }}>
                   {[
-                    { label: "Request #", field: "requestNo" as keyof BulkRequest, sortable: true },
-                    { label: "Request Name", field: "name" as keyof BulkRequest, sortable: true },
-                    { label: "Status", field: null, sortable: false },
-                    { label: "Date", field: null, sortable: false },
-                    { label: "Actions", field: null, sortable: false },
+                    { label: "Request #", field: "requestNo" as const, sortable: true },
+                    { label: "Request Name", field: "name" as const, sortable: true },
+                    { label: "Status", sortable: false },
+                    { label: "Date", sortable: false },
+                    { label: "Actions", sortable: false },
                   ].map((col, idx) => (
                     <th
-                      key={idx}
+                      key={col.label}
                       onClick={() => col.sortable && col.field && handleSort(col.field)}
                       style={{
-                        padding: "10px 14px",
-                        fontSize: "11px",
-                        fontWeight: 600,
-                        color: "#555555",
+                        padding: "10px 14px", fontSize: "11px", fontWeight: 600, color: isDarkMode ? "#9CA3AF" : "#555555",
                         cursor: col.sortable ? "pointer" : "default",
-                        borderRight: idx < 4 ? "1px solid #E5E7EB" : "none",
+                        borderRight: idx < 4 ? (isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB") : "none",
                         userSelect: "none",
-                      }}
-                      onMouseEnter={(e) => {
-                        if (col.sortable) e.currentTarget.style.background = "#F3F4F6";
-                      }}
-                      onMouseLeave={(e) => {
-                        if (col.sortable) e.currentTarget.style.background = "transparent";
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px" }}>
                         <span>{col.label}</span>
-                        {col.sortable && (
-                          <ArrowUpDown
-                            size={11}
-                            style={{
-                              color: sortField === col.field ? "rgb(199, 0, 57)" : "#A0A0A0",
-                            }}
-                          />
+                        {col.sortable && col.field && (
+                          <ArrowUpDown size={11} style={{ color: sortField === col.field ? "rgb(199, 0, 57)" : "#A0A0A0" }} />
                         )}
                       </div>
                     </th>
@@ -312,17 +378,8 @@ export function BulkOrderRequests() {
               <tbody>
                 {paginatedRequests.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={5}
-                      style={{
-                        padding: "16px",
-                        textAlign: "center",
-                        fontSize: "12px",
-                        color: "#8A8A8A",
-                        background: "#FFFFFF",
-                      }}
-                    >
-                      No records found
+                    <td colSpan={5} style={{ padding: "24px 16px", textAlign: "center", fontSize: "12px", color: "#8A8A8A", background: isDarkMode ? "#1A1C21" : "#FFFFFF" }}>
+                      No active tickets found
                     </td>
                   </tr>
                 ) : (
@@ -330,78 +387,47 @@ export function BulkOrderRequests() {
                     <tr
                       key={request.requestNo}
                       style={{
-                        background: idx % 2 === 0 ? "#FFFFFF" : "#FAFAFA",
-                        borderBottom: "1px solid #F3F4F6",
-                        transition: "background 0.15s ease",
+                        background: idx % 2 === 0 ? (isDarkMode ? "#1A1C21" : "#FFFFFF") : (isDarkMode ? "#252830" : "#FAFAFA"),
+                        borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #F3F4F6",
                       }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = "#F5F8FC")}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = idx % 2 === 0 ? "#FFFFFF" : "#FAFAFA")}
                     >
-                      {/* Request # */}
-                      <td style={{ padding: "12px 14px", fontSize: "12px", color: "#555555" }}>
-                        {request.requestNo}
-                      </td>
-                      {/* Request Name */}
-                      <td style={{ padding: "12px 14px", fontSize: "12px", color: "rgb(199, 0, 57)", fontWeight: 500 }}>
-                        {request.name}
-                      </td>
-                      {/* Status */}
+                      <td style={{ padding: "12px 14px", fontSize: "12px", color: isDarkMode ? "#9CA3AF" : "#555555" }}>{request.requestNo}</td>
+                      <td style={{ padding: "12px 14px", fontSize: "12px", color: "rgb(199, 0, 57)", fontWeight: 500 }}>{request.name}</td>
                       <td style={{ padding: "12px 14px" }}>
                         <span
                           style={{
                             display: "inline-block",
-                            padding: "2px 8px",
+                            padding: "2px 10px",
                             borderRadius: "12px",
                             fontSize: "10px",
-                            fontWeight: 600,
-                            background:
-                              request.status === "RESOLVED"
-                                ? "#F3E8FF"
-                                : request.status === "PENDING"
-                                  ? "#EFF6FF"
-                                  : request.status === "IN PROGRESS"
-                                    ? "#FFFBEB"
-                                    : "#FCE8E6",
-                            color:
-                              request.status === "RESOLVED"
-                                ? "#6B21A8"
-                                : request.status === "PENDING"
-                                  ? "#1D4ED8"
-                                  : request.status === "IN PROGRESS"
-                                    ? "#92400E"
-                                    : "#C5221F",
-                            border: `1px solid ${request.status === "RESOLVED"
-                                ? "#E9D5FF"
-                                : request.status === "PENDING"
-                                  ? "#BFDBFE"
-                                  : request.status === "IN PROGRESS"
-                                    ? "#FDE68A"
-                                    : "#FAD2CF"
-                              }`,
+                            fontWeight: 700,
+                            background: "#E6F4EA",
+                            color: "#137333",
+                            letterSpacing: "0.3px",
                           }}
                         >
                           {request.status}
                         </span>
                       </td>
-                      {/* Date */}
-                      <td style={{ padding: "12px 14px", fontSize: "12px", color: "#555555" }}>
-                        {request.date}
-                      </td>
-                      {/* Actions */}
+                      <td style={{ padding: "12px 14px", fontSize: "12px", color: isDarkMode ? "#9CA3AF" : "#555555" }}>{request.date}</td>
                       <td style={{ padding: "12px 14px" }}>
                         <button
+                          type="button"
                           title="View Request"
+                          onClick={() => setViewingRequest(request)}
                           style={{
-                            background: "none",
+                            background: "rgb(199, 0, 57)",
                             border: "none",
+                            borderRadius: "50%",
+                            width: "28px",
+                            height: "28px",
                             cursor: "pointer",
-                            color: "rgb(199, 0, 57)",
-                            padding: "2px",
                             display: "flex",
                             alignItems: "center",
+                            justifyContent: "center",
                           }}
                         >
-                          <Eye size={14} />
+                          <Eye size={14} color="#FFFFFF" />
                         </button>
                       </td>
                     </tr>
@@ -411,127 +437,51 @@ export function BulkOrderRequests() {
             </table>
           </div>
 
-          {/* Footer / Pagination Controls */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "12px 16px",
-              borderTop: "1px solid #E5E7EB",
-              background: "#FFFFFF",
-              flexWrap: "wrap",
-              gap: "12px",
-            }}
-          >
-            {/* Showing entries status */}
-            <span style={{ fontSize: "12px", color: "#777777" }}>
-              Showing {startIndex} to {endIndex} of {totalEntries} entries
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderTop: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB", background: isDarkMode ? "#1A1C21" : "#FFFFFF", flexWrap: "wrap", gap: "12px" }}>
+            <span style={{ fontSize: "12px", color: isDarkMode ? "#9CA3AF" : "#777777" }}>
+              Showing {startIndex} to {endIndex} of {totalEntries} {entryLabel}
             </span>
-
-            {/* Pagination buttons */}
             <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
-              {/* First Page button */}
-              <button
-                onClick={() => setPage(1)}
-                disabled={page === 1}
-                style={{
-                  background: "none",
-                  border: "1px solid #E5E7EB",
-                  padding: "4px 6px",
-                  cursor: page === 1 ? "not-allowed" : "pointer",
-                  opacity: page === 1 ? 0.35 : 1,
-                  display: "flex",
-                  alignItems: "center",
-                  borderRadius: "3px 0 0 3px",
-                }}
-              >
+              <button onClick={() => setPage(1)} disabled={page === 1} style={paginationBtnStyle(isDarkMode, true, page === 1)}>
                 <ChevronsLeft size={12} style={{ color: "#777777" }} />
               </button>
-
-              {/* Prev Page button */}
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                style={{
-                  background: "none",
-                  border: "1px solid #E5E7EB",
-                  borderLeft: "none",
-                  padding: "4px 6px",
-                  cursor: page === 1 ? "not-allowed" : "pointer",
-                  opacity: page === 1 ? 0.35 : 1,
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
+              <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} style={paginationBtnStyle(isDarkMode, false, page === 1)}>
                 <ChevronLeft size={12} style={{ color: "#777777" }} />
               </button>
-
-              {/* Page Number Buttons */}
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
-                const isCurrent = page === p;
-                return (
-                  <button
-                    key={p}
-                    onClick={() => setPage(p)}
-                    style={{
-                      background: isCurrent ? "rgb(199, 0, 57)" : "none",
-                      border: "1px solid #E5E7EB",
-                      borderLeft: "none",
-                      color: isCurrent ? "#FFFFFF" : "#777777",
-                      padding: "4px 8px",
-                      fontSize: "12px",
-                      fontWeight: isCurrent ? "600" : "400",
-                      cursor: "pointer",
-                      minWidth: "26px",
-                      borderRadius: isCurrent ? "50%" : "0", // Circle paginator highlight
-                      boxSizing: "border-box",
-                      height: "26px",
-                      width: "26px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {p}
-                  </button>
-                );
-              })}
-
-              {/* Next Page button */}
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                style={{
-                  background: "none",
-                  border: "1px solid #E5E7EB",
-                  borderLeft: "none",
-                  padding: "4px 6px",
-                  cursor: page === totalPages ? "not-allowed" : "pointer",
-                  opacity: page === totalPages ? 0.35 : 1,
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
+              {totalEntries > 0 &&
+                Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+                  const isCurrent = page === p;
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => setPage(p)}
+                      style={{
+                        background: isCurrent ? "rgb(199, 0, 57)" : "none",
+                        border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
+                        borderLeft: "none",
+                        color: isCurrent ? "#FFFFFF" : "#777777",
+                        padding: "4px 8px",
+                        fontSize: "12px",
+                        fontWeight: isCurrent ? 600 : 400,
+                        cursor: "pointer",
+                        minWidth: "26px",
+                        borderRadius: isCurrent ? "50%" : "0",
+                        boxSizing: "border-box",
+                        height: "26px",
+                        width: "26px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {p}
+                    </button>
+                  );
+                })}
+              <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages || totalEntries === 0} style={paginationBtnStyle(isDarkMode, false, page === totalPages || totalEntries === 0)}>
                 <ChevronRight size={12} style={{ color: "#777777" }} />
               </button>
-
-              {/* Last Page button */}
-              <button
-                onClick={() => setPage(totalPages)}
-                disabled={page === totalPages}
-                style={{
-                  background: "none",
-                  border: "1px solid #E5E7EB",
-                  borderLeft: "none",
-                  padding: "4px 6px",
-                  cursor: page === totalPages ? "not-allowed" : "pointer",
-                  opacity: page === totalPages ? 0.35 : 1,
-                  display: "flex",
-                  alignItems: "center",
-                  borderRadius: "0 3px 3px 0",
-                }}
-              >
+              <button onClick={() => setPage(totalPages)} disabled={page === totalPages || totalEntries === 0} style={paginationBtnStyle(isDarkMode, false, page === totalPages || totalEntries === 0, true)}>
                 <ChevronsRight size={12} style={{ color: "#777777" }} />
               </button>
             </div>
@@ -540,7 +490,6 @@ export function BulkOrderRequests() {
       </div>
       <Footer />
 
-      {/* Add New Request Modal Dialog */}
       {isModalOpen && (
         <div
           style={{
@@ -554,121 +503,78 @@ export function BulkOrderRequests() {
             alignItems: "center",
             justifyContent: "center",
             zIndex: 1000,
-            animation: "fadeIn 0.15s ease-out",
           }}
         >
-          <div
-            style={{
-              background: "#FFFFFF",
-              borderRadius: "4px",
-              boxShadow: "0 4px 24px rgba(0, 0, 0, 0.15)",
-              width: "420px",
-              maxWidth: "90%",
-              overflow: "hidden",
-
-            }}
-          >
-            {/* Modal Header */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "16px",
-                borderBottom: "1px solid #E5E7EB",
-                background: "#F9FAFB",
-              }}
-            >
-              <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "#333" }}>
-                Request Bulk Order
+          <div style={{ background: "#FFFFFF", borderRadius: "4px", boxShadow: "0 4px 24px rgba(0, 0, 0, 0.15)", width: "480px", maxWidth: "90%", overflow: "hidden" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", background: "rgb(199, 0, 57)" }}>
+              <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "#FFFFFF" }}>
+                New Bulk Order Request
               </h3>
               <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "#6B7280",
-                  padding: "2px",
-                  display: "flex",
-                  alignItems: "center",
-                }}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "#FFFFFF", padding: "2px", display: "flex" }}
               >
                 <X size={16} />
               </button>
             </div>
 
-            {/* Modal Body / Form */}
-            <form onSubmit={handleAddRequest} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
-              {/* Request Name Input */}
-              <div style={formFieldStyle}>
-                <label style={formLabelStyle}>Request Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={requestName}
-                  onChange={(e) => setRequestName(e.target.value)}
-                  style={formInputStyle}
-                  placeholder="e.g. June Bulk Recruitment"
-                />
+            <form onSubmit={handleAddRequest} style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <input
+                type="text"
+                required
+                value={requestName}
+                onChange={(e) => setRequestName(e.target.value)}
+                placeholder="Request Name"
+                style={modalInputStyle}
+              />
+              <textarea
+                value={requestDetails}
+                onChange={(e) => setRequestDetails(e.target.value)}
+                placeholder="Request Details"
+                style={{ ...modalInputStyle, minHeight: "100px", resize: "vertical" }}
+              />
+              <div>
+                <label style={{ display: "block", fontSize: "12px", color: "#777777", marginBottom: "8px" }}>Attachments</label>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <label
+                    style={{
+                      display: "inline-block",
+                      padding: "6px 14px",
+                      fontSize: "12px",
+                      color: "#333333",
+                      background: "#F3F4F6",
+                      border: "1px solid #D1D5DB",
+                      borderRadius: "3px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Choose File
+                    <input type="file" style={{ display: "none" }} onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)} />
+                  </label>
+                  <span style={{ fontSize: "12px", color: "#777777" }}>{selectedFile ? selectedFile.name : "No file chosen"}</span>
+                </div>
+                <p style={{ fontSize: "11px", color: "#9CA3AF", margin: "8px 0 0 0" }}>
+                  Supported file types: jpg, jpeg, png, gif, pdf, zip, csv
+                </p>
               </div>
 
-              {/* Package Selector */}
-              <div style={formFieldStyle}>
-                <label style={formLabelStyle}>Select Package *</label>
-                <select
-                  value={pkg}
-                  onChange={(e) => setPkg(e.target.value)}
-                  style={formSelectStyle}
-                >
-                  <option value="Basic Screening">Basic Screening</option>
-                  <option value="Standard">Standard</option>
-                  <option value="DEMO-2">DEMO-2</option>
-                  <option value="nationwide + federal">nationwide + federal</option>
-                </select>
-              </div>
-
-              {/* Details/Notes */}
-              <div style={formFieldStyle}>
-                <label style={formLabelStyle}>Details / Notes</label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  style={{
-                    ...formInputStyle,
-                    height: "70px",
-                    resize: "none",
-                  }}
-                  placeholder="Provide any additional notes or details..."
-                />
-              </div>
-
-              {/* Modal Actions */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "10px",
-                  marginTop: "8px",
-                  borderTop: "1px solid #E5E7EB",
-                  paddingTop: "16px",
-                }}
-              >
+              <div style={{ display: "flex", justifyContent: "center", gap: "12px", marginTop: "8px", paddingTop: "8px" }}>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   style={{
-                    background: "#FFFFFF",
-                    border: "1px solid #D1D5DB",
+                    background: "#4A4E69",
+                    color: "#FFFFFF",
+                    border: "none",
                     borderRadius: "3px",
-                    padding: "6px 14px",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    color: "#374151",
+                    padding: "8px 24px",
+                    fontSize: "13px",
+                    fontWeight: 500,
                     cursor: "pointer",
                   }}
                 >
-                  Cancel
+                  Close
                 </button>
                 <button
                   type="submit"
@@ -677,9 +583,9 @@ export function BulkOrderRequests() {
                     color: "#FFFFFF",
                     border: "none",
                     borderRadius: "3px",
-                    padding: "6px 16px",
-                    fontSize: "12px",
-                    fontWeight: 600,
+                    padding: "8px 24px",
+                    fontSize: "13px",
+                    fontWeight: 500,
                     cursor: "pointer",
                   }}
                 >
@@ -690,43 +596,44 @@ export function BulkOrderRequests() {
           </div>
         </div>
       )}
-
-      {/* CSS Animation Keyframes */}
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-      `}</style>
     </div>
   );
 }
 
-// Modal Form Styling Definitions
-const formFieldStyle: React.CSSProperties = {
+const actionButtonStyle: React.CSSProperties = {
   display: "flex",
-  flexDirection: "column",
-  gap: "4px",
+  alignItems: "center",
+  gap: "8px",
+  background: "rgb(199, 0, 57)",
+  color: "#FFFFFF",
+  border: "none",
+  borderRadius: "3px",
+  padding: "8px 16px",
+  fontSize: "13px",
+  fontWeight: 500,
+  cursor: "pointer",
 };
 
-const formLabelStyle: React.CSSProperties = {
-  fontSize: "11px",
-  fontWeight: 600,
-  color: "#4B5563",
-};
-
-const formInputStyle: React.CSSProperties = {
+const modalInputStyle: React.CSSProperties = {
   border: "1px solid #D1D5DB",
   borderRadius: "3px",
-  padding: "8px 12px",
-  fontSize: "12px",
+  padding: "12px 14px",
+  fontSize: "13px",
   outline: "none",
   color: "#374151",
-
+  width: "100%",
+  boxSizing: "border-box",
+  fontFamily: "inherit",
 };
 
-const formSelectStyle: React.CSSProperties = {
-  ...formInputStyle,
-  cursor: "pointer",
-  background: "#FFFFFF",
-};
+const paginationBtnStyle = (isDarkMode: boolean, isFirst: boolean, disabled: boolean, isLast = false): React.CSSProperties => ({
+  background: "none",
+  border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
+  borderLeft: isFirst ? undefined : "none",
+  padding: "4px 6px",
+  cursor: disabled ? "not-allowed" : "pointer",
+  opacity: disabled ? 0.35 : 1,
+  display: "flex",
+  alignItems: "center",
+  borderRadius: isFirst ? "3px 0 0 3px" : isLast ? "0 3px 3px 0" : "0",
+});
