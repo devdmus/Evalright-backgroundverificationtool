@@ -136,9 +136,9 @@ export default function App() {
       case "email-activity":
         return <EmailActivityLog isDarkMode={isDarkMode} />;
       case "announcements":
-        return <AnnouncementsPage isDarkMode={isDarkMode} />;
+        return <AnnouncementsPage />;
       case "activity-report":
-        return <ActivityReportPage isDarkMode={isDarkMode} />;
+        return <ActivityReportPage />;
       default:
         return <PlaceholderPage title={PAGE_TITLES[currentPage] ?? currentPage} />;
     }
@@ -165,7 +165,7 @@ export default function App() {
         isActivityReportActive={currentPage === "activity-report"}
         isDarkMode={isDarkMode}
         onThemeToggle={() => setIsDarkMode(!isDarkMode)}
-        onNavigate={setCurrentPage}
+        onNavigate={(page) => setCurrentPage(page as PageKey)}
       />
 
       {/* Body: sidebar + content */}
