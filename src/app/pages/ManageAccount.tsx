@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, CheckCircle2, Eye, Circle, Check, X } from "lucide-react";
+import { ChevronDown, CheckCircle2, Eye, Circle, Check, X, CircleAlert } from "lucide-react";
 import { Footer } from "../components/Footer";
 
 const US_STATES = [
@@ -10,6 +10,53 @@ const US_STATES = [
   "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
   "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
 ];
+
+type ValidationState = "error" | "success" | "neutral";
+type PasswordFieldKey = "existing" | "new" | "confirm";
+
+const ERROR_COLOR = "rgb(199, 0, 57)";
+const SUCCESS_COLOR = "#79B249";
+
+const PASSWORD_RULES = [
+  { id: "length", label: "At least 8 characters", test: (p: string) => p.length >= 8 },
+  { id: "number", label: "At least 1 number", test: (p: string) => /\d/.test(p) },
+  { id: "upper", label: "At least 1 upper case letter", test: (p: string) => /[A-Z]/.test(p) },
+  { id: "special", label: "At least 1 special character", test: (p: string) => /[^A-Za-z0-9]/.test(p) },
+] as const;
+
+const isStrongPassword = (password: string) => PASSWORD_RULES.every((rule) => rule.test(password));
+
+const getPasswordFieldValidation = (
+  field: PasswordFieldKey,
+  existingPassword: string,
+  newPassword: string,
+  confirmPassword: string,
+  hasSubmitted: boolean
+): ValidationState => {
+  if (!hasSubmitted) return "neutral";
+
+  const hasExisting = existingPassword.trim() !== "";
+  const hasNew = newPassword.trim() !== "";
+  const isNewStrong = isStrongPassword(newPassword);
+  const hasConfirm = confirmPassword.trim() !== "";
+  const passwordsMatch = newPassword === confirmPassword;
+
+  if (field === "existing") {
+    return hasExisting ? "success" : "error";
+  }
+
+  if (!hasExisting) return "neutral";
+
+  if (field === "new") {
+    if (!hasNew || !isNewStrong) return "error";
+    return "success";
+  }
+
+  if (!hasNew || !isNewStrong) return "neutral";
+
+  if (!hasConfirm || !passwordsMatch) return "error";
+  return "success";
+};
 
 export function ManageAccount({ isDarkMode = false }: { isDarkMode?: boolean }) {
   const [activeTab, setActiveTab] = useState<"Details" | "Billing" | "Security">("Details");
@@ -35,16 +82,22 @@ export function ManageAccount({ isDarkMode = false }: { isDarkMode?: boolean }) 
 
   // Submission State
   const [showSuccess, setShowSuccess] = useState(false);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [errorToast, setErrorToast] = useState("");
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [passwordSubmitted, setPasswordSubmitted] = useState(false);
+
+  const showErrorToast = (message: string) => {
+    setErrorToast(message);
+    setTimeout(() => setErrorToast(""), 5000);
+  };
 
   const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     setHasSubmitted(true);
     
     if (!phoneNumber) {
-      setErrorToast("You did not enter your Phone Number");
-      setTimeout(() => setErrorToast(""), 5000);
+      showErrorToast("You did not enter your Phone Number");
       return;
     }
     
@@ -53,6 +106,45 @@ export function ManageAccount({ isDarkMode = false }: { isDarkMode?: boolean }) 
     setTimeout(() => {
       setShowSuccess(false);
     }, 4000);
+  };
+
+  const handlePasswordUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordSubmitted(true);
+    setPasswordSuccess(false);
+
+    if (!existingPassword.trim()) {
+      showErrorToast("Please enter your existing password.");
+      return;
+    }
+
+    if (!newPassword.trim()) {
+      showErrorToast("Please enter a new password.");
+      return;
+    }
+
+    if (!isStrongPassword(newPassword)) {
+      showErrorToast("Please enter a stronger password.");
+      return;
+    }
+
+    if (!confirmPassword.trim()) {
+      showErrorToast("Please confirm your new password.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showErrorToast("Passwords do not match.");
+      return;
+    }
+
+    setErrorToast("");
+    setPasswordSuccess(true);
+    setPasswordSubmitted(false);
+    setExistingPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setTimeout(() => setPasswordSuccess(false), 4000);
   };
 
   return (
@@ -441,6 +533,28 @@ export function ManageAccount({ isDarkMode = false }: { isDarkMode?: boolean }) 
               padding: "24px",
             }}
           >
+            {passwordSuccess && (
+              <div
+                style={{
+                  background: "#E6F4EA",
+                  border: "1px solid #CEEAD6",
+                  color: "#137333",
+                  padding: "10px 16px",
+                  borderRadius: "4px",
+                  marginBottom: "16px",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  animation: "fadeIn 0.2s ease-out",
+                }}
+              >
+                <CheckCircle2 size={16} />
+                Password updated successfully!
+              </div>
+            )}
+
             <h3 style={{ fontSize: "14px", fontWeight: 500, color: isDarkMode ? "#E5E7EB" : "#555555", margin: "0 0 4px 0" }}>
               Change Login Password
             </h3>
@@ -448,88 +562,62 @@ export function ManageAccount({ isDarkMode = false }: { isDarkMode?: boolean }) 
               Login password is used to log in to your account.
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "20px", maxWidth: "480px" }}>
-              {/* Existing Password */}
-              <div style={getInputContainerStyle(isDarkMode, false, true)}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ ...getLabelStyle(isDarkMode), display: existingPassword ? "block" : "none" }}>Existing Password</label>
-                  <input
-                    type={showExisting ? "text" : "password"}
-                    placeholder={existingPassword ? "" : "Existing Password"}
-                    value={existingPassword}
-                    onChange={(e) => setExistingPassword(e.target.value)}
-                    style={{ ...getInputStyle(isDarkMode), width: "100%" }}
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowExisting(!showExisting)}
-                  style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: "0 4px", display: "flex", alignItems: "center" }}
-                >
-                  <Eye size={16} />
-                </button>
-              </div>
+            <form onSubmit={handlePasswordUpdate} style={{ display: "flex", flexDirection: "column", gap: "20px", maxWidth: "480px" }}>
+              <PasswordField
+                label="Existing Password"
+                value={existingPassword}
+                onChange={setExistingPassword}
+                showPassword={showExisting}
+                onToggleShow={() => setShowExisting(!showExisting)}
+                isDarkMode={isDarkMode}
+                validationState={getPasswordFieldValidation("existing", existingPassword, newPassword, confirmPassword, passwordSubmitted)}
+              />
 
-              {/* New Password */}
-              <div style={getInputContainerStyle(isDarkMode, false, true)}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ ...getLabelStyle(isDarkMode), display: newPassword ? "block" : "none" }}>New Password</label>
-                  <input
-                    type={showNew ? "text" : "password"}
-                    placeholder={newPassword ? "" : "New Password"}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    style={{ ...getInputStyle(isDarkMode), width: "100%" }}
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowNew(!showNew)}
-                  style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: "0 4px", display: "flex", alignItems: "center" }}
-                >
-                  <Eye size={16} />
-                </button>
-              </div>
+              <PasswordField
+                label="New Password"
+                value={newPassword}
+                onChange={setNewPassword}
+                showPassword={showNew}
+                onToggleShow={() => setShowNew(!showNew)}
+                isDarkMode={isDarkMode}
+                validationState={getPasswordFieldValidation("new", existingPassword, newPassword, confirmPassword, passwordSubmitted)}
+              />
 
               {/* Password Rules */}
               <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginLeft: "2px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", color: isDarkMode ? "#9CA3AF" : "#777777", fontSize: "14px" }}>
-                  <Circle size={14} strokeWidth={2} /> <span>At least 8 characters</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", color: isDarkMode ? "#9CA3AF" : "#777777", fontSize: "14px" }}>
-                  <Circle size={14} strokeWidth={2} /> <span>At least 1 number</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", color: isDarkMode ? "#9CA3AF" : "#777777", fontSize: "14px" }}>
-                  <Circle size={14} strokeWidth={2} /> <span>At least 1 upper case letter</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", color: isDarkMode ? "#9CA3AF" : "#777777", fontSize: "14px" }}>
-                  <Circle size={14} strokeWidth={2} /> <span>At least 1 special character</span>
-                </div>
+                {PASSWORD_RULES.map((rule) => {
+                  const met = rule.test(newPassword);
+                  const showUnmet = passwordSubmitted && newPassword.trim() && !met;
+                  return (
+                    <div
+                      key={rule.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        color: showUnmet ? ERROR_COLOR : met ? SUCCESS_COLOR : isDarkMode ? "#9CA3AF" : "#777777",
+                        fontSize: "14px",
+                      }}
+                    >
+                      {met ? <Check size={14} strokeWidth={3} /> : <Circle size={14} strokeWidth={2} />}
+                      <span>{rule.label}</span>
+                    </div>
+                  );
+                })}
               </div>
 
-              {/* Confirm New Password */}
-              <div style={getInputContainerStyle(isDarkMode, false, true)}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ ...getLabelStyle(isDarkMode), display: confirmPassword ? "block" : "none" }}>Confirm New Password</label>
-                  <input
-                    type={showConfirm ? "text" : "password"}
-                    placeholder={confirmPassword ? "" : "Confirm New Password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    style={{ ...getInputStyle(isDarkMode), width: "100%" }}
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(!showConfirm)}
-                  style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: "0 4px", display: "flex", alignItems: "center" }}
-                >
-                  <Eye size={16} />
-                </button>
-              </div>
+              <PasswordField
+                label="Confirm New Password"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                showPassword={showConfirm}
+                onToggleShow={() => setShowConfirm(!showConfirm)}
+                isDarkMode={isDarkMode}
+                validationState={getPasswordFieldValidation("confirm", existingPassword, newPassword, confirmPassword, passwordSubmitted)}
+              />
 
-              {/* Update Password Button */}
               <button
+                type="submit"
                 style={{
                   background: "rgb(199, 0, 57)",
                   color: "#FFFFFF",
@@ -548,7 +636,7 @@ export function ManageAccount({ isDarkMode = false }: { isDarkMode?: boolean }) 
               >
                 Update Password
               </button>
-            </div>
+            </form>
           </div>
         )}
       </div>
@@ -599,3 +687,68 @@ const getInputStyle = (isDarkMode: boolean): React.CSSProperties => ({
   height: "18px",
 
 });
+
+function PasswordField({
+  label,
+  value,
+  onChange,
+  showPassword,
+  onToggleShow,
+  isDarkMode,
+  validationState = "neutral",
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  showPassword: boolean;
+  onToggleShow: () => void;
+  isDarkMode: boolean;
+  validationState?: ValidationState;
+}) {
+  const borderColor =
+    validationState === "error"
+      ? ERROR_COLOR
+      : validationState === "success"
+        ? SUCCESS_COLOR
+        : isDarkMode
+          ? "#333333"
+          : "rgb(229, 231, 235)";
+
+  return (
+    <div
+      style={{
+        border: `1px solid ${borderColor}`,
+        borderRadius: "3px",
+        padding: "6px 12px",
+        background: isDarkMode ? "#2A2D34" : "#FAFAFA",
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        minHeight: "56px",
+        boxSizing: "border-box",
+      }}
+    >
+      <div style={{ flex: 1 }}>
+        <label style={{ ...getLabelStyle(isDarkMode), display: value ? "block" : "none" }}>{label}</label>
+        <input
+          type={showPassword ? "text" : "password"}
+          placeholder={value ? "" : label}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          style={{ ...getInputStyle(isDarkMode), width: "100%" }}
+        />
+      </div>
+      {validationState === "error" && (
+        <CircleAlert size={18} color={ERROR_COLOR} fill={ERROR_COLOR} stroke="#FFFFFF" strokeWidth={2} />
+      )}
+      {validationState === "success" && <Check size={20} color={SUCCESS_COLOR} strokeWidth={3} />}
+      <button
+        type="button"
+        onClick={onToggleShow}
+        style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: "0 4px", display: "flex", alignItems: "center" }}
+      >
+        <Eye size={16} />
+      </button>
+    </div>
+  );
+}

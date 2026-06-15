@@ -23,6 +23,12 @@ interface User {
   name: string;
   email: string;
   status: boolean;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  carbonCopy?: string;
+  branches?: Record<string, boolean>;
+  roles?: Record<SecurityRole, boolean>;
 }
 
 const INITIAL_USERS: User[] = [
@@ -70,6 +76,27 @@ const createEmptyForm = (): AddUserFormState => ({
   roles: Object.fromEntries(SECURITY_ROLES.map((r) => [r, false])) as Record<SecurityRole, boolean>,
 });
 
+const userToFormState = (user: User): AddUserFormState => {
+  const nameParts = user.name.trim().split(/\s+/);
+  const firstName = user.firstName ?? nameParts[0] ?? "";
+  const lastName = user.lastName ?? nameParts.slice(1).join(" ");
+
+  return {
+    branches: user.branches ?? Object.fromEntries(BRANCHES.map((b) => [b, false])),
+    firstName,
+    lastName,
+    username: user.username,
+    password: "",
+    confirmPassword: "",
+    email: user.email,
+    phone: user.phone ?? "",
+    carbonCopy: user.carbonCopy ?? "",
+    roles:
+      user.roles ??
+      (Object.fromEntries(SECURITY_ROLES.map((r) => [r, false])) as Record<SecurityRole, boolean>),
+  };
+};
+
 type FormFieldKey =
   | "firstName"
   | "lastName"
@@ -90,18 +117,22 @@ const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.
 const getFieldValidation = (
   field: FormFieldKey,
   formState: AddUserFormState,
-  hasSubmitted: boolean
+  hasSubmitted: boolean,
+  isEditing: boolean
 ): ValidationState => {
   if (!hasSubmitted) return "neutral";
 
   const value = formState[field].trim();
+  const isChangingPassword = formState.password.trim() || formState.confirmPassword.trim();
 
   if (field === "confirmPassword") {
+    if (isEditing && !isChangingPassword) return "neutral";
     if (!value || value !== formState.password) return "error";
     return "success";
   }
 
   if (field === "password") {
+    if (isEditing && !isChangingPassword) return "neutral";
     if (!value) return "error";
     if (formState.confirmPassword && value !== formState.confirmPassword) return "error";
     return "success";
@@ -119,16 +150,22 @@ const getFieldValidation = (
   return value ? "success" : "error";
 };
 
-const isFormValid = (formState: AddUserFormState) => {
+const isFormValid = (formState: AddUserFormState, isEditing: boolean) => {
   const hasBranch = BRANCHES.some((b) => formState.branches[b]);
+  const isChangingPassword = formState.password.trim() || formState.confirmPassword.trim();
+  const passwordValid =
+    isEditing && !isChangingPassword
+      ? true
+      : formState.password.trim() &&
+        formState.confirmPassword.trim() &&
+        formState.password === formState.confirmPassword;
+
   return (
     hasBranch &&
     formState.firstName.trim() &&
     formState.lastName.trim() &&
     formState.username.trim() &&
-    formState.password.trim() &&
-    formState.confirmPassword.trim() &&
-    formState.password === formState.confirmPassword &&
+    passwordValid &&
     isValidEmail(formState.email)
   );
 };
@@ -138,11 +175,18 @@ export function ManageUsers({ isDarkMode = false }: { isDarkMode?: boolean }) {
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
-  const [showAddUser, setShowAddUser] = useState(false);
+  const [showUserForm, setShowUserForm] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<number | null>(null);
   const [formState, setFormState] = useState<AddUserFormState>(createEmptyForm);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+
+  const isEditing = editingUserId !== null;
+  const editingUser = users.find((u) => u.id === editingUserId);
+  const formTitle = isEditing
+    ? `Editing User - ${formState.firstName} ${formState.lastName}`.trim()
+    : "Add User";
 
   const [sortField, setSortField] = useState<keyof User | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
@@ -173,37 +217,74 @@ export function ManageUsers({ isDarkMode = false }: { isDarkMode?: boolean }) {
   const handleSaveUser = (e: React.FormEvent) => {
     e.preventDefault();
     setHasSubmitted(true);
-    if (!isFormValid(formState)) return;
+    if (!isFormValid(formState, isEditing)) return;
 
-    const newUser: User = {
-      id: Math.floor(10000 + Math.random() * 90000),
+    const userPayload = {
       username: formState.username,
       name: `${formState.firstName} ${formState.lastName}`.trim(),
       email: formState.email,
-      status: true,
+      firstName: formState.firstName,
+      lastName: formState.lastName,
+      phone: formState.phone,
+      carbonCopy: formState.carbonCopy,
+      branches: formState.branches,
+      roles: formState.roles,
     };
 
-    setUsers((prev) => [...prev, newUser]);
+    if (isEditing && editingUserId !== null) {
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.id === editingUserId ? { ...user, ...userPayload } : user
+        )
+      );
+    } else {
+      const newUser: User = {
+        id: Math.floor(10000 + Math.random() * 90000),
+        ...userPayload,
+        status: true,
+      };
+      setUsers((prev) => [...prev, newUser]);
+    }
+
+    closeUserForm();
+  };
+
+  const closeUserForm = () => {
     setFormState(createEmptyForm());
     setShowPassword(false);
     setShowConfirmPassword(false);
     setHasSubmitted(false);
-    setShowAddUser(false);
+    setEditingUserId(null);
+    setShowUserForm(false);
   };
 
   const handleCancelChanges = () => {
-    setFormState(createEmptyForm());
+    if (isEditing && editingUser) {
+      setFormState(userToFormState(editingUser));
+    } else {
+      setFormState(createEmptyForm());
+    }
     setShowPassword(false);
     setShowConfirmPassword(false);
     setHasSubmitted(false);
   };
 
   const handleOpenAddUser = () => {
+    setEditingUserId(null);
     setFormState(createEmptyForm());
     setShowPassword(false);
     setShowConfirmPassword(false);
     setHasSubmitted(false);
-    setShowAddUser(true);
+    setShowUserForm(true);
+  };
+
+  const handleOpenEditUser = (user: User) => {
+    setEditingUserId(user.id);
+    setFormState(userToFormState(user));
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+    setHasSubmitted(false);
+    setShowUserForm(true);
   };
 
   const hasBranchSelected = BRANCHES.some((b) => formState.branches[b]);
@@ -248,7 +329,7 @@ export function ManageUsers({ isDarkMode = false }: { isDarkMode?: boolean }) {
     return processedUsers.slice((page - 1) * pageSize, page * pageSize);
   }, [processedUsers, page, pageSize]);
 
-  if (showAddUser) {
+  if (showUserForm) {
     return (
       <div
         className="flex-1 flex flex-col min-h-0"
@@ -263,7 +344,7 @@ export function ManageUsers({ isDarkMode = false }: { isDarkMode?: boolean }) {
               marginBottom: "24px",
             }}
           >
-            Add User
+            {formTitle}
           </h1>
 
           <form onSubmit={handleSaveUser}>
@@ -384,14 +465,14 @@ export function ManageUsers({ isDarkMode = false }: { isDarkMode?: boolean }) {
                   value={formState.firstName}
                   onChange={(v) => setFormState((prev) => ({ ...prev, firstName: v }))}
                   isDarkMode={isDarkMode}
-                  validationState={getFieldValidation("firstName", formState, hasSubmitted)}
+                  validationState={getFieldValidation("firstName", formState, hasSubmitted, isEditing)}
                 />
                 <FormField
                   label="Last Name"
                   value={formState.lastName}
                   onChange={(v) => setFormState((prev) => ({ ...prev, lastName: v }))}
                   isDarkMode={isDarkMode}
-                  validationState={getFieldValidation("lastName", formState, hasSubmitted)}
+                  validationState={getFieldValidation("lastName", formState, hasSubmitted, isEditing)}
                 />
               </div>
 
@@ -408,7 +489,7 @@ export function ManageUsers({ isDarkMode = false }: { isDarkMode?: boolean }) {
                   value={formState.username}
                   onChange={(v) => setFormState((prev) => ({ ...prev, username: v }))}
                   isDarkMode={isDarkMode}
-                  validationState={getFieldValidation("username", formState, hasSubmitted)}
+                  validationState={getFieldValidation("username", formState, hasSubmitted, isEditing)}
                 />
                 <FormField
                   label="Password"
@@ -416,7 +497,7 @@ export function ManageUsers({ isDarkMode = false }: { isDarkMode?: boolean }) {
                   onChange={(v) => setFormState((prev) => ({ ...prev, password: v }))}
                   isDarkMode={isDarkMode}
                   type={showPassword ? "text" : "password"}
-                  validationState={getFieldValidation("password", formState, hasSubmitted)}
+                  validationState={getFieldValidation("password", formState, hasSubmitted, isEditing)}
                   eyeToggle={{
                     show: showPassword,
                     onToggle: () => setShowPassword(!showPassword),
@@ -428,7 +509,7 @@ export function ManageUsers({ isDarkMode = false }: { isDarkMode?: boolean }) {
                   onChange={(v) => setFormState((prev) => ({ ...prev, confirmPassword: v }))}
                   isDarkMode={isDarkMode}
                   type={showConfirmPassword ? "text" : "password"}
-                  validationState={getFieldValidation("confirmPassword", formState, hasSubmitted)}
+                  validationState={getFieldValidation("confirmPassword", formState, hasSubmitted, isEditing)}
                   eyeToggle={{
                     show: showConfirmPassword,
                     onToggle: () => setShowConfirmPassword(!showConfirmPassword),
@@ -443,14 +524,14 @@ export function ManageUsers({ isDarkMode = false }: { isDarkMode?: boolean }) {
                   onChange={(v) => setFormState((prev) => ({ ...prev, email: v }))}
                   isDarkMode={isDarkMode}
                   type="email"
-                  validationState={getFieldValidation("email", formState, hasSubmitted)}
+                  validationState={getFieldValidation("email", formState, hasSubmitted, isEditing)}
                 />
                 <FormField
                   label="Phone Number"
                   value={formState.phone}
                   onChange={(v) => setFormState((prev) => ({ ...prev, phone: v }))}
                   isDarkMode={isDarkMode}
-                  validationState={getFieldValidation("phone", formState, hasSubmitted)}
+                  validationState={getFieldValidation("phone", formState, hasSubmitted, isEditing)}
                 />
                 <div>
                   <FormField
@@ -458,7 +539,7 @@ export function ManageUsers({ isDarkMode = false }: { isDarkMode?: boolean }) {
                     value={formState.carbonCopy}
                     onChange={(v) => setFormState((prev) => ({ ...prev, carbonCopy: v }))}
                     isDarkMode={isDarkMode}
-                    validationState={getFieldValidation("carbonCopy", formState, hasSubmitted)}
+                    validationState={getFieldValidation("carbonCopy", formState, hasSubmitted, isEditing)}
                   />
                   <span
                     style={{
@@ -535,10 +616,7 @@ export function ManageUsers({ isDarkMode = false }: { isDarkMode?: boolean }) {
             <div style={{ display: "flex", gap: "12px", marginBottom: "24px" }}>
               <button
                 type="button"
-                onClick={() => {
-                  setHasSubmitted(false);
-                  setShowAddUser(false);
-                }}
+                onClick={closeUserForm}
                 style={secondaryButtonStyle(isDarkMode)}
               >
                 <ArrowLeft size={16} /> Go Back
@@ -838,7 +916,9 @@ export function ManageUsers({ isDarkMode = false }: { isDarkMode?: boolean }) {
                       </td>
                       <td style={{ padding: "12px 14px" }}>
                         <button
+                          type="button"
                           title="Edit User"
+                          onClick={() => handleOpenEditUser(user)}
                           style={{
                             background: "none",
                             border: "none",
