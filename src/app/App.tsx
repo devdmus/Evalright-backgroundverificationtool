@@ -2,9 +2,13 @@ import { useState, useEffect } from "react";
 import { Header } from "./components/Header";
 import { Sidebar, PageKey } from "./components/Sidebar";
 import { OrderCreation } from "./pages/OrderCreation";
-import { ReportsOrders } from "./pages/ReportsOrders";
 import { AllOrderDetails } from "./pages/AllOrderDetails";
 import { OrderList } from "./pages/OrderList";
+import { DraftOrderList } from "./pages/DraftOrderList";
+import { OrderSummaryReport } from "./pages/OrderSummaryReport";
+import { ElectronicConsents } from "./pages/ElectronicConsents";
+import { AdverseWorksheets } from "./pages/AdverseWorksheets";
+import { AdverseActionLog } from "./pages/AdverseActionLog";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
 import { HomePage } from "./pages/HomePage";
 import { ApplicantManager } from "./pages/ApplicantManager";
@@ -21,6 +25,9 @@ import { ApplicantInviteTemplates } from "./pages/ApplicantInviteTemplates";
 import { ApplicantStatistics } from "./pages/ApplicantStatistics";
 import { AnnouncementsPage } from "./pages/AnnouncementsPage";
 import { ActivityReportPage } from "./pages/ActivityReportPage";
+import { AnalyticsDashboard } from "./pages/AnalyticsDashboard";
+import { HRSoftwareIntegrations } from "./pages/HRSoftwareIntegrations";
+import { DisputesList } from "./pages/DisputesList";
 // import { ChatWidget } from "./components/ChatWidget";
 
 const USER_NAME = "Farooq Shaik";
@@ -70,17 +77,40 @@ export default function App() {
   function renderPage() {
     switch (currentPage) {
       case "home":
-        return <HomePage isDarkMode={isDarkMode} />;
+        return <HomePage isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
       case "order":
-        return <OrderCreation isDarkMode={isDarkMode} />;
+        return <OrderCreation isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
       case "order-invitation":
-        return <OrderCreation isInvitation showInvitationBanner isDarkMode={isDarkMode} />;
+        return (
+          <OrderCreation
+            isInvitation
+            showInvitationBanner
+            isDarkMode={isDarkMode}
+            onNavigate={setCurrentPage}
+          />
+        );
       case "order-list":
         return <OrderList isDarkMode={isDarkMode} />;
       case "reports-all-order-details":
         return <AllOrderDetails isDarkMode={isDarkMode} />;
       case "reports-orders-list":
-        return <ReportsOrders isDarkMode={isDarkMode} />;
+        return <OrderList isDarkMode={isDarkMode} />;
+      case "reports-draft-orders":
+        return <DraftOrderList />;
+      case "reports-summary":
+        return <OrderSummaryReport />;
+      case "reports-consents":
+        return <ElectronicConsents />;
+      case "reports-adverse-worksheets":
+        return <AdverseWorksheets />;
+      case "reports-adverse-log":
+        return <AdverseActionLog />;
+      case "reports-analytics":
+        return <AnalyticsDashboard />;
+      case "reports-hr":
+        return <HRSoftwareIntegrations />;
+      case "reports-disputes":
+        return <DisputesList />;
       case "applicants":
         return <ApplicantManager isDarkMode={isDarkMode} />;
       case "applicant-invite-templates":

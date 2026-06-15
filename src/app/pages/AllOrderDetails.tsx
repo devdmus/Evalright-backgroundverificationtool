@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { Eye, Upload } from "lucide-react";
-import { ORDERS, type SearchStatus, type OrderRecord, VERIFICATION_TYPES } from "../data/mockData";
+﻿import { useState, useRef, useEffect } from "react";
+import { Eye, Upload, ChevronDown } from "lucide-react";
+import { ORDERS, type SearchStatus, type OrderRecord, VERIFICATION_TYPES, US_STATES } from "../data/mockData";
 import { Footer } from "../components/Footer";
 
 interface Filters {
@@ -34,69 +34,181 @@ const EMPTY_FILTERS: Filters = {
   age: "", applicantEmail: "", criminalRecordsFound: "", orderedBy: "",
 };
 
-const FIELD_CONTAINER_STYLE: React.CSSProperties = {
+const CELL_STYLE: React.CSSProperties = {
   background: "#FFFFFF",
-  border: "1px solid #F3F4F6", // very faint border matching screenshot
-  borderRadius: "2px",
-  padding: "6px 12px",
+  border: "1px solid #E2E8F0",
+  borderRadius: "4px",
+  padding: "8px 12px",
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
-  height: "56px",
+  height: "58px",
   boxSizing: "border-box",
-  boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
+  position: "relative",
 };
 
-const FIELD_LABEL_STYLE: React.CSSProperties = {
+const CELL_LABEL_STYLE: React.CSSProperties = {
   fontSize: "12px",
-  color: "#9CA3AF",
+  color: "#8A8A8A",
   fontWeight: 400,
   lineHeight: "1.2",
-  textTransform: "none",
-  marginBottom: "2px",
+  marginBottom: "3px",
+  textAlign: "left",
 };
 
-const getInputStyle = (isDarkMode: boolean): React.CSSProperties => ({
-  width: "100%",
+const INPUT_ELEMENT_STYLE: React.CSSProperties = {
   border: "none",
   outline: "none",
   background: "transparent",
-  fontSize: "14px",
-  color: isDarkMode ? "#E5E7EB" : "#4B5563",
-  padding: "0",
-  height: "22px",
-});
-
-const getSelectStyle = (isDarkMode: boolean): React.CSSProperties => ({
   width: "100%",
-  border: "none",
-  outline: "none",
-  background: "transparent",
   fontSize: "14px",
-  color: isDarkMode ? "#E5E7EB" : "#4B5563",
+  color: "#374151",
   padding: "0",
-  height: "22px",
-  appearance: "none",
-  backgroundImage: isDarkMode 
-    ? `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%23E5E7EB' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`
-    : `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
-  backgroundRepeat: "no-repeat",
-  backgroundPosition: "right 0px center",
-  paddingRight: "15px",
-  cursor: "pointer",
-});
+  margin: "0",
+  fontFamily: "inherit",
+};
 
-function Field({ label, children, isDarkMode }: { label: string; children: React.ReactNode; isDarkMode?: boolean }) {
+function InputField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+}) {
   return (
-    <div style={{
-      ...FIELD_CONTAINER_STYLE,
-      background: isDarkMode ? "#1A1C21" : "#FFFFFF",
-      border: isDarkMode ? "1px solid #333333" : "1px solid #F3F4F6",
-    }}>
-      <label style={{ ...FIELD_LABEL_STYLE, color: isDarkMode ? "#9CA3AF" : "#9CA3AF" }}>{label}</label>
-      <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
-        {children}
+    <div style={CELL_STYLE}>
+      <label style={CELL_LABEL_STYLE}>{label}</label>
+      <input
+        style={INPUT_ELEMENT_STYLE}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
+  );
+}
+
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface CustomDropdownProps {
+  label: string;
+  value: string;
+  options: Option[];
+  onChange: (value: string) => void;
+}
+
+function CustomDropdown({ label, value, options, onChange }: CustomDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const selectedOption = options.find((opt) => opt.value === value) || options[0];
+
+  return (
+    <div
+      ref={containerRef}
+      onClick={() => setIsOpen(!isOpen)}
+      style={{ ...CELL_STYLE, cursor: "pointer" }}
+    >
+      <label style={CELL_LABEL_STYLE}>{label}</label>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", userSelect: "none" }}>
+        <span
+          style={{
+            fontSize: "14px",
+            color: "#374151",
+            fontWeight: 400,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {selectedOption ? selectedOption.label : value}
+        </span>
+        <ChevronDown size={14} style={{ color: "#6B7280", marginLeft: "4px", flexShrink: 0 }} />
       </div>
+
+      {isOpen && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 2px)",
+            left: "-1px",
+            width: "calc(100% + 2px)",
+            background: "#FFFFFF",
+            border: "1px solid #cbd5e1",
+            borderRadius: "4px",
+            boxSizing: "border-box",
+            zIndex: 1000,
+            maxHeight: "240px",
+            overflowY: "auto",
+            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+          }}
+        >
+          {options.map((opt) => {
+            const isSelected = opt.value === value;
+            return (
+              <DropdownItem
+                key={opt.value}
+                label={opt.label}
+                isSelected={isSelected}
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DropdownItem({
+  label,
+  isSelected,
+  onClick,
+}: {
+  label: string;
+  isSelected: boolean;
+  onClick: () => void;
+}) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <div
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        padding: "8px 12px",
+        fontSize: "14px",
+        fontFamily: "'Wix Madefor Display', sans-serif",
+        color: isHovered || isSelected ? "#FFFFFF" : "#4B5563",
+        background: isHovered || isSelected ? "#7b7b7b" : "#FFFFFF",
+        cursor: "pointer",
+        transition: "background 0.1s ease, color 0.1s ease",
+      }}
+    >
+      {label}
     </div>
   );
 }
@@ -107,6 +219,192 @@ const BADGE_STYLES: Record<SearchStatus, { bg: string; color: string; border: st
   PENDING: { bg: "#FEF08A", color: "#854D0E", border: "#FDE047" },
   "IN PROGRESS": { bg: "#F3F4F6", color: "#374151", border: "#E5E7EB" },
 };
+
+const STATUS_OPTIONS = [
+  { value: "", label: "Any Status" },
+  { value: "Draft", label: "Draft" },
+  { value: "Pending", label: "Pending" },
+  { value: "Closed", label: "Closed" },
+  { value: "Record", label: "Record" },
+];
+
+const SORT_ORDER_OPTIONS = [
+  { value: "Status", label: "Status" },
+  { value: "Search ID", label: "Search ID" },
+  { value: "Search ID (High to Low)", label: "Search ID (High to Low)" },
+  { value: "Order Date", label: "Order Date" },
+  { value: "Order Date(Newest to Oldest)", label: "Order Date(Newest to Oldest)" },
+];
+
+const PER_PAGE_OPTIONS = [
+  { value: "20", label: "20 Searches" },
+  { value: "10", label: "10 Searches" },
+  { value: "50", label: "50 Searches" },
+  { value: "100", label: "100 Searches" },
+];
+
+const AGE_OPTIONS = [
+  { value: "", label: "All" },
+  { value: "Up to 24 Hours Old", label: "Up to 24 Hours Old" },
+  { value: "24 to 48 Hours Old", label: "24 to 48 Hours Old" },
+  { value: "48 to 72 Hours Old", label: "48 to 72 Hours Old" },
+  { value: "Over 72 Hours", label: "Over 72 Hours" },
+];
+
+const CRIMINAL_RECORDS_OPTIONS = [
+  { value: "", label: "All" },
+  { value: "no", label: "No" },
+  { value: "yes", label: "Yes" },
+];
+
+const ORDERED_BY_OPTIONS = [
+  { value: "", label: "All Users" },
+  { value: "Suresh Ramakoti", label: "Suresh Ramakoti" },
+  { value: "Admin User", label: "Admin User" },
+];
+
+const STATE_OPTIONS = [
+  { value: "", label: "Select State" },
+  ...US_STATES.map((s) => ({ value: s, label: s })),
+];
+
+const SEARCH_TYPE_OPTIONS = [
+  { value: "", label: "All Searches" },
+  { value: "Drug Screening 4 Panel (LabCorp)", label: "Drug Screening 4 Panel (LabCorp)" },
+  { value: "Drug Screening 5 Panel with Nicotine", label: "Drug Screening 5 Panel with Nicotine" },
+  { value: "Education Verification", label: "Education Verification" },
+  { value: "Employment Verification", label: "Employment Verification" },
+  { value: "ES - 10 Panel (1906)", label: "ES - 10 Panel (1906)" },
+  { value: "ES - 10 Panel (1918)", label: "ES - 10 Panel (1918)" },
+  { value: "ES - 10 Panel 6AM (2249)", label: "ES - 10 Panel 6AM (2249)" },
+  { value: "ES - 10 Panel 6AM/ EXBNZ/ MDMA/ EXOPI/ OXY (6728)", label: "ES - 10 Panel 6AM/ EXBNZ/ MDMA/ EXOPI/ OXY (6728)" },
+  { value: "ES - 10 Panel 6AM/ HYDO/ OXY/ MDMA (4089)", label: "ES - 10 Panel 6AM/ HYDO/ OXY/ MDMA (4089)" },
+  { value: "ES - 10 Panel 6AM/ OXY/ MEP/ MDMA (3462)", label: "ES - 10 Panel 6AM/ OXY/ MEP/ MDMA (3462)" },
+  { value: "ES - 10 Panel ALCOHOL (1208)", label: "ES - 10 Panel ALCOHOL (1208)" },
+  { value: "ES - 10 Panel ALCOHOL/ FENT/ MEP/ EXT OPI (4007)", label: "ES - 10 Panel ALCOHOL/ FENT/ MEP/ EXT OPI (4007)" },
+  { value: "ES - 10 Panel BUP/ FENT/ MDMA/ MEP/ EXP OPI/ OXY/ TCA/ TRAM (7127)", label: "ES - 10 Panel BUP/ FENT/ MDMA/ MEP/ EXP OPI/ OXY/ TCA/ TRAM (7127)" },
+  { value: "ES - 10 Panel BUP/ OXY (2303)", label: "ES - 10 Panel BUP/ OXY (2303)" },
+  { value: "ES - 10 Panel COT/ EXP OPI/ ALCOHOL (3485)", label: "ES - 10 Panel COT/ EXP OPI/ ALCOHOL (3485)" },
+  { value: "ES - 10 Panel Custom Drug Test", label: "ES - 10 Panel Custom Drug Test" },
+  { value: "ES - 10 Panel EXP OPI/ OXY (1910)", label: "ES - 10 Panel EXP OPI/ OXY (1910)" },
+  { value: "ES - 10 Panel FEN (8596)", label: "ES - 10 Panel FEN (8596)" },
+  { value: "ES - 10 Panel Hair/EXP OPI (H10P)", label: "ES - 10 Panel Hair/EXP OPI (H10P)" },
+  { value: "ES - 10 Panel MDMA/ BATHSALTS (3324)", label: "ES - 10 Panel MDMA/ BATHSALTS (3324)" },
+  { value: "ES - 10 Panel NO THC/ 6AM/ EXP OPI (4225)", label: "ES - 10 Panel NO THC/ 6AM/ EXP OPI (4225)" },
+  { value: "ES - 10 Panel NO THC/ 6AM/ MEQ (4111)", label: "ES - 10 Panel NO THC/ 6AM/ MEQ (4111)" },
+  { value: "ES - 10 Panel NO THC/ EXP OPI (6664)", label: "ES - 10 Panel NO THC/ EXP OPI (6664)" },
+  { value: "ES - 10 Panel NO THC/ MEQ (4343)", label: "ES - 10 Panel NO THC/ MEQ (4343)" },
+  { value: "ES - 10 Panel NO THC/ OXY/ EXP OPI (3477)", label: "ES - 10 Panel NO THC/ OXY/ EXP OPI (3477)" },
+  { value: "ES - 10 Panel NO THC/ OXY/ MDMA (4691)", label: "ES - 10 Panel NO THC/ OXY/ MDMA (4691)" },
+  { value: "ES - 10 Panel Standard (1204)", label: "ES - 10 Panel Standard (1204)" },
+  { value: "ES - 10-Panel NICOTINE (1224)", label: "ES - 10-Panel NICOTINE (1224)" },
+  { value: "ES - 11 Panel ALCOHOL/ FENT/ EXP OPI (8548)", label: "ES - 11 Panel ALCOHOL/ FENT/ EXP OPI (8548)" },
+  { value: "ES - 11 Panel ExpOPI/NOTHC/OXY/ECS/FEN/TRAM", label: "ES - 11 Panel ExpOPI/NOTHC/OXY/ECS/FEN/TRAM" },
+  { value: "ES - 11 Panel No THC/ 6AM/ Exp Opi (8145)", label: "ES - 11 Panel No THC/ 6AM/ Exp Opi (8145)" },
+  { value: "ES - 11 Panel NO THC/ FENT/ OXY (6405)", label: "ES - 11 Panel NO THC/ FENT/ OXY (6405)" },
+  { value: "ES - 12 Panel NO THC/ MDMA/ OXY/ 6AM (4137)", label: "ES - 12 Panel NO THC/ MDMA/ OXY/ 6AM (4137)" },
+  { value: "ES - 16 Panel 6AM/ ALCOHOL/ FEN/ MEP/ OXY/ TRAM (6605)", label: "ES - 16 Panel 6AM/ ALCOHOL/ FEN/ MEP/ OXY/ TRAM (6605)" },
+  { value: "ES - 3DR HYCD MDMA/6AM", label: "ES - 3DR HYCD MDMA/6AM" },
+  { value: "ES - 4 Panel 6AM/ FENT/ MDMA (6276)", label: "ES - 4 Panel 6AM/ FENT/ MDMA (6276)" },
+  { value: "ES - 4 Panel NO THC (1687)", label: "ES - 4 Panel NO THC (1687)" },
+  { value: "ES - 4 Panel NO THC/ 6AM/ HYD/ MDMA/ OXY (3488)", label: "ES - 4 Panel NO THC/ 6AM/ HYD/ MDMA/ OXY (3488)" },
+  { value: "ES - 5 Panel Alcohol (2447)", label: "ES - 5 Panel Alcohol (2447)" },
+  { value: "ES - 5 Panel Hair EXP OPI (H5PEO)", label: "ES - 5 Panel Hair EXP OPI (H5PEO)" },
+  { value: "ES - 5 Panel NO THC/ EXP OPI/ ALCOHOL (4645)", label: "ES - 5 Panel NO THC/ EXP OPI/ ALCOHOL (4645)" },
+  { value: "ES - 5 Panel Standard (1200)", label: "ES - 5 Panel Standard (1200)" },
+  { value: "ES - 6 Panel (2275)", label: "ES - 6 Panel (2275)" },
+  { value: "ES - 6 Panel Standard (3121)", label: "ES - 6 Panel Standard (3121)" },
+  { value: "ES - 7 Panel", label: "ES - 7 Panel" },
+  { value: "ES - 7 Panel (5DSP/OXY/PHN)", label: "ES - 7 Panel (5DSP/OXY/PHN)" },
+  { value: "ES - 7 Panel 6AM (2267)", label: "ES - 7 Panel 6AM (2267)" },
+  { value: "ES - 7 Panel 6AM/ BUP/ FENT/ MDMA/ EXP OPI/ OXY/ TRAM (5268)", label: "ES - 7 Panel 6AM/ BUP/ FENT/ MDMA/ EXP OPI/ OXY/ TRAM (5268)" },
+  { value: "ES - 7 Panel FENT/ BUP (2304)", label: "ES - 7 Panel FENT/ BUP (2304)" },
+  { value: "ES - 7 Panel MDMA/ EXP OPI/ OXY/ TCA (7116)", label: "ES - 7 Panel MDMA/ EXP OPI/ OXY/ TCA (7116)" },
+  { value: "ES - 7 Panel NO THC (2480)", label: "ES - 7 Panel NO THC (2480)" },
+  { value: "ES - 7 Panel NO THC/ BUP/ MDMA/ OXY/ TCA (3249)", label: "ES - 7 Panel NO THC/ BUP/ MDMA/ OXY/ TCA (3249)" },
+  { value: "ES - 7 Panel OXY/ MDMA (3124)", label: "ES - 7 Panel OXY/ MDMA (3124)" },
+  { value: "ES - 7 Panel Plus MDMA", label: "ES - 7 Panel Plus MDMA" },
+  { value: "ES - 7 Panel Standard (1203)", label: "ES - 7 Panel Standard (1203)" },
+  { value: "ES - 8 Panel", label: "ES - 8 Panel" },
+  { value: "ES - 8 Panel 6AM/ MDMA/ MEQ/ OXY/ NO THC (6480)", label: "ES - 8 Panel 6AM/ MDMA/ MEQ/ OXY/ NO THC (6480)" },
+  { value: "ES - 8 Panel BUP/ MDMA/ OXY (4163)", label: "ES - 8 Panel BUP/ MDMA/ OXY (4163)" },
+  { value: "ES - 8 Panel FENT/ EXP OPI (4686)", label: "ES - 8 Panel FENT/ EXP OPI (4686)" },
+  { value: "ES - 8 Panel HYCD/ MDMA/ OXY (6477)", label: "ES - 8 Panel HYCD/ MDMA/ OXY (6477)" },
+  { value: "ES - 8 Panel NO THC/ 6AM (4249)", label: "ES - 8 Panel NO THC/ 6AM (4249)" },
+  { value: "ES - 8 Panel NO THC/ 6AM/ MEQ (6766)", label: "ES - 8 Panel NO THC/ 6AM/ MEQ (6766)" },
+  { value: "ES - 8 Panel NO THC/ BUP/ MDMA/ MEQ/ OXY (8825)", label: "ES - 8 Panel NO THC/ BUP/ MDMA/ MEQ/ OXY (8825)" },
+  { value: "ES - 8 Panel NO THC/ OXY/ MEP (7108)", label: "ES - 8 Panel NO THC/ OXY/ MEP (7108)" },
+  { value: "ES - 8 Panel OXY/ 6AM/ MDMA (2333)", label: "ES - 8 Panel OXY/ 6AM/ MDMA (2333)" },
+  { value: "ES - 8 Panel Standard (3123)", label: "ES - 8 Panel Standard (3123)" },
+  { value: "ES - 9 Panel 6AM/ FENT/ MDMA/ OXY (4758)", label: "ES - 9 Panel 6AM/ FENT/ MDMA/ OXY (4758)" },
+  { value: "ES - 9 Panel 6AM/ NO THC/ MDMA/ BUP/ EXP OPI/ OXY (8542)", label: "ES - 9 Panel 6AM/ NO THC/ MDMA/ BUP/ EXP OPI/ OXY (8542)" },
+  { value: "ES - 9 Panel 6AM/ NO THC/ MDMA/ BUP/ FENT/ EXP OPI/ OXY (8244)", label: "ES - 9 Panel 6AM/ NO THC/ MDMA/ BUP/ FENT/ EXP OPI/ OXY (8244)" },
+  { value: "ES - 9 Panel 6AM/ OXY/ MDMA (6829)", label: "ES - 9 Panel 6AM/ OXY/ MDMA (6829)" },
+  { value: "ES - 9 Panel 6AM/ OXY/ MEP (4520)", label: "ES - 9 Panel 6AM/ OXY/ MEP (4520)" },
+  { value: "ES - 9 Panel BUP/ MDMA/ OXY/ TCA (4715)", label: "ES - 9 Panel BUP/ MDMA/ OXY/ TCA (4715)" },
+  { value: "ES - 9 Panel FENT/ EXOPI (6902)", label: "ES - 9 Panel FENT/ EXOPI (6902)" },
+  { value: "ES - 9 Panel FENT/ MEP/ MEQ/ OXY/ TRAM (6544)", label: "ES - 9 Panel FENT/ MEP/ MEQ/ OXY/ TRAM (6544)" },
+  { value: "ES - 9 Panel NO THC (1790)", label: "ES - 9 Panel NO THC (1790)" },
+  { value: "ES - 9 Panel NO THC (6599)", label: "ES - 9 Panel NO THC (6599)" },
+  { value: "ES - 9 Panel NO THC/ OXY (7027)", label: "ES - 9 Panel NO THC/ OXY (7027)" },
+  { value: "ES - 9 Panel NO THC/ OXY (8798)", label: "ES - 9 Panel NO THC/ OXY (8798)" },
+  { value: "ES - 9 Panel OXY/ MDMA/ OPIEX (4190)", label: "ES - 9 Panel OXY/ MDMA/ OPIEX (4190)" },
+  { value: "ES - 9 Panel Standard (1205)", label: "ES - 9 Panel Standard (1205)" },
+  { value: "ES - 9DSP/EXP OPI/Custom Levels/OXY/ECS/PHN", label: "ES - 9DSP/EXP OPI/Custom Levels/OXY/ECS/PHN" },
+  { value: "ES - ALCOHOL", label: "ES - ALCOHOL" },
+  { value: "ES - Audiogram", label: "ES - Audiogram" },
+  { value: "ES - Chest X-Ray (1 or 2 Views)", label: "ES - Chest X-Ray (1 or 2 Views)" },
+  { value: "ES - Chest X-Ray (2 Views)", label: "ES - Chest X-Ray (2 Views)" },
+  { value: "ES - DOT Alcohol (BAT)", label: "ES - DOT Alcohol (BAT)" },
+  { value: "ES - DOT Drug Test", label: "ES - DOT Drug Test" },
+  { value: "ES - DOT Physical", label: "ES - DOT Physical" },
+  { value: "ES - DOT Physical Recertification", label: "ES - DOT Physical Recertification" },
+  { value: "ES - DOT Urine Test", label: "ES - DOT Urine Test" },
+  { value: "ES - Hep A Titer", label: "ES - Hep A Titer" },
+  { value: "ES - Hep A Vaccine #1", label: "ES - Hep A Vaccine #1" },
+  { value: "ES - Hep A Vaccine #2", label: "ES - Hep A Vaccine #2" },
+  { value: "ES - Hep B Surface Antigen ΓÇô (Screen for Acute/Chronic Disease)", label: "ES - Hep B Surface Antigen ΓÇô (Screen for Acute/Chronic Disease)" },
+  { value: "ES - Hep B Titer", label: "ES - Hep B Titer" },
+  { value: "ES - Hep B Vaccine #1", label: "ES - Hep B Vaccine #1" },
+  { value: "ES - Hep B Vaccine #2", label: "ES - Hep B Vaccine #2" },
+  { value: "ES - Hep B Vaccine #3", label: "ES - Hep B Vaccine #3" },
+  { value: "ES - Hep C Titer", label: "ES - Hep C Titer" },
+  { value: "ES - Influenza Vaccine", label: "ES - Influenza Vaccine" },
+  { value: "ES - Lift Test", label: "ES - Lift Test" },
+  { value: "ES - MMR Titer", label: "ES - MMR Titer" },
+  { value: "ES - MMR Vaccine", label: "ES - MMR Vaccine" },
+  { value: "ES - MMR Vaccine #2", label: "ES - MMR Vaccine #2" },
+  { value: "ES - Mumps Antibody (IgG)", label: "ES - Mumps Antibody (IgG)" },
+  { value: "ES - Non DOT Alcohol (BAT)", label: "ES - Non DOT Alcohol (BAT)" },
+  { value: "ES - Non-DOT Physical", label: "ES - Non-DOT Physical" },
+  { value: "ES - Oral 10 Panel BUP/ MDMA (6037)", label: "ES - Oral 10 Panel BUP/ MDMA (6037)" },
+  { value: "ES - Oral 10 Panel EXP OPI/ MDMA (6036)", label: "ES - Oral 10 Panel EXP OPI/ MDMA (6036)" },
+  { value: "ES - Oral 10 Panel MDMA/ ALCOHOL (6043)", label: "ES - Oral 10 Panel MDMA/ ALCOHOL (6043)" },
+  { value: "ES - Oral 5 Panel (6008)", label: "ES - Oral 5 Panel (6008)" },
+  { value: "ES - Oral 6 Panel MDMA/ OXY (6002)", label: "ES - Oral 6 Panel MDMA/ OXY (6002)" },
+  { value: "ES - Oral Fluid Drug Screen", label: "ES - Oral Fluid Drug Screen" },
+  { value: "ES - Oral Swab Kits", label: "ES - Oral Swab Kits" },
+  { value: "ES - Oral THC (6051)", label: "ES - Oral THC (6051)" },
+  { value: "ES - OSHA Respirator Questionnaire", label: "ES - OSHA Respirator Questionnaire" },
+  { value: "ES - Pulmonary Function Test/Spirometry", label: "ES - Pulmonary Function Test/Spirometry" },
+  { value: "ES - Respirator Fit Test, Qualitative", label: "ES - Respirator Fit Test, Qualitative" },
+  { value: "ES - Respirator Fit Test, Quantitative", label: "ES - Respirator Fit Test, Quantitative" },
+  { value: "ES - Rubella Antibody (IgG)", label: "ES - Rubella Antibody (IgG)" },
+  { value: "ES - TB Chest X-Ray", label: "ES - TB Chest X-Ray" },
+  { value: "ES - TB/PPD Skin Test - 1 Step Only", label: "ES - TB/PPD Skin Test - 1 Step Only" },
+  { value: "ES - TB/PPD Test 1", label: "ES - TB/PPD Test 1" },
+  { value: "ES - TB/PPD Test 2", label: "ES - TB/PPD Test 2" },
+  { value: "ES - TDAP", label: "ES - TDAP" },
+  { value: "ES - TSPOT/TB Blood Test", label: "ES - TSPOT/TB Blood Test" },
+  { value: "ES - Urine Fentanyl Only", label: "ES - Urine Fentanyl Only" },
+  { value: "ES - Varicella Titer", label: "ES - Varicella Titer" },
+  { value: "ES - Varicella Vaccine", label: "ES - Varicella Vaccine" },
+  { value: "ES - Varicella Vaccine #2", label: "ES - Varicella Vaccine #2" },
+  { value: "ES - Vision Test, Ishihara", label: "ES - Vision Test, Ishihara" },
+  { value: "ES - Vision Test, Jaeger", label: "ES - Vision Test, Jaeger" },
+  { value: "ES - Vision Test, Snellen", label: "ES - Vision Test, Snellen" },
+  { value: "ES - Vision Test, Titmus", label: "ES - Vision Test, Titmus" }
+];
 
 export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }) {
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
@@ -140,7 +438,10 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
   const filtered = ORDERS.filter((o) => {
     if (applied.searchId && !o.searchId.toLowerCase().includes(applied.searchId.toLowerCase())) return false;
     if (applied.reportId && !o.reportId.toLowerCase().includes(applied.reportId.toLowerCase())) return false;
-    if (applied.status && o.status !== applied.status) return false;
+    
+    // Status mapping case-insensitively
+    if (applied.status && o.status.toLowerCase() !== applied.status.toLowerCase()) return false;
+    
     if (applied.searchType && o.verificationType !== applied.searchType) return false;
     if (applied.firstName && !o.applicantName.split(" ")[0].toLowerCase().includes(applied.firstName.toLowerCase())) return false;
     if (applied.lastName && !o.applicantName.split(" ").slice(-1)[0].toLowerCase().includes(applied.lastName.toLowerCase())) return false;
@@ -157,13 +458,23 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
       if (applied.criminalRecordsFound === "yes" && !hasRecords) return false;
       if (applied.criminalRecordsFound === "no" && hasRecords) return false;
     }
+    
+    // Age of order in hours:
     if (applied.age) {
-      if (!o.dob) return false;
-      const birthYear = new Date(o.dob).getFullYear();
-      const age = new Date().getFullYear() - birthYear;
-      if (applied.age === "Under 25" && age >= 25) return false;
-      if (applied.age === "25 - 40" && (age < 25 || age > 40)) return false;
-      if (applied.age === "Over 40" && age <= 40) return false;
+      const orderDate = new Date(o.orderDate);
+      const now = new Date();
+      const diffMs = now.getTime() - orderDate.getTime();
+      const diffHours = diffMs / (1000 * 60 * 60);
+      
+      if (applied.age === "Up to 24 Hours Old") {
+        if (diffHours > 24) return false;
+      } else if (applied.age === "24 to 48 Hours Old") {
+        if (diffHours < 24 || diffHours > 48) return false;
+      } else if (applied.age === "48 to 72 Hours Old") {
+        if (diffHours < 48 || diffHours > 72) return false;
+      } else if (applied.age === "Over 72 Hours") {
+        if (diffHours <= 72) return false;
+      }
     }
     return true;
   });
@@ -172,8 +483,12 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
     if (applied.sortOrder === "Status") {
       return a.status.localeCompare(b.status);
     } else if (applied.sortOrder === "Search ID") {
+      return a.searchId.localeCompare(b.searchId);
+    } else if (applied.sortOrder === "Search ID (High to Low)") {
       return b.searchId.localeCompare(a.searchId);
     } else if (applied.sortOrder === "Order Date") {
+      return a.orderDate.localeCompare(b.orderDate);
+    } else if (applied.sortOrder === "Order Date(Newest to Oldest)") {
       return b.orderDate.localeCompare(a.orderDate);
     }
     return b.searchId.localeCompare(a.searchId);
@@ -182,6 +497,8 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
   const totalPages = Math.ceil(sorted.length / perPage);
   const paginated = sorted.slice((page - 1) * perPage, page * perPage);
 
+  const searchTypeOptions = SEARCH_TYPE_OPTIONS;
+
   return (
     <div
       style={{
@@ -189,14 +506,13 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
         display: "flex",
         flexDirection: "column",
         minHeight: 0,
-
       }}
     >
       <div
         style={{
           flex: 1,
           padding: "16px 20px",
-          background: isDarkMode ? "#252830" : "#F5F5F5",
+          background: "#F5F5F5",
           overflowY: "auto",
         }}
       >
@@ -205,201 +521,53 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
           style={{
             fontSize: "20px",
             fontWeight: 500,
-            color: isDarkMode ? "#DF2A57" : "rgb(199, 0, 57)",
+            color: "rgb(199, 0, 57)",
             marginBottom: "14px",
-
           }}
         >
           All Order Details
         </h1>
 
-        {/* ── Filters Grid ───────────────────────────────────────────── */}
+        {/* ΓöÇΓöÇ Filters Grid ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(6, 1fr)",
-            gap: "10px",
-            marginBottom: "16px",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: "14px",
+            marginBottom: "24px",
           }}
         >
           {/* Row 1 */}
-          <Field label="Search ID" isDarkMode={isDarkMode}>
-            <input
-              style={getInputStyle(isDarkMode)}
-              value={filters.searchId}
-              onChange={(e) => set("searchId", e.target.value)}
-            />
-          </Field>
-          <Field label="Report ID" isDarkMode={isDarkMode}>
-            <input
-              style={getInputStyle(isDarkMode)}
-              value={filters.reportId}
-              onChange={(e) => set("reportId", e.target.value)}
-            />
-          </Field>
-          <Field label="Status" isDarkMode={isDarkMode}>
-            <select
-              style={getSelectStyle(isDarkMode)}
-              value={filters.status}
-              onChange={(e) => set("status", e.target.value)}
-            >
-              <option value="">Any Status</option>
-              <option value="CLOSED">CLOSED</option>
-              <option value="CANCELLED">CANCELLED</option>
-              <option value="PENDING">PENDING</option>
-              <option value="IN PROGRESS">IN PROGRESS</option>
-            </select>
-          </Field>
-          <Field label="Search Type / Name" isDarkMode={isDarkMode}>
-            <select
-              style={getSelectStyle(isDarkMode)}
-              value={filters.searchType}
-              onChange={(e) => set("searchType", e.target.value)}
-            >
-              <option value="">All Searches</option>
-              {VERIFICATION_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="First Name" isDarkMode={isDarkMode}>
-            <input
-              style={getInputStyle(isDarkMode)}
-              value={filters.firstName}
-              onChange={(e) => set("firstName", e.target.value)}
-            />
-          </Field>
-          <Field label="Last Name" isDarkMode={isDarkMode}>
-            <input
-              style={getInputStyle(isDarkMode)}
-              value={filters.lastName}
-              onChange={(e) => set("lastName", e.target.value)}
-            />
-          </Field>
+          <InputField label="Search ID" value={filters.searchId} onChange={(val) => set("searchId", val)} />
+          <InputField label="Report ID" value={filters.reportId} onChange={(val) => set("reportId", val)} />
+          <CustomDropdown label="Status" value={filters.status} options={STATUS_OPTIONS} onChange={(val) => set("status", val)} />
+          <CustomDropdown label="Search Type / Name" value={filters.searchType} options={searchTypeOptions} onChange={(val) => set("searchType", val)} />
 
           {/* Row 2 */}
-          <Field label="SSN" isDarkMode={isDarkMode}>
-            <input
-              style={getInputStyle(isDarkMode)}
-              value={filters.ssn}
-              onChange={(e) => set("ssn", e.target.value)}
-            />
-          </Field>
-          <Field label="DOB" isDarkMode={isDarkMode}>
-            <input
-              style={getInputStyle(isDarkMode)}
-              value={filters.dob}
-              onChange={(e) => set("dob", e.target.value)}
-            />
-          </Field>
-          <Field label="County" isDarkMode={isDarkMode}>
-            <input
-              style={getInputStyle(isDarkMode)}
-              value={filters.county}
-              onChange={(e) => set("county", e.target.value)}
-            />
-          </Field>
-          <Field label="State" isDarkMode={isDarkMode}>
-            <input
-              style={getInputStyle(isDarkMode)}
-              value={filters.state}
-              onChange={(e) => set("state", e.target.value)}
-            />
-          </Field>
-          <Field label="Order Reference" isDarkMode={isDarkMode}>
-            <input
-              style={getInputStyle(isDarkMode)}
-              value={filters.orderReference}
-              onChange={(e) => set("orderReference", e.target.value)}
-            />
-          </Field>
-          <Field label="Order Date From" isDarkMode={isDarkMode}>
-            <input
-              style={getInputStyle(isDarkMode)}
-              value={filters.orderDateFrom}
-              onChange={(e) => set("orderDateFrom", e.target.value)}
-            />
-          </Field>
+          <InputField label="First Name" value={filters.firstName} onChange={(val) => set("firstName", val)} />
+          <InputField label="Last Name" value={filters.lastName} onChange={(val) => set("lastName", val)} />
+          <InputField label="SSN" value={filters.ssn} onChange={(val) => set("ssn", val)} />
+          <InputField label="DOB" value={filters.dob} onChange={(val) => set("dob", val)} />
 
           {/* Row 3 */}
-          <Field label="Order Date To" isDarkMode={isDarkMode}>
-            <input
-              style={getInputStyle(isDarkMode)}
-              value={filters.orderDateTo}
-              onChange={(e) => set("orderDateTo", e.target.value)}
-            />
-          </Field>
-          <Field label="Sort Order" isDarkMode={isDarkMode}>
-            <select
-              style={getSelectStyle(isDarkMode)}
-              value={filters.sortOrder}
-              onChange={(e) => set("sortOrder", e.target.value)}
-            >
-              <option value="Status">Status</option>
-              <option value="Search ID">Search ID</option>
-              <option value="Order Date">Order Date</option>
-            </select>
-          </Field>
-          <Field label="Searches per page" isDarkMode={isDarkMode}>
-            <select
-              style={getSelectStyle(isDarkMode)}
-              value={filters.perPage}
-              onChange={(e) => set("perPage", e.target.value)}
-            >
-              <option value="20">20 Searches</option>
-              <option value="10">10 Searches</option>
-              <option value="50">50 Searches</option>
-              <option value="100">100 Searches</option>
-            </select>
-          </Field>
-          <Field label="Age" isDarkMode={isDarkMode}>
-            <select
-              style={getSelectStyle(isDarkMode)}
-              value={filters.age}
-              onChange={(e) => set("age", e.target.value)}
-            >
-              <option value="">All</option>
-              <option value="Under 25">Under 25</option>
-              <option value="25 - 40">25 - 40</option>
-              <option value="Over 40">Over 40</option>
-            </select>
-          </Field>
-          <Field label="Applicant Email" isDarkMode={isDarkMode}>
-            <input
-              style={getInputStyle(isDarkMode)}
-              value={filters.applicantEmail}
-              onChange={(e) => set("applicantEmail", e.target.value)}
-            />
-          </Field>
-          <Field label="Criminal Records Found" isDarkMode={isDarkMode}>
-            <select
-              style={getSelectStyle(isDarkMode)}
-              value={filters.criminalRecordsFound}
-              onChange={(e) => set("criminalRecordsFound", e.target.value)}
-            >
-              <option value="">All</option>
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
-          </Field>
+          <InputField label="County" value={filters.county} onChange={(val) => set("county", val)} />
+          <InputField label="State" value={filters.state} onChange={(val) => set("state", val)} />
+          <InputField label="Order Reference" value={filters.orderReference} onChange={(val) => set("orderReference", val)} />
+          <InputField label="Order Date From" value={filters.orderDateFrom} onChange={(val) => set("orderDateFrom", val)} />
 
           {/* Row 4 */}
-          <Field label="Ordered By" isDarkMode={isDarkMode}>
-            <select
-              style={getSelectStyle(isDarkMode)}
-              value={filters.orderedBy}
-              onChange={(e) => set("orderedBy", e.target.value)}
-            >
-              <option value="">All Users</option>
-              <option value="Suresh Ramakoti">Suresh Ramakoti</option>
-              <option value="Admin User">Admin User</option>
-            </select>
-          </Field>
+          <InputField label="Order Date To" value={filters.orderDateTo} onChange={(val) => set("orderDateTo", val)} />
+          <CustomDropdown label="Sort Order" value={filters.sortOrder} options={SORT_ORDER_OPTIONS} onChange={(val) => set("sortOrder", val)} />
+          <CustomDropdown label="Searches per page" value={filters.perPage} options={PER_PAGE_OPTIONS} onChange={(val) => set("perPage", val)} />
+          <CustomDropdown label="Age" value={filters.age} options={AGE_OPTIONS} onChange={(val) => set("age", val)} />
+
+          {/* Row 5 */}
+          <InputField label="Applicant Email" value={filters.applicantEmail} onChange={(val) => set("applicantEmail", val)} />
+          <CustomDropdown label="Criminal Records Found" value={filters.criminalRecordsFound} options={CRIMINAL_RECORDS_OPTIONS} onChange={(val) => set("criminalRecordsFound", val)} />
+          <CustomDropdown label="Ordered By" value={filters.orderedBy} options={ORDERED_BY_OPTIONS} onChange={(val) => set("orderedBy", val)} />
         </div>
 
-        {/* ── Buttons ────────────────────────────────────────────────── */}
+        {/* ΓöÇΓöÇ Buttons ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         <div
           style={{
             display: "flex",
@@ -419,7 +587,6 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
               fontSize: "14px",
               fontWeight: 500,
               cursor: "pointer",
-
             }}
           >
             Search
@@ -427,23 +594,22 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
           <button
             onClick={handleReset}
             style={{
-              background: "#312E81",
-              color: "#FFFFFF",
-              border: "none",
+              background: "#FFFFFF",
+              color: "#C70039",
+              border: "1px solid #C70039",
               borderRadius: "4px",
               padding: "10px 24px",
               fontSize: "14px",
               fontWeight: 500,
               cursor: "pointer",
-
             }}
           >
             Reset
           </button>
         </div>
 
-        {/* ── Green success alert banner ─────────────────────────────── */}
-        {searched && showAlert && (
+        {/* ΓöÇΓöÇ Green success alert banner ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+        {searched && showAlert && sorted.length > 0 && (
           <div
             style={{
               background: "#E6F0CD", // Olive-ish light green from screenshot
@@ -457,7 +623,6 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
               justifyContent: "space-between",
               alignItems: "center",
               marginBottom: "16px",
-
             }}
           >
             <div style={{ flex: 1, textAlign: "center" }}>
@@ -477,17 +642,33 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
                 alignItems: "center",
               }}
             >
-              ✕
+              Γ£ò
             </button>
           </div>
         )}
 
-        {/* ── Search Results Card ─────────────────────────────────────── */}
-        {searched && (
+        {/* ΓöÇΓöÇ Red "No records found." Centered Banner ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+        {searched && sorted.length === 0 && (
           <div
             style={{
-              background: isDarkMode ? "#1A1C21" : "#FFFFFF",
-              border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
+              textAlign: "center",
+              fontSize: "15px",
+              fontWeight: "bold",
+              color: "#C70039",
+              margin: "24px 0",
+              fontFamily: "'Wix Madefor Display', sans-serif",
+            }}
+          >
+            No records found.
+          </div>
+        )}
+
+        {/* ΓöÇΓöÇ Search Results Card ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+        {searched && sorted.length > 0 && (
+          <div
+            style={{
+              background: "#FFFFFF",
+              border: "1px solid #E5E7EB",
               borderRadius: "4px",
               boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
               marginBottom: "20px",
@@ -500,8 +681,8 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
                 justifyContent: "space-between",
                 alignItems: "center",
                 padding: "8px 16px",
-                background: isDarkMode ? "#252830" : "#F5F5F5",
-                borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
+                background: "#F5F5F5",
+                borderBottom: "1px solid #E5E7EB",
                 borderTopLeftRadius: "4px",
                 borderTopRightRadius: "4px",
               }}
@@ -510,7 +691,7 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
                 style={{
                   fontSize: "14px",
                   fontWeight: 600,
-                  color: isDarkMode ? "#F9FAFB" : "#6B7280",
+                  color: "#6B7280",
 
                 }}
               >
@@ -572,20 +753,20 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
                         alignItems: "center",
                         justifyContent: "space-between",
                         padding: "10px 16px",
-                        borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
-                        background: isDarkMode ? "#1A1C21" : "#FFFFFF",
+                        borderBottom: "1px solid #E5E7EB",
+                        background: "#FFFFFF",
                         cursor: "pointer",
                       }}
                     >
                       {/* Left: Search ID */}
                       <div style={{ fontSize: "13px", width: "160px" }}>
                         <span style={{ color: "#9CA3AF", fontWeight: 400 }}>Search ID: </span>
-                        <span style={{ color: isDarkMode ? "#E5E7EB" : "#4B5563", fontWeight: 600 }}>{o.searchId}</span>
+                        <span style={{ color: "#4B5563", fontWeight: 600 }}>{o.searchId}</span>
                       </div>
 
                       {/* Center: Applicant name + Verification type */}
                       <div style={{ fontSize: "13px", flex: 1, textAlign: "left", paddingLeft: "20px" }}>
-                        <span style={{ color: isDarkMode ? "#E5E7EB" : "#4B5563", fontWeight: 600 }}>{o.applicantName}</span>
+                        <span style={{ color: "#4B5563", fontWeight: 600 }}>{o.applicantName}</span>
                         <span style={{ color: "#9CA3AF" }}> : {o.verificationType}</span>
                       </div>
 
