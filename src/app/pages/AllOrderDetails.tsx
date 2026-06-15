@@ -56,40 +56,44 @@ const FIELD_LABEL_STYLE: React.CSSProperties = {
   marginBottom: "2px",
 };
 
-const FIELD_INPUT_STYLE: React.CSSProperties = {
+const getInputStyle = (isDarkMode: boolean): React.CSSProperties => ({
   width: "100%",
   border: "none",
   outline: "none",
   background: "transparent",
   fontSize: "14px",
-  color: "#4B5563",
-
+  color: isDarkMode ? "#E5E7EB" : "#4B5563",
   padding: "0",
   height: "22px",
-};
+});
 
-const FIELD_SELECT_STYLE: React.CSSProperties = {
+const getSelectStyle = (isDarkMode: boolean): React.CSSProperties => ({
   width: "100%",
   border: "none",
   outline: "none",
   background: "transparent",
   fontSize: "14px",
-  color: "#4B5563",
-
+  color: isDarkMode ? "#E5E7EB" : "#4B5563",
   padding: "0",
   height: "22px",
   appearance: "none",
-  backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
+  backgroundImage: isDarkMode 
+    ? `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%23E5E7EB' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`
+    : `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
   backgroundRepeat: "no-repeat",
   backgroundPosition: "right 0px center",
   paddingRight: "15px",
   cursor: "pointer",
-};
+});
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, isDarkMode }: { label: string; children: React.ReactNode; isDarkMode?: boolean }) {
   return (
-    <div style={FIELD_CONTAINER_STYLE}>
-      <label style={FIELD_LABEL_STYLE}>{label}</label>
+    <div style={{
+      ...FIELD_CONTAINER_STYLE,
+      background: isDarkMode ? "#1A1C21" : "#FFFFFF",
+      border: isDarkMode ? "1px solid #333333" : "1px solid #F3F4F6",
+    }}>
+      <label style={{ ...FIELD_LABEL_STYLE, color: isDarkMode ? "#9CA3AF" : "#9CA3AF" }}>{label}</label>
       <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
         {children}
       </div>
@@ -104,7 +108,7 @@ const BADGE_STYLES: Record<SearchStatus, { bg: string; color: string; border: st
   "IN PROGRESS": { bg: "#F3F4F6", color: "#374151", border: "#E5E7EB" },
 };
 
-export function AllOrderDetails() {
+export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }) {
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
@@ -192,7 +196,7 @@ export function AllOrderDetails() {
         style={{
           flex: 1,
           padding: "16px 20px",
-          background: "#F5F5F5",
+          background: isDarkMode ? "#252830" : "#F5F5F5",
           overflowY: "auto",
         }}
       >
@@ -201,7 +205,7 @@ export function AllOrderDetails() {
           style={{
             fontSize: "20px",
             fontWeight: 500,
-            color: "rgb(199, 0, 57)",
+            color: isDarkMode ? "#DF2A57" : "rgb(199, 0, 57)",
             marginBottom: "14px",
 
           }}
@@ -219,23 +223,23 @@ export function AllOrderDetails() {
           }}
         >
           {/* Row 1 */}
-          <Field label="Search ID">
+          <Field label="Search ID" isDarkMode={isDarkMode}>
             <input
-              style={FIELD_INPUT_STYLE}
+              style={getInputStyle(isDarkMode)}
               value={filters.searchId}
               onChange={(e) => set("searchId", e.target.value)}
             />
           </Field>
-          <Field label="Report ID">
+          <Field label="Report ID" isDarkMode={isDarkMode}>
             <input
-              style={FIELD_INPUT_STYLE}
+              style={getInputStyle(isDarkMode)}
               value={filters.reportId}
               onChange={(e) => set("reportId", e.target.value)}
             />
           </Field>
-          <Field label="Status">
+          <Field label="Status" isDarkMode={isDarkMode}>
             <select
-              style={FIELD_SELECT_STYLE}
+              style={getSelectStyle(isDarkMode)}
               value={filters.status}
               onChange={(e) => set("status", e.target.value)}
             >
@@ -246,9 +250,9 @@ export function AllOrderDetails() {
               <option value="IN PROGRESS">IN PROGRESS</option>
             </select>
           </Field>
-          <Field label="Search Type / Name">
+          <Field label="Search Type / Name" isDarkMode={isDarkMode}>
             <select
-              style={FIELD_SELECT_STYLE}
+              style={getSelectStyle(isDarkMode)}
               value={filters.searchType}
               onChange={(e) => set("searchType", e.target.value)}
             >
@@ -260,76 +264,76 @@ export function AllOrderDetails() {
               ))}
             </select>
           </Field>
-          <Field label="First Name">
+          <Field label="First Name" isDarkMode={isDarkMode}>
             <input
-              style={FIELD_INPUT_STYLE}
+              style={getInputStyle(isDarkMode)}
               value={filters.firstName}
               onChange={(e) => set("firstName", e.target.value)}
             />
           </Field>
-          <Field label="Last Name">
+          <Field label="Last Name" isDarkMode={isDarkMode}>
             <input
-              style={FIELD_INPUT_STYLE}
+              style={getInputStyle(isDarkMode)}
               value={filters.lastName}
               onChange={(e) => set("lastName", e.target.value)}
             />
           </Field>
 
           {/* Row 2 */}
-          <Field label="SSN">
+          <Field label="SSN" isDarkMode={isDarkMode}>
             <input
-              style={FIELD_INPUT_STYLE}
+              style={getInputStyle(isDarkMode)}
               value={filters.ssn}
               onChange={(e) => set("ssn", e.target.value)}
             />
           </Field>
-          <Field label="DOB">
+          <Field label="DOB" isDarkMode={isDarkMode}>
             <input
-              style={FIELD_INPUT_STYLE}
+              style={getInputStyle(isDarkMode)}
               value={filters.dob}
               onChange={(e) => set("dob", e.target.value)}
             />
           </Field>
-          <Field label="County">
+          <Field label="County" isDarkMode={isDarkMode}>
             <input
-              style={FIELD_INPUT_STYLE}
+              style={getInputStyle(isDarkMode)}
               value={filters.county}
               onChange={(e) => set("county", e.target.value)}
             />
           </Field>
-          <Field label="State">
+          <Field label="State" isDarkMode={isDarkMode}>
             <input
-              style={FIELD_INPUT_STYLE}
+              style={getInputStyle(isDarkMode)}
               value={filters.state}
               onChange={(e) => set("state", e.target.value)}
             />
           </Field>
-          <Field label="Order Reference">
+          <Field label="Order Reference" isDarkMode={isDarkMode}>
             <input
-              style={FIELD_INPUT_STYLE}
+              style={getInputStyle(isDarkMode)}
               value={filters.orderReference}
               onChange={(e) => set("orderReference", e.target.value)}
             />
           </Field>
-          <Field label="Order Date From">
+          <Field label="Order Date From" isDarkMode={isDarkMode}>
             <input
-              style={FIELD_INPUT_STYLE}
+              style={getInputStyle(isDarkMode)}
               value={filters.orderDateFrom}
               onChange={(e) => set("orderDateFrom", e.target.value)}
             />
           </Field>
 
           {/* Row 3 */}
-          <Field label="Order Date To">
+          <Field label="Order Date To" isDarkMode={isDarkMode}>
             <input
-              style={FIELD_INPUT_STYLE}
+              style={getInputStyle(isDarkMode)}
               value={filters.orderDateTo}
               onChange={(e) => set("orderDateTo", e.target.value)}
             />
           </Field>
-          <Field label="Sort Order">
+          <Field label="Sort Order" isDarkMode={isDarkMode}>
             <select
-              style={FIELD_SELECT_STYLE}
+              style={getSelectStyle(isDarkMode)}
               value={filters.sortOrder}
               onChange={(e) => set("sortOrder", e.target.value)}
             >
@@ -338,9 +342,9 @@ export function AllOrderDetails() {
               <option value="Order Date">Order Date</option>
             </select>
           </Field>
-          <Field label="Searches per page">
+          <Field label="Searches per page" isDarkMode={isDarkMode}>
             <select
-              style={FIELD_SELECT_STYLE}
+              style={getSelectStyle(isDarkMode)}
               value={filters.perPage}
               onChange={(e) => set("perPage", e.target.value)}
             >
@@ -350,9 +354,9 @@ export function AllOrderDetails() {
               <option value="100">100 Searches</option>
             </select>
           </Field>
-          <Field label="Age">
+          <Field label="Age" isDarkMode={isDarkMode}>
             <select
-              style={FIELD_SELECT_STYLE}
+              style={getSelectStyle(isDarkMode)}
               value={filters.age}
               onChange={(e) => set("age", e.target.value)}
             >
@@ -362,16 +366,16 @@ export function AllOrderDetails() {
               <option value="Over 40">Over 40</option>
             </select>
           </Field>
-          <Field label="Applicant Email">
+          <Field label="Applicant Email" isDarkMode={isDarkMode}>
             <input
-              style={FIELD_INPUT_STYLE}
+              style={getInputStyle(isDarkMode)}
               value={filters.applicantEmail}
               onChange={(e) => set("applicantEmail", e.target.value)}
             />
           </Field>
-          <Field label="Criminal Records Found">
+          <Field label="Criminal Records Found" isDarkMode={isDarkMode}>
             <select
-              style={FIELD_SELECT_STYLE}
+              style={getSelectStyle(isDarkMode)}
               value={filters.criminalRecordsFound}
               onChange={(e) => set("criminalRecordsFound", e.target.value)}
             >
@@ -382,9 +386,9 @@ export function AllOrderDetails() {
           </Field>
 
           {/* Row 4 */}
-          <Field label="Ordered By">
+          <Field label="Ordered By" isDarkMode={isDarkMode}>
             <select
-              style={FIELD_SELECT_STYLE}
+              style={getSelectStyle(isDarkMode)}
               value={filters.orderedBy}
               onChange={(e) => set("orderedBy", e.target.value)}
             >
@@ -482,8 +486,8 @@ export function AllOrderDetails() {
         {searched && (
           <div
             style={{
-              background: "#FFFFFF",
-              border: "1px solid #E5E7EB",
+              background: isDarkMode ? "#1A1C21" : "#FFFFFF",
+              border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
               borderRadius: "4px",
               boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
               marginBottom: "20px",
@@ -496,8 +500,8 @@ export function AllOrderDetails() {
                 justifyContent: "space-between",
                 alignItems: "center",
                 padding: "8px 16px",
-                background: "#F5F5F5",
-                borderBottom: "1px solid #E5E7EB",
+                background: isDarkMode ? "#252830" : "#F5F5F5",
+                borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
                 borderTopLeftRadius: "4px",
                 borderTopRightRadius: "4px",
               }}
@@ -506,7 +510,7 @@ export function AllOrderDetails() {
                 style={{
                   fontSize: "14px",
                   fontWeight: 600,
-                  color: "#6B7280",
+                  color: isDarkMode ? "#F9FAFB" : "#6B7280",
 
                 }}
               >
@@ -568,20 +572,20 @@ export function AllOrderDetails() {
                         alignItems: "center",
                         justifyContent: "space-between",
                         padding: "10px 16px",
-                        borderBottom: "1px solid #E5E7EB",
-                        background: "#FFFFFF",
+                        borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
+                        background: isDarkMode ? "#1A1C21" : "#FFFFFF",
                         cursor: "pointer",
                       }}
                     >
                       {/* Left: Search ID */}
                       <div style={{ fontSize: "13px", width: "160px" }}>
                         <span style={{ color: "#9CA3AF", fontWeight: 400 }}>Search ID: </span>
-                        <span style={{ color: "#4B5563", fontWeight: 600 }}>{o.searchId}</span>
+                        <span style={{ color: isDarkMode ? "#E5E7EB" : "#4B5563", fontWeight: 600 }}>{o.searchId}</span>
                       </div>
 
                       {/* Center: Applicant name + Verification type */}
                       <div style={{ fontSize: "13px", flex: 1, textAlign: "left", paddingLeft: "20px" }}>
-                        <span style={{ color: "#4B5563", fontWeight: 600 }}>{o.applicantName}</span>
+                        <span style={{ color: isDarkMode ? "#E5E7EB" : "#4B5563", fontWeight: 600 }}>{o.applicantName}</span>
                         <span style={{ color: "#9CA3AF" }}> : {o.verificationType}</span>
                       </div>
 

@@ -6,20 +6,17 @@ import { Footer } from "../components/Footer";
 interface OrderCreationProps {
   isInvitation?: boolean;
   showInvitationBanner?: boolean;
+  isDarkMode?: boolean;
 }
 
-export function OrderCreation({ isInvitation = false, showInvitationBanner = false }: OrderCreationProps) {
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+export function OrderCreation({ isInvitation = false, showInvitationBanner = false, isDarkMode = false }: OrderCreationProps) {
+  const [selected, setSelected] = useState<string | null>(null);
   const [alaCarteSelected, setAlaCarteSelected] = useState<Set<string>>(new Set());
   const [bannerVisible, setBannerVisible] = useState(true);
   const [aLaCarteOpen, setALaCarteOpen] = useState(false);
 
   function toggle(id: string) {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+    setSelected(id);
   }
 
   function toggleAlaCarte(id: string) {
@@ -31,7 +28,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
   }
 
   function startOver() {
-    setSelected(new Set());
+    setSelected(null);
     setAlaCarteSelected(new Set());
     setBannerVisible(true);
   }
@@ -55,14 +52,14 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
         style={{
           flex: 1,
           padding: "20px",
-          background: "#F5F5F5",
+          background: "transparent",
         }}
       >
         <h1
           style={{
             fontSize: "22px",
             fontWeight: 500,
-            color: "#C70039",
+            color: isDarkMode ? "#DF2A57" : "#C70039",
             marginBottom: "24px",
           }}
         >
@@ -90,43 +87,29 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               <span>ⓘ</span>
               <span>This is an applicant invitation order.</span>
             </div>
-            <button
-              onClick={() => setBannerVisible(false)}
-              style={{
-                position: "absolute",
-                right: "12px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "#93C5FD",
-                fontSize: "18px",
-                lineHeight: 1,
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-              }}
-            >
-              ×
-            </button>
           </div>
         )}
 
         {/* Packages section */}
         <div
           style={{
-            background: "#FFFFFF",
+            background: isDarkMode ? "#252830" : "#FFFFFF",
+            border: isDarkMode ? "1px solid #333333" : "none",
+            borderRadius: "4px",
+            overflow: "hidden",
           }}
         >
           {/* PACKAGES header bar */}
           <div
             style={{
               height: "40px",
-              background: "#E5E7EB",
+              background: isDarkMode ? "#1A1C21" : "#E5E7EB",
               display: "flex",
               alignItems: "center",
               paddingLeft: "20px",
               fontSize: "14px",
               fontWeight: 500,
-              color: "#6B7280",
+              color: isDarkMode ? "#9CA3AF" : "#6B7280",
             }}
           >
             PACKAGES
@@ -138,7 +121,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               display: "grid",
               gridTemplateColumns: "1fr 1fr 1fr",
               padding: "24px 20px",
-              background: "#FFFFFF",
+              background: isDarkMode ? "#252830" : "#FFFFFF",
               alignItems: "start",
             }}
           >
@@ -147,8 +130,9 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 <PackageRow
                   key={pkg.id}
                   pkg={pkg}
-                  checked={selected.has(pkg.id)}
+                  checked={selected === pkg.id}
                   onToggle={() => toggle(pkg.id)}
+                  isDarkMode={isDarkMode}
                 />
               ))}
             </div>
@@ -157,8 +141,9 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 <PackageRow
                   key={pkg.id}
                   pkg={pkg}
-                  checked={selected.has(pkg.id)}
+                  checked={selected === pkg.id}
                   onToggle={() => toggle(pkg.id)}
+                  isDarkMode={isDarkMode}
                 />
               ))}
             </div>
@@ -167,8 +152,9 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 <PackageRow
                   key={pkg.id}
                   pkg={pkg}
-                  checked={selected.has(pkg.id)}
+                  checked={selected === pkg.id}
                   onToggle={() => toggle(pkg.id)}
+                  isDarkMode={isDarkMode}
                 />
               ))}
             </div>
@@ -179,7 +165,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             onClick={() => setALaCarteOpen((p) => !p)}
             style={{
               height: "40px",
-              background: "#E5E7EB",
+              background: isDarkMode ? "#1A1C21" : "#E5E7EB",
               display: "flex",
               alignItems: "center",
               paddingLeft: "20px",
@@ -189,7 +175,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
           >
             <span
               style={{
-                color: "#C70039",
+                color: isDarkMode ? "#DF2A57" : "#C70039",
                 fontSize: "14px",
                 fontWeight: 500,
                 marginRight: "6px",
@@ -199,7 +185,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             </span>
             <span
               style={{
-                color: "#6B7280",
+                color: isDarkMode ? "#9CA3AF" : "#6B7280",
                 fontSize: "14px",
                 fontWeight: 500,
               }}
@@ -214,9 +200,10 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr 1fr",
-                padding: "12px 16px",
-                gap: "8px 0",
-                borderTop: "1px solid #E5E7EB",
+                padding: "24px 20px",
+                gap: "16px",
+                background: isDarkMode ? "#252830" : "#FFFFFF",
+                borderTop: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
               }}
             >
               {ALA_CARTE_SEARCHES.map((item) => (
@@ -228,7 +215,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     gap: "8px",
                     cursor: "pointer",
                     fontSize: "14px",
-                    color: "#555555",
+                    color: isDarkMode ? "#E5E7EB" : "#555555",
                     userSelect: "none",
                   }}
                 >
@@ -265,11 +252,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             gap: "8px",
             height: "40px",
             padding: "0 20px",
-            background: "#F3F4F6",
-            border: "none",
+            background: isDarkMode ? "#252830" : "#F3F4F6",
+            border: isDarkMode ? "1px solid #333333" : "none",
             borderRadius: "4px",
             fontSize: "14px",
-            color: "#4B5563",
+            color: isDarkMode ? "#9CA3AF" : "#4B5563",
             cursor: "pointer",
             fontWeight: 500,
           }}
@@ -309,10 +296,12 @@ function PackageRow({
   pkg,
   checked,
   onToggle,
+  isDarkMode,
 }: {
   pkg: { id: string; name: string; whatsIncluded: string };
   checked: boolean;
   onToggle: () => void;
+  isDarkMode?: boolean;
 }) {
   return (
     <label
@@ -322,7 +311,7 @@ function PackageRow({
         gap: "8px",
         cursor: "pointer",
         userSelect: "none",
-        color: "#4B5563",
+        color: isDarkMode ? "#E5E7EB" : "#4B5563",
       }}
     >
       <input

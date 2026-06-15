@@ -2,7 +2,9 @@ import { useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, ArrowUpDown } from "lucide-react";
 import { Footer } from "../components/Footer";
 
-interface DrugScreen {
+type TabKey = "Pending Drug Screens" | "Completed Drug Screens";
+
+interface PendingDrugScreen {
   orderId: string;
   applicant: string;
   search: string;
@@ -12,18 +14,46 @@ interface DrugScreen {
   findLabs: string;
 }
 
-export function DrugScreening() {
-  const [activeTab, setActiveTab] = useState<"Pending Drug Screens" | "Completed Drug Screens">("Pending Drug Screens");
+interface CompletedDrugScreen {
+  orderId: string;
+  applicant: string;
+  search: string;
+  orderDate: string;
+  closeDate: string;
+}
+
+const PENDING_COLUMNS: { label: string; field: keyof PendingDrugScreen }[] = [
+  { label: "Order ID", field: "orderId" },
+  { label: "Applicant", field: "applicant" },
+  { label: "Search", field: "search" },
+  { label: "Order Date", field: "orderDate" },
+  { label: "Reg. ID", field: "regId" },
+  { label: "Status", field: "status" },
+  { label: "Find Labs", field: "findLabs" },
+];
+
+const COMPLETED_COLUMNS: { label: string; field: keyof CompletedDrugScreen }[] = [
+  { label: "Order ID", field: "orderId" },
+  { label: "Applicant", field: "applicant" },
+  { label: "Search", field: "search" },
+  { label: "Order Date", field: "orderDate" },
+  { label: "Close Date", field: "closeDate" },
+];
+
+export function DrugScreening({ isDarkMode = false }: { isDarkMode?: boolean }) {
+  const [activeTab, setActiveTab] = useState<TabKey>("Pending Drug Screens");
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
-  const [drugScreens] = useState<DrugScreen[]>([]); // Initially empty to match screenshot
-
-  // Sorting state
-  const [sortField, setSortField] = useState<keyof DrugScreen | null>(null);
+  const [pendingScreens] = useState<PendingDrugScreen[]>([]);
+  const [completedScreens] = useState<CompletedDrugScreen[]>([]);
+  const [sortField, setSortField] = useState<string | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
 
-  const handleSort = (field: keyof DrugScreen) => {
+  const columns = activeTab === "Pending Drug Screens" ? PENDING_COLUMNS : COMPLETED_COLUMNS;
+  const rawData = activeTab === "Pending Drug Screens" ? pendingScreens : completedScreens;
+
+  const handleSort = (field: string) => {
     if (sortField === field) {
       setSortAsc(!sortAsc);
     } else {
@@ -32,28 +62,20 @@ export function DrugScreening() {
     }
   };
 
-  // Filter and sort logic
   const processedScreens = useMemo(() => {
-    let result = [...drugScreens];
+    let result = [...rawData] as Record<string, string>[];
 
-    // Filter by Search Query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (a) =>
-          a.orderId.toLowerCase().includes(query) ||
-          a.applicant.toLowerCase().includes(query) ||
-          a.search.toLowerCase().includes(query) ||
-          a.orderDate.toLowerCase().includes(query) ||
-          a.status.toLowerCase().includes(query)
+      result = result.filter((row) =>
+        Object.values(row).some((val) => val.toLowerCase().includes(query))
       );
     }
 
-    // Sort
     if (sortField) {
       result = [...result].sort((a, b) => {
-        const valA = a[sortField];
-        const valB = b[sortField];
+        const valA = a[sortField] ?? "";
+        const valB = b[sortField] ?? "";
         if (valA < valB) return sortAsc ? -1 : 1;
         if (valA > valB) return sortAsc ? 1 : -1;
         return 0;
@@ -61,9 +83,8 @@ export function DrugScreening() {
     }
 
     return result;
-  }, [drugScreens, searchQuery, sortField, sortAsc]);
+  }, [rawData, searchQuery, sortField, sortAsc]);
 
-  // Pagination calculations
   const totalEntries = processedScreens.length;
   const totalPages = Math.max(1, Math.ceil(totalEntries / pageSize));
   const startIndex = totalEntries === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -76,33 +97,24 @@ export function DrugScreening() {
   return (
     <div
       className="flex-1 flex flex-col min-h-0"
-      style={{
-        background: "#F6F6F6",
-      }}
+      style={{ background: isDarkMode ? "#252830" : "#F6F6F6" }}
     >
-      <div
-        className="flex-1 p-6"
-        style={{
-          overflowY: "auto",
-        }}
-      >
-        {/* Page Title */}
+      <div className="flex-1 p-6" style={{ overflowY: "auto" }}>
         <h1
           style={{
             fontSize: "20px",
             fontWeight: 500,
-            color: "rgb(199, 0, 57)",
+            color: isDarkMode ? "#DF2A57" : "rgb(199, 0, 57)",
             marginBottom: "20px",
           }}
         >
           Drug Screen Dashboard
         </h1>
 
-        {/* Tab Navigation */}
         <div
           style={{
             display: "flex",
-            borderBottom: "1px solid #E0E0E0",
+            borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #E0E0E0",
             marginBottom: "20px",
           }}
         >
@@ -114,6 +126,8 @@ export function DrugScreening() {
                 onClick={() => {
                   setActiveTab(tab);
                   setPage(1);
+                  setSortField(null);
+                  setSearchQuery("");
                 }}
                 style={{
                   background: "none",
@@ -122,7 +136,7 @@ export function DrugScreening() {
                   padding: "8px 16px",
                   fontSize: "13px",
                   fontWeight: isActive ? 600 : 400,
-                  color: isActive ? "#333333" : "#777777",
+                  color: isActive ? (isDarkMode ? "#E5E7EB" : "#333333") : (isDarkMode ? "#9CA3AF" : "#777777"),
                   cursor: "pointer",
                   transition: "all 0.15s ease",
                   marginBottom: "-1px",
@@ -131,7 +145,7 @@ export function DrugScreening() {
                   if (!isActive) e.currentTarget.style.color = "rgb(199, 0, 57)";
                 }}
                 onMouseLeave={(e) => {
-                  if (!isActive) e.currentTarget.style.color = "#777777";
+                  if (!isActive) e.currentTarget.style.color = isDarkMode ? "#9CA3AF" : "#777777";
                 }}
               >
                 {tab}
@@ -140,12 +154,11 @@ export function DrugScreening() {
           })}
         </div>
 
-        {/* Tab Content Title */}
         <p
           style={{
             fontSize: "14px",
             fontWeight: 500,
-            color: "#555555",
+            color: isDarkMode ? "#E5E7EB" : "#555555",
             marginBottom: "16px",
             marginTop: "0",
           }}
@@ -153,18 +166,16 @@ export function DrugScreening() {
           {activeTab}
         </p>
 
-        {/* Table Container Card */}
         <div
           style={{
-            background: "#FFFFFF",
-            border: "1px solid #E5E7EB",
+            background: isDarkMode ? "#1A1C21" : "#FFFFFF",
+            border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
             borderRadius: "4px",
             boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
             overflow: "hidden",
             marginBottom: "20px",
           }}
         >
-          {/* Toolbar */}
           <div
             style={{
               display: "flex",
@@ -175,8 +186,7 @@ export function DrugScreening() {
               gap: "12px",
             }}
           >
-            {/* Page Size Selector */}
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#555555" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: isDarkMode ? "#9CA3AF" : "#555555" }}>
               <select
                 value={pageSize}
                 onChange={(e) => {
@@ -184,12 +194,13 @@ export function DrugScreening() {
                   setPage(1);
                 }}
                 style={{
-                  border: "1px solid #D1D5DB",
+                  border: isDarkMode ? "1px solid #333333" : "1px solid #D1D5DB",
                   borderRadius: "3px",
                   padding: "3px 6px",
                   fontSize: "12px",
                   outline: "none",
-                  background: "#FFFFFF",
+                  background: isDarkMode ? "#252830" : "#FFFFFF",
+                  color: isDarkMode ? "#E5E7EB" : "#333333",
                   cursor: "pointer",
                 }}
               >
@@ -201,13 +212,12 @@ export function DrugScreening() {
               <span>entries per page</span>
             </div>
 
-            {/* Search Input */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                background: "#F9FAFB",
-                border: "1px solid #D1D5DB",
+                background: isDarkMode ? "#252830" : "#F9FAFB",
+                border: isDarkMode ? "1px solid #333333" : "1px solid #D1D5DB",
                 borderRadius: "3px",
                 padding: "0 8px",
                 height: "28px",
@@ -228,14 +238,13 @@ export function DrugScreening() {
                   background: "transparent",
                   outline: "none",
                   fontSize: "12px",
-                  color: "#333333",
+                  color: isDarkMode ? "#E5E7EB" : "#333333",
                   width: "100%",
                 }}
               />
             </div>
           </div>
 
-          {/* Table */}
           <div style={{ overflowX: "auto" }}>
             <table
               style={{
@@ -247,49 +256,39 @@ export function DrugScreening() {
               <thead>
                 <tr
                   style={{
-                    background: "#F9FAFB",
-                    borderTop: "1px solid #E5E7EB",
-                    borderBottom: "1px solid #E5E7EB",
+                    background: isDarkMode ? "#2A2D34" : "#F9FAFB",
+                    borderTop: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
+                    borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
                   }}
                 >
-                  {[
-                    { label: "Order ID", field: "orderId" as keyof DrugScreen, sortable: true },
-                    { label: "Applicant", field: "applicant" as keyof DrugScreen, sortable: true },
-                    { label: "Search", field: "search" as keyof DrugScreen, sortable: true },
-                    { label: "Order Date", field: "orderDate" as keyof DrugScreen, sortable: true },
-                    { label: "Reg. ID", field: "regId" as keyof DrugScreen, sortable: true },
-                    { label: "Status", field: "status" as keyof DrugScreen, sortable: true },
-                    { label: "Find Labs", field: "findLabs" as keyof DrugScreen, sortable: true },
-                  ].map((col, idx) => (
+                  {columns.map((col, idx) => (
                     <th
-                      key={idx}
-                      onClick={() => col.sortable && col.field && handleSort(col.field)}
+                      key={col.field}
+                      onClick={() => handleSort(col.field)}
                       style={{
                         padding: "10px 14px",
                         fontSize: "11px",
                         fontWeight: 600,
-                        color: "#555555",
-                        cursor: col.sortable ? "pointer" : "default",
-                        borderRight: idx < 6 ? "1px solid #E5E7EB" : "none",
+                        color: isDarkMode ? "#9CA3AF" : "#555555",
+                        cursor: "pointer",
+                        borderRight: idx < columns.length - 1 ? (isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB") : "none",
                         userSelect: "none",
                       }}
                       onMouseEnter={(e) => {
-                         if (col.sortable) e.currentTarget.style.background = "#F3F4F6";
+                        e.currentTarget.style.background = isDarkMode ? "#333333" : "#F3F4F6";
                       }}
                       onMouseLeave={(e) => {
-                         if (col.sortable) e.currentTarget.style.background = "transparent";
+                        e.currentTarget.style.background = "transparent";
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px" }}>
                         <span>{col.label}</span>
-                        {col.sortable && (
-                          <ArrowUpDown
-                            size={11}
-                            style={{
-                              color: sortField === col.field ? "rgb(199, 0, 57)" : "#A0A0A0",
-                            }}
-                          />
-                        )}
+                        <ArrowUpDown
+                          size={11}
+                          style={{
+                            color: sortField === col.field ? "rgb(199, 0, 57)" : "#A0A0A0",
+                          }}
+                        />
                       </div>
                     </th>
                   ))}
@@ -299,13 +298,13 @@ export function DrugScreening() {
                 {paginatedScreens.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={columns.length}
                       style={{
                         padding: "24px 16px",
                         textAlign: "center",
                         fontSize: "12px",
                         color: "#8A8A8A",
-                        background: "#FFFFFF",
+                        background: isDarkMode ? "#1A1C21" : "#FFFFFF",
                       }}
                     >
                       No records found
@@ -316,34 +315,28 @@ export function DrugScreening() {
                     <tr
                       key={idx}
                       style={{
-                        background: idx % 2 === 0 ? "#FFFFFF" : "#FAFAFA",
-                        borderBottom: "1px solid #F3F4F6",
+                        background: idx % 2 === 0 ? (isDarkMode ? "#1A1C21" : "#FFFFFF") : (isDarkMode ? "#252830" : "#FAFAFA"),
+                        borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #F3F4F6",
                         transition: "background 0.15s ease",
                       }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = "#F5F8FC")}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = idx % 2 === 0 ? "#FFFFFF" : "#FAFAFA")}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = isDarkMode ? "#2A2D34" : "#F5F8FC")}
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = idx % 2 === 0 ? (isDarkMode ? "#1A1C21" : "#FFFFFF") : (isDarkMode ? "#252830" : "#FAFAFA"))
+                      }
                     >
-                      <td style={{ padding: "10px 14px", fontSize: "12px", color: "rgb(199, 0, 57)", fontWeight: 500 }}>
-                        {screen.orderId}
-                      </td>
-                      <td style={{ padding: "10px 14px", fontSize: "12px", color: "#333333", fontWeight: 500 }}>
-                        {screen.applicant}
-                      </td>
-                      <td style={{ padding: "10px 14px", fontSize: "12px", color: "#555555" }}>
-                        {screen.search}
-                      </td>
-                      <td style={{ padding: "10px 14px", fontSize: "12px", color: "#555555" }}>
-                        {screen.orderDate}
-                      </td>
-                      <td style={{ padding: "10px 14px", fontSize: "12px", color: "#555555" }}>
-                        {screen.regId}
-                      </td>
-                      <td style={{ padding: "10px 14px", fontSize: "12px", color: "#555555" }}>
-                        {screen.status}
-                      </td>
-                      <td style={{ padding: "10px 14px", fontSize: "12px", color: "#666666" }}>
-                        {screen.findLabs}
-                      </td>
+                      {columns.map((col) => (
+                        <td
+                          key={col.field}
+                          style={{
+                            padding: "10px 14px",
+                            fontSize: "12px",
+                            color: col.field === "orderId" ? "rgb(199, 0, 57)" : isDarkMode ? "#D1D5DB" : "#555555",
+                            fontWeight: col.field === "orderId" || col.field === "applicant" ? 500 : 400,
+                          }}
+                        >
+                          {screen[col.field]}
+                        </td>
+                      ))}
                     </tr>
                   ))
                 )}
@@ -351,33 +344,29 @@ export function DrugScreening() {
             </table>
           </div>
 
-          {/* Footer / Pagination Controls */}
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
               padding: "12px 16px",
-              borderTop: "1px solid #E5E7EB",
-              background: "#FFFFFF",
+              borderTop: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
+              background: isDarkMode ? "#1A1C21" : "#FFFFFF",
               flexWrap: "wrap",
               gap: "12px",
             }}
           >
-            {/* Showing entries status */}
-            <span style={{ fontSize: "12px", color: "#777777" }}>
+            <span style={{ fontSize: "12px", color: isDarkMode ? "#9CA3AF" : "#777777" }}>
               Showing {startIndex} to {endIndex} of {totalEntries} entries
             </span>
 
-            {/* Pagination buttons */}
             <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
-              {/* First Page button */}
               <button
                 onClick={() => setPage(1)}
                 disabled={page === 1}
                 style={{
                   background: "none",
-                  border: "1px solid #E5E7EB",
+                  border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
                   padding: "4px 6px",
                   cursor: page === 1 ? "not-allowed" : "pointer",
                   opacity: page === 1 ? 0.35 : 1,
@@ -389,13 +378,12 @@ export function DrugScreening() {
                 <ChevronsLeft size={12} style={{ color: "#777777" }} />
               </button>
 
-              {/* Prev Page button */}
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
                 style={{
                   background: "none",
-                  border: "1px solid #E5E7EB",
+                  border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
                   borderLeft: "none",
                   padding: "4px 6px",
                   cursor: page === 1 ? "not-allowed" : "pointer",
@@ -407,48 +395,16 @@ export function DrugScreening() {
                 <ChevronLeft size={12} style={{ color: "#777777" }} />
               </button>
 
-              {/* Page Number Button */}
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
-                if (totalPages > 5 && Math.abs(p - page) > 1 && p !== 1 && p !== totalPages) {
-                  if (p === 2 || p === totalPages - 1) {
-                    return <span key={p} style={{ padding: "2px 6px", fontSize: "11px", color: "#9CA3AF" }}>...</span>;
-                  }
-                  return null;
-                }
-                const isCurrent = page === p;
-                return (
-                  <button
-                    key={p}
-                    onClick={() => setPage(p)}
-                    style={{
-                      background: isCurrent ? "rgb(199, 0, 57)" : "none",
-                      border: "1px solid #E5E7EB",
-                      borderLeft: "none",
-                      color: isCurrent ? "#FFFFFF" : "#777777",
-                      padding: "4px 8px",
-                      fontSize: "12px",
-                      fontWeight: isCurrent ? "600" : "400",
-                      cursor: "pointer",
-                      minWidth: "26px",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    {p}
-                  </button>
-                );
-              })}
-
-              {/* Next Page button */}
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
+                disabled={page === totalPages || totalEntries === 0}
                 style={{
                   background: "none",
-                  border: "1px solid #E5E7EB",
+                  border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
                   borderLeft: "none",
                   padding: "4px 6px",
-                  cursor: page === totalPages ? "not-allowed" : "pointer",
-                  opacity: page === totalPages ? 0.35 : 1,
+                  cursor: page === totalPages || totalEntries === 0 ? "not-allowed" : "pointer",
+                  opacity: page === totalPages || totalEntries === 0 ? 0.35 : 1,
                   display: "flex",
                   alignItems: "center",
                 }}
@@ -456,17 +412,16 @@ export function DrugScreening() {
                 <ChevronRight size={12} style={{ color: "#777777" }} />
               </button>
 
-              {/* Last Page button */}
               <button
                 onClick={() => setPage(totalPages)}
-                disabled={page === totalPages}
+                disabled={page === totalPages || totalEntries === 0}
                 style={{
                   background: "none",
-                  border: "1px solid #E5E7EB",
+                  border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
                   borderLeft: "none",
                   padding: "4px 6px",
-                  cursor: page === totalPages ? "not-allowed" : "pointer",
-                  opacity: page === totalPages ? 0.35 : 1,
+                  cursor: page === totalPages || totalEntries === 0 ? "not-allowed" : "pointer",
+                  opacity: page === totalPages || totalEntries === 0 ? 0.35 : 1,
                   display: "flex",
                   alignItems: "center",
                   borderRadius: "0 3px 3px 0",

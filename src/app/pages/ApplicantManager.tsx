@@ -11,7 +11,7 @@ interface Applicant {
   emailActivity: string;
 }
 
-export function ApplicantManager() {
+export function ApplicantManager({ isDarkMode = false }: { isDarkMode?: boolean }) {
   const [activeTab, setActiveTab] = useState<"Active" | "Complete" | "Expired/Other">("Active");
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
@@ -78,7 +78,7 @@ export function ApplicantManager() {
       className="flex-1 flex flex-col min-h-0"
       style={{
 
-        background: "#F6F6F6",
+        background: isDarkMode ? "#252830" : "#F6F6F6",
       }}
     >
       <div
@@ -92,91 +92,92 @@ export function ApplicantManager() {
           style={{
             fontSize: "20px",
             fontWeight: 500,
-            color: "rgb(199, 0, 57)",
+            color: isDarkMode ? "#DF2A57" : "rgb(199, 0, 57)",
             marginBottom: "20px",
           }}
         >
           Applicant Manager
         </h1>
 
-        {/* Tab Navigation */}
-        <div
-          style={{
-            display: "flex",
-            borderBottom: "1px solid #E0E0E0",
-            marginBottom: "16px",
-          }}
-        >
-          {(["Active", "Complete", "Expired/Other"] as const).map((tab) => {
-            const isActive = activeTab === tab;
-            return (
-              <button
-                key={tab}
-                onClick={() => {
-                  setActiveTab(tab);
-                  setPage(1);
-                }}
-                style={{
-                  background: "none",
-                  border: "none",
-                  borderBottom: isActive ? "2px solid rgb(199, 0, 57)" : "2px solid transparent",
-                  padding: "8px 16px",
-                  fontSize: "13px",
-                  fontWeight: isActive ? 600 : 400,
-                  color: isActive ? "#333333" : "#777777",
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                  marginBottom: "-1px",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) e.currentTarget.style.color = "rgb(199, 0, 57)";
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) e.currentTarget.style.color = "#777777";
-                }}
-              >
-                {tab}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Subtitle Description */}
-        <p
-          style={{
-            fontSize: "12px",
-            color: "#8A8A8A",
-            marginBottom: "20px",
-            marginTop: "0",
-          }}
-        >
-          Manage your applicants efficiently with status-based tabs.
-        </p>
-
         {/* Table Container Card */}
         <div
           style={{
-            background: "#FFFFFF",
-            border: "1px solid #E5E7EB",
+            background: isDarkMode ? "#1A1C21" : "#FFFFFF",
+            border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
             borderRadius: "4px",
             boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
             overflow: "hidden",
             marginBottom: "20px",
           }}
         >
+          {/* Tab Navigation */}
+          <div
+            style={{
+              display: "flex",
+              borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
+              padding: "0 20px",
+            }}
+          >
+            {(["Active", "Complete", "Expired/Other"] as const).map((tab) => {
+              const isActive = activeTab === tab;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => {
+                    setActiveTab(tab);
+                    setPage(1);
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    borderBottom: isActive ? "2px solid rgb(199, 0, 57)" : "2px solid transparent",
+                    padding: "16px 20px",
+                    fontSize: "14px",
+                    fontWeight: isActive ? 500 : 400,
+                    color: isActive ? (isDarkMode ? "#E5E7EB" : "#333333") : (isDarkMode ? "#9CA3AF" : "#777777"),
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                    marginBottom: "-1px",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) e.currentTarget.style.color = "rgb(199, 0, 57)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) e.currentTarget.style.color = isDarkMode ? "#9CA3AF" : "#777777";
+                  }}
+                >
+                  {tab}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Subtitle Description */}
+          <div style={{ padding: "20px 20px 0 20px" }}>
+            <p
+              style={{
+                fontSize: "13px",
+                color: isDarkMode ? "#9CA3AF" : "#8A8A8A",
+                margin: 0,
+              }}
+            >
+              Manage your applicants efficiently with status-based tabs.
+            </p>
+          </div>
+
           {/* Toolbar */}
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              padding: "12px 16px",
+              padding: "20px",
               flexWrap: "wrap",
               gap: "12px",
             }}
           >
             {/* Page Size Selector */}
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#555555" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: isDarkMode ? "#9CA3AF" : "#555555" }}>
               <select
                 value={pageSize}
                 onChange={(e) => {
@@ -184,12 +185,13 @@ export function ApplicantManager() {
                   setPage(1);
                 }}
                 style={{
-                  border: "1px solid #D1D5DB",
+                  border: isDarkMode ? "1px solid #333333" : "1px solid #D1D5DB",
                   borderRadius: "3px",
                   padding: "3px 6px",
                   fontSize: "12px",
                   outline: "none",
-                  background: "#FFFFFF",
+                  background: isDarkMode ? "#1A1C21" : "#FFFFFF",
+                  color: isDarkMode ? "#E5E7EB" : "#333333",
                   cursor: "pointer",
                 }}
               >
@@ -206,8 +208,8 @@ export function ApplicantManager() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                background: "#F9FAFB",
-                border: "1px solid #D1D5DB",
+                background: isDarkMode ? "#252830" : "#F9FAFB",
+                border: isDarkMode ? "1px solid #333333" : "1px solid #D1D5DB",
                 borderRadius: "3px",
                 padding: "0 8px",
                 height: "28px",
@@ -228,7 +230,7 @@ export function ApplicantManager() {
                   background: "transparent",
                   outline: "none",
                   fontSize: "12px",
-                  color: "#333333",
+                  color: isDarkMode ? "#E5E7EB" : "#333333",
                   width: "100%",
 
                 }}
@@ -248,9 +250,9 @@ export function ApplicantManager() {
               <thead>
                 <tr
                   style={{
-                    background: "#F9FAFB",
-                    borderTop: "1px solid #E5E7EB",
-                    borderBottom: "1px solid #E5E7EB",
+                    background: isDarkMode ? "#2A2D34" : "#F3F4F6",
+                    borderTop: isDarkMode ? "1px solid #333333" : "none",
+                    borderBottom: isDarkMode ? "1px solid #333333" : "none",
                   }}
                 >
                   {[
@@ -258,36 +260,36 @@ export function ApplicantManager() {
                     { label: "Applicant Name", field: "name" as keyof Applicant, sortable: true },
                     { label: "Email", field: "email" as keyof Applicant, sortable: true },
                     { label: "Date Created", field: "dateCreated" as keyof Applicant, sortable: true },
-                    { label: "Status", field: "status" as keyof Applicant, sortable: true },
-                    { label: "Email Activity", field: null, sortable: false },
+                    { label: "Status", field: "status" as keyof Applicant, sortable: true, hideOnComplete: true },
+                    { label: "Email Activity", field: null, sortable: false, hideOnComplete: true },
                     { label: "Actions", field: null, sortable: false },
-                  ].map((col, idx) => (
+                  ].filter(col => !(activeTab === "Complete" && col.hideOnComplete)).map((col, idx) => (
                     <th
                       key={idx}
                       onClick={() => col.sortable && col.field && handleSort(col.field)}
                       style={{
-                        padding: "10px 14px",
-                        fontSize: "11px",
+                        padding: "14px 20px",
+                        fontSize: "12px",
                         fontWeight: 600,
-                        color: "#555555",
+                        color: isDarkMode ? "#9CA3AF" : "#555555",
                         cursor: col.sortable ? "pointer" : "default",
-                        borderRight: idx < 6 ? "1px solid #E5E7EB" : "none",
+                        borderRight: "none",
                         userSelect: "none",
                       }}
                       onMouseEnter={(e) => {
-                        if (col.sortable) e.currentTarget.style.background = "#F3F4F6";
+                        if (col.sortable) e.currentTarget.style.background = isDarkMode ? "#313641" : "#E5E7EB";
                       }}
                       onMouseLeave={(e) => {
                         if (col.sortable) e.currentTarget.style.background = "transparent";
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "8px" }}>
                         <span>{col.label}</span>
                         {col.sortable && (
                           <ArrowUpDown
-                            size={11}
+                            size={12}
                             style={{
-                              color: sortField === col.field ? "rgb(199, 0, 57)" : "#A0A0A0",
+                              color: sortField === col.field ? "rgb(199, 0, 57)" : "#D1D5DB",
                             }}
                           />
                         )}
@@ -305,8 +307,8 @@ export function ApplicantManager() {
                         padding: "16px",
                         textAlign: "center",
                         fontSize: "12px",
-                        color: "#8A8A8A",
-                        background: "#FFFFFF",
+                        color: isDarkMode ? "#9CA3AF" : "#8A8A8A",
+                        background: "transparent",
                       }}
                     >
                       No records found
@@ -317,59 +319,63 @@ export function ApplicantManager() {
                     <tr
                       key={applicant.inviteId}
                       style={{
-                        background: idx % 2 === 0 ? "#FFFFFF" : "#FAFAFA",
-                        borderBottom: "1px solid #F3F4F6",
+                        background: idx % 2 === 0 ? (isDarkMode ? "#1A1C21" : "#FFFFFF") : (isDarkMode ? "#252830" : "#FAFAFA"),
+                        borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #F3F4F6",
                         transition: "background 0.15s ease",
                       }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = "#F5F8FC")}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = idx % 2 === 0 ? "#FFFFFF" : "#FAFAFA")}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = isDarkMode ? "#313641" : "#F5F8FC")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = idx % 2 === 0 ? (isDarkMode ? "#1A1C21" : "#FFFFFF") : (isDarkMode ? "#252830" : "#FAFAFA"))}
                     >
-                      <td style={{ padding: "10px 14px", fontSize: "12px", color: "rgb(199, 0, 57)", fontWeight: 500 }}>
+                      <td style={{ padding: "10px 14px", fontSize: "12px", color: isDarkMode ? "#93C5FD" : "rgb(199, 0, 57)", fontWeight: 500 }}>
                         {applicant.inviteId}
                       </td>
-                      <td style={{ padding: "10px 14px", fontSize: "12px", color: "#333333", fontWeight: 500 }}>
+                      <td style={{ padding: "10px 14px", fontSize: "12px", color: isDarkMode ? "#E5E7EB" : "#333333", fontWeight: 500 }}>
                         {applicant.name}
                       </td>
-                      <td style={{ padding: "10px 14px", fontSize: "12px", color: "#555555" }}>
+                      <td style={{ padding: "10px 14px", fontSize: "12px", color: isDarkMode ? "#9CA3AF" : "#555555" }}>
                         {applicant.email}
                       </td>
-                      <td style={{ padding: "10px 14px", fontSize: "12px", color: "#555555" }}>
+                      <td style={{ padding: "10px 14px", fontSize: "12px", color: isDarkMode ? "#9CA3AF" : "#555555" }}>
                         {applicant.dateCreated}
                       </td>
-                      <td style={{ padding: "10px 14px" }}>
-                        <span
-                          style={{
-                            display: "inline-block",
-                            padding: "2px 8px",
-                            borderRadius: "12px",
-                            fontSize: "10px",
-                            fontWeight: 600,
-                            background:
-                              applicant.status === "Complete"
-                                ? "#E6F4EA"
+                      {activeTab !== "Complete" && (
+                        <td style={{ padding: "10px 14px" }}>
+                          <span
+                            style={{
+                              display: "inline-block",
+                              padding: "2px 8px",
+                              borderRadius: "12px",
+                              fontSize: "10px",
+                              fontWeight: 600,
+                              background:
+                                applicant.status === "Complete"
+                                  ? "#E6F4EA"
+                                  : applicant.status === "Active"
+                                    ? "#E8F0FE"
+                                    : "#FCE8E6",
+                              color:
+                                applicant.status === "Complete"
+                                  ? "#137333"
+                                  : applicant.status === "Active"
+                                    ? "#1A73E8"
+                                    : "#C5221F",
+                              border: `1px solid ${applicant.status === "Complete"
+                                ? "#CEEAD6"
                                 : applicant.status === "Active"
-                                  ? "#E8F0FE"
-                                  : "#FCE8E6",
-                            color:
-                              applicant.status === "Complete"
-                                ? "#137333"
-                                : applicant.status === "Active"
-                                  ? "#1A73E8"
-                                  : "#C5221F",
-                            border: `1px solid ${applicant.status === "Complete"
-                              ? "#CEEAD6"
-                              : applicant.status === "Active"
-                                ? "#D2E3FC"
-                                : "#FAD2CF"
-                              }`,
-                          }}
-                        >
-                          {applicant.status}
-                        </span>
-                      </td>
-                      <td style={{ padding: "10px 14px", fontSize: "12px", color: "#666666" }}>
-                        {applicant.emailActivity}
-                      </td>
+                                  ? "#D2E3FC"
+                                  : "#FAD2CF"
+                                }`,
+                            }}
+                          >
+                            {applicant.status}
+                          </span>
+                        </td>
+                      )}
+                      {activeTab !== "Complete" && (
+                        <td style={{ padding: "10px 14px", fontSize: "12px", color: isDarkMode ? "#9CA3AF" : "#666666" }}>
+                          {applicant.emailActivity}
+                        </td>
+                      )}
                       <td style={{ padding: "10px 14px" }}>
                         <div style={{ display: "flex", gap: "8px" }}>
                           <button
@@ -435,36 +441,37 @@ export function ApplicantManager() {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              padding: "12px 16px",
-              borderTop: "1px solid #E5E7EB",
-              background: "#FFFFFF",
+              padding: "16px 20px",
+              borderTop: isDarkMode ? "1px solid #333333" : "1px solid #F3F4F6",
+              background: isDarkMode ? "#1A1C21" : "#FFFFFF",
               flexWrap: "wrap",
               gap: "12px",
             }}
           >
             {/* Showing entries status */}
-            <span style={{ fontSize: "12px", color: "#777777" }}>
+            <span style={{ fontSize: "13px", color: isDarkMode ? "#9CA3AF" : "#8A8A8A" }}>
               Showing {startIndex} to {endIndex} of {totalEntries} entries
             </span>
 
             {/* Pagination buttons */}
-            <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0" }}>
               {/* First Page button */}
               <button
                 onClick={() => setPage(1)}
                 disabled={page === 1}
                 style={{
-                  background: "none",
-                  border: "1px solid #E5E7EB",
-                  padding: "4px 6px",
+                  background: isDarkMode ? "#252830" : "#FFFFFF",
+                  border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
+                  padding: "6px 10px",
                   cursor: page === 1 ? "not-allowed" : "pointer",
                   opacity: page === 1 ? 0.35 : 1,
                   display: "flex",
                   alignItems: "center",
+                  color: isDarkMode ? "#9CA3AF" : "#8A8A8A",
                   borderRadius: "3px 0 0 3px",
                 }}
               >
-                <ChevronsLeft size={12} style={{ color: "#777777" }} />
+                <ChevronsLeft size={16} />
               </button>
 
               {/* Prev Page button */}
@@ -472,67 +479,37 @@ export function ApplicantManager() {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
                 style={{
-                  background: "none",
-                  border: "1px solid #E5E7EB",
+                  background: isDarkMode ? "#252830" : "#FFFFFF",
+                  border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
                   borderLeft: "none",
-                  padding: "4px 6px",
+                  padding: "6px 10px",
                   cursor: page === 1 ? "not-allowed" : "pointer",
                   opacity: page === 1 ? 0.35 : 1,
                   display: "flex",
                   alignItems: "center",
+                  color: isDarkMode ? "#9CA3AF" : "#8A8A8A",
                 }}
               >
-                <ChevronLeft size={12} style={{ color: "#777777" }} />
+                <ChevronLeft size={16} />
               </button>
-
-              {/* Page Number Button */}
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
-                // Only render pages near current page for cleaner paginator if totalPages is large
-                if (totalPages > 5 && Math.abs(p - page) > 1 && p !== 1 && p !== totalPages) {
-                  if (p === 2 || p === totalPages - 1) {
-                    return <span key={p} style={{ padding: "2px 6px", fontSize: "11px", color: "#9CA3AF" }}>...</span>;
-                  }
-                  return null;
-                }
-                const isCurrent = page === p;
-                return (
-                  <button
-                    key={p}
-                    onClick={() => setPage(p)}
-                    style={{
-                      background: isCurrent ? "rgb(199, 0, 57)" : "none",
-                      border: "1px solid #E5E7EB",
-                      borderLeft: "none",
-                      color: isCurrent ? "#FFFFFF" : "#777777",
-                      padding: "4px 8px",
-                      fontSize: "12px",
-                      fontWeight: isCurrent ? "600" : "400",
-                      cursor: "pointer",
-                      minWidth: "26px",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    {p}
-                  </button>
-                );
-              })}
 
               {/* Next Page button */}
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
                 style={{
-                  background: "none",
-                  border: "1px solid #E5E7EB",
+                  background: isDarkMode ? "#252830" : "#FFFFFF",
+                  border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
                   borderLeft: "none",
-                  padding: "4px 6px",
+                  padding: "6px 10px",
                   cursor: page === totalPages ? "not-allowed" : "pointer",
                   opacity: page === totalPages ? 0.35 : 1,
                   display: "flex",
                   alignItems: "center",
+                  color: isDarkMode ? "#9CA3AF" : "#8A8A8A",
                 }}
               >
-                <ChevronRight size={12} style={{ color: "#777777" }} />
+                <ChevronRight size={16} />
               </button>
 
               {/* Last Page button */}
@@ -540,18 +517,19 @@ export function ApplicantManager() {
                 onClick={() => setPage(totalPages)}
                 disabled={page === totalPages}
                 style={{
-                  background: "none",
-                  border: "1px solid #E5E7EB",
+                  background: isDarkMode ? "#252830" : "#FFFFFF",
+                  border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
                   borderLeft: "none",
-                  padding: "4px 6px",
+                  padding: "6px 10px",
                   cursor: page === totalPages ? "not-allowed" : "pointer",
                   opacity: page === totalPages ? 0.35 : 1,
                   display: "flex",
                   alignItems: "center",
+                  color: isDarkMode ? "#9CA3AF" : "#8A8A8A",
                   borderRadius: "0 3px 3px 0",
                 }}
               >
-                <ChevronsRight size={12} style={{ color: "#777777" }} />
+                <ChevronsRight size={16} />
               </button>
             </div>
           </div>
