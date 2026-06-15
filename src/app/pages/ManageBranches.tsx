@@ -56,6 +56,7 @@ const MOCK_USERS = [
 ];
 
 export function ManageBranches({ isDarkMode = false }: { isDarkMode?: boolean }) {
+  const [branches, setBranches] = useState(MOCK_BRANCHES);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [actionMenuOpen, setActionMenuOpen] = useState<number | null>(null);
 
@@ -64,6 +65,7 @@ export function ManageBranches({ isDarkMode = false }: { isDarkMode?: boolean })
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<any>(null); // null means adding new
+  const [branchToDelete, setBranchToDelete] = useState<typeof MOCK_BRANCHES[number] | null>(null);
 
   const actionMenuRef = useRef<HTMLDivElement>(null);
 
@@ -100,9 +102,28 @@ export function ManageBranches({ isDarkMode = false }: { isDarkMode?: boolean })
     setActionMenuOpen(null);
   };
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = (branch: typeof MOCK_BRANCHES[number]) => {
+    setBranchToDelete(branch);
     setIsDeleteModalOpen(true);
     setActionMenuOpen(null);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!branchToDelete) return;
+
+    setBranches((prev) => prev.filter((b) => b.id !== branchToDelete.id));
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      next.delete(branchToDelete.id);
+      return next;
+    });
+    setIsDeleteModalOpen(false);
+    setBranchToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setBranchToDelete(null);
   };
 
   return (
@@ -228,7 +249,7 @@ export function ManageBranches({ isDarkMode = false }: { isDarkMode?: boolean })
                 </tr>
               </thead>
               <tbody>
-                {MOCK_BRANCHES.map((branch) => {
+                {branches.map((branch) => {
                   const isExpanded = expandedRows.has(branch.id);
                   return (
                     <React.Fragment key={branch.id}>
@@ -320,7 +341,7 @@ export function ManageBranches({ isDarkMode = false }: { isDarkMode?: boolean })
                                       <Edit2 size={14} /> Edit
                                     </button>
                                     <button
-                                      onClick={handleDeleteClick}
+                                      onClick={() => handleDeleteClick(branch)}
                                       style={getDropdownItemStyle(isDarkMode)}
                                       onMouseEnter={(e) => e.currentTarget.style.background = isDarkMode ? "#333" : "#F3F4F6"}
                                       onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
@@ -343,7 +364,11 @@ export function ManageBranches({ isDarkMode = false }: { isDarkMode?: boolean })
 
           {/* Footer / Pagination */}
           <div style={{ padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", color: isDarkMode ? "#9CA3AF" : "#777777", fontSize: "13px" }}>
-            <span>Showing 1 to 3 of 3 entries</span>
+            <span>
+              {branches.length === 0
+                ? "Showing 0 to 0 of 0 entries"
+                : `Showing 1 to ${branches.length} of ${branches.length} entries`}
+            </span>
             <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
               <button style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "not-allowed" }}>«</button>
               <button style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "not-allowed" }}>‹</button>
@@ -547,12 +572,14 @@ export function ManageBranches({ isDarkMode = false }: { isDarkMode?: boolean })
                 margin: "0 0 32px 0",
               }}
             >
-              You won't be able to revert this!
+              {branchToDelete
+                ? `Delete "${branchToDelete.name}"? You won't be able to revert this!`
+                : "You won't be able to revert this!"}
             </p>
 
             <div style={{ display: "flex", gap: "12px" }}>
               <button
-                onClick={() => setIsDeleteModalOpen(false)}
+                onClick={handleConfirmDelete}
                 style={{
                   background: "#C70039",
                   color: "#FFFFFF",
@@ -567,7 +594,7 @@ export function ManageBranches({ isDarkMode = false }: { isDarkMode?: boolean })
                 Yes, delete it!
               </button>
               <button
-                onClick={() => setIsDeleteModalOpen(false)}
+                onClick={handleCancelDelete}
                 style={{
                   background: "#4A148C",
                   color: "#FFFFFF",
