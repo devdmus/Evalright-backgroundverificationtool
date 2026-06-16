@@ -3,7 +3,9 @@
   "private": true,
   "scripts": {
     "dev": "npm run dev --prefix client/frontend",
+    "dev:admin": "npm run dev --prefix admin/frontend",
     "build": "npm run build --prefix client/frontend",
-    "install-all": "npm install --prefix client/frontend"
+    "build:admin": "npm run build --prefix admin/frontend",
+    "install-all": "npm install --prefix client/frontend && npm install --prefix admin/frontend"
   }
 }
