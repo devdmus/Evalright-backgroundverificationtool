@@ -12,10 +12,10 @@ interface HeaderProps {
   isAnnouncementsActive?: boolean;
   onAnalyticsClick?: () => void;
   isActivityReportActive?: boolean;
-  isActivityReportActive?: boolean;
   isDarkMode?: boolean;
   onThemeToggle?: () => void;
   onNavigate?: (page: string) => void;
+  onLogout?: () => void;
 }
 
 export function Header({
@@ -28,6 +28,7 @@ export function Header({
   isDarkMode,
   onThemeToggle,
   onNavigate,
+  onLogout,
 }: HeaderProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -252,7 +253,10 @@ export function Header({
             </div>
 
             <div
-              onClick={() => setShowDropdown(false)}
+              onClick={() => {
+                setShowDropdown(false);
+                onLogout?.();
+              }}
               style={{
                 display: "flex",
                 alignItems: "center",

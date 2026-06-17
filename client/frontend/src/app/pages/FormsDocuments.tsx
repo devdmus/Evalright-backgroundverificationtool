@@ -125,7 +125,7 @@ export function FormsDocuments({ isDarkMode = false }: { isDarkMode?: boolean })
           ))}
         </div>
       </div>
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

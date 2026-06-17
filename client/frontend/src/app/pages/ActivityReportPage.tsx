@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Download, Calendar } from "lucide-react";
+import { Download } from "lucide-react";
 import { Footer } from "../components/Footer";
+import { getPageTheme } from "../theme/pageTheme";
 
 const TABS = [
   {
@@ -42,53 +43,20 @@ const TABS = [
 
 type TabKey = (typeof TABS)[number]["key"];
 
-// ── Component ─────────────────────────────────────────────────────────────────
-export function ActivityReportPage() {
+export function ActivityReportPage({ isDarkMode = false }: { isDarkMode?: boolean }) {
   const [activeTab, setActiveTab] = useState<TabKey>("ytd");
-
-  const current = TABS.find((t) => t.key === activeTab)!;
+  const t = getPageTheme(isDarkMode);
+  const current = TABS.find((tab) => tab.key === activeTab)!;
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
-      <div
-        style={{
-          flex: 1,
-          padding: "20px 24px",
-          background: "#F5F5F5",
-          overflowY: "auto",
-        }}
-      >
-        {/* Page title */}
-        <h1
-          style={{
-            fontSize: "20px",
-            fontWeight: 500,
-            color: "#B7042C",
-            marginBottom: "16px",
-          }}
-        >
+      <div style={{ flex: 1, padding: "20px 24px", background: t.contentBg, overflowY: "auto" }}>
+        <h1 style={{ fontSize: "20px", fontWeight: 500, color: t.titleAlt, marginBottom: "16px" }}>
           {current.pageTitle}
         </h1>
 
-        {/* ── Tab bar + Download button ──────────────────────────────── */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "12px",
-            marginBottom: "12px", // Added gap between tabs and red header bar
-          }}
-        >
-          {/* Tabs strip */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "stretch",
-              background: "#f4f4f4",
-              padding: "0",
-            }}
-          >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "12px" }}>
+          <div style={{ display: "flex", alignItems: "stretch", background: t.tabInactiveBg, padding: 0 }}>
             {TABS.map((tab) => {
               const isActive = tab.key === activeTab;
               return (
@@ -99,25 +67,20 @@ export function ActivityReportPage() {
                     padding: "10px 20px",
                     fontSize: "14px",
                     fontWeight: 400,
-                    color: "#333333",
-                    background: isActive ? "#d4d4d4" : "transparent",
+                    color: t.text,
+                    background: isActive ? t.tabActiveBg : "transparent",
                     border: "none",
-                    borderRadius: "0", // No border radius
+                    borderRadius: 0,
                     cursor: "pointer",
                     whiteSpace: "nowrap",
                     letterSpacing: "0.01em",
                     transition: "background 0.15s, color 0.15s",
                   }}
                   onMouseEnter={(e) => {
-                    if (!isActive) {
-                      (e.currentTarget as HTMLButtonElement).style.background =
-                        "#ebebeb";
-                    }
+                    if (!isActive) e.currentTarget.style.background = isDarkMode ? "#333333" : "#ebebeb";
                   }}
                   onMouseLeave={(e) => {
-                    if (!isActive) {
-                      (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-                    }
+                    if (!isActive) e.currentTarget.style.background = "transparent";
                   }}
                 >
                   {tab.label}
@@ -126,7 +89,6 @@ export function ActivityReportPage() {
             })}
           </div>
 
-          {/* Download CSV Report button */}
           <button
             style={{
               display: "flex",
@@ -142,47 +104,40 @@ export function ActivityReportPage() {
               cursor: "pointer",
               whiteSpace: "nowrap",
               flexShrink: 0,
-              transition: "background 0.15s",
             }}
-            onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLButtonElement).style.background = "#2E2060")
-            }
-            onMouseLeave={(e) =>
-              ((e.currentTarget as HTMLButtonElement).style.background = "#3D2B7A")
-            }
           >
             <Download size={15} strokeWidth={2.2} />
             Download CSV Report
           </button>
         </div>
 
-        {/* ── Optional Filter Box (Average Search Time) ──────────────── */}
         {activeTab === "avg-search" && (
           <div
             style={{
-              background: "#FFFFFF",
-              border: "1px solid #E5E7EB",
+              background: t.cardBg,
+              border: t.cardBorder,
               borderRadius: "4px",
               padding: "20px",
               display: "flex",
               alignItems: "flex-end",
               gap: "24px",
               marginBottom: "16px",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+              boxShadow: t.cardShadow,
             }}
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <label style={{ fontSize: "14px", color: "#6B7280" }}>Start Date</label>
-              <div style={{ width: "180px" }}>
+            {["Start Date", "End Date"].map((label) => (
+              <div key={label} style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <label style={{ fontSize: "14px", color: t.textMuted }}>{label}</label>
                 <input
                   type="date"
                   style={{
-                    width: "100%",
+                    width: "180px",
                     padding: "9px 12px",
-                    border: "1px solid #E5E7EB",
+                    border: t.inputBorder,
                     borderRadius: "4px",
                     fontSize: "14px",
-                    color: "#333333",
+                    color: t.text,
+                    background: t.inputBg,
                     outline: "none",
                     boxSizing: "border-box",
                     fontFamily: "inherit",
@@ -190,28 +145,7 @@ export function ActivityReportPage() {
                   }}
                 />
               </div>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <label style={{ fontSize: "14px", color: "#6B7280" }}>End Date</label>
-              <div style={{ width: "180px" }}>
-                <input
-                  type="date"
-                  style={{
-                    width: "100%",
-                    padding: "9px 12px",
-                    border: "1px solid #E5E7EB",
-                    borderRadius: "4px",
-                    fontSize: "14px",
-                    color: "#333333",
-                    outline: "none",
-                    boxSizing: "border-box",
-                    fontFamily: "inherit",
-                    cursor: "pointer",
-                  }}
-                />
-              </div>
-            </div>
+            ))}
 
             <button
               style={{
@@ -224,10 +158,7 @@ export function ActivityReportPage() {
                 fontWeight: 500,
                 cursor: "pointer",
                 height: "40px",
-                transition: "background 0.15s",
               }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "#900322")}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "#B7042C")}
             >
               Apply Filter
             </button>
@@ -235,7 +166,7 @@ export function ActivityReportPage() {
             <button
               style={{
                 padding: "10px 24px",
-                background: "#FFFFFF",
+                background: t.inputBg,
                 color: "#4A3CA0",
                 border: "1px solid #4A3CA0",
                 borderRadius: "4px",
@@ -243,17 +174,13 @@ export function ActivityReportPage() {
                 fontWeight: 500,
                 cursor: "pointer",
                 height: "40px",
-                transition: "background 0.15s",
               }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "#F4F2FF")}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "#FFFFFF")}
             >
               Clear Filters
             </button>
           </div>
         )}
 
-        {/* ── Dark red section header ────────────────────────────────── */}
         <div
           style={{
             background: "#B7042C",
@@ -267,11 +194,10 @@ export function ActivityReportPage() {
           {current.barTitle}
         </div>
 
-        {/* ── Content / empty state ─────────────────────────────────── */}
         <div
           style={{
-            background: "#FFFFFF",
-            border: "1px solid #E5E7EB",
+            background: t.cardBg,
+            border: t.cardBorder,
             borderTop: "none",
             minHeight: "220px",
             display: "flex",
@@ -283,12 +209,12 @@ export function ActivityReportPage() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                background: "#F4F4F4",
+                background: isDarkMode ? "#2A2D34" : "#F4F4F4",
                 padding: "12px 18px",
                 fontSize: "14px",
                 fontWeight: 600,
-                color: "#6B7280",
-                borderBottom: "1px solid #E5E7EB",
+                color: t.textMuted,
+                borderBottom: t.tableRowBorder,
               }}
             >
               <div style={{ flex: 1 }}>Search Type</div>
@@ -296,13 +222,13 @@ export function ActivityReportPage() {
             </div>
           ) : (
             <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
-              <span style={{ fontSize: "14px", color: "#6B7280" }}>{current.empty}</span>
+              <span style={{ fontSize: "14px", color: t.textMuted }}>{current.empty}</span>
             </div>
           )}
         </div>
       </div>
 
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }
