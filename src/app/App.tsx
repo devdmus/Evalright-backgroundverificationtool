@@ -28,6 +28,7 @@ import { ActivityReportPage } from "./pages/ActivityReportPage";
 import { AnalyticsDashboard } from "./pages/AnalyticsDashboard";
 import { HRSoftwareIntegrations } from "./pages/HRSoftwareIntegrations";
 import { DisputesList } from "./pages/DisputesList";
+import { LoginPage } from "./pages/LoginPage";
 // import { ChatWidget } from "./components/ChatWidget";
 
 const USER_NAME = "Farooq Shaik";
@@ -64,15 +65,37 @@ const PAGE_TITLES: Record<PageKey, string> = {
 };
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showLogoutBanner, setShowLogoutBanner] = useState(false);
   const [currentPage, setCurrentPage] = useState<PageKey>("home");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
+  const handleLogin = () => {
+    setShowLogoutBanner(false);
+    setIsAuthenticated(true);
+    setCurrentPage("home");
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setShowLogoutBanner(true);
+    setCurrentPage("home");
+  };
+
   // Dynamically update browser tab title
   useEffect(() => {
+    if (!isAuthenticated) {
+      document.title = "EvalRight - Login";
+      return;
+    }
     const pageLabel = PAGE_TITLES[currentPage] ?? currentPage;
     document.title = `EvalRight - ${pageLabel}`;
-  }, [currentPage]);
+  }, [currentPage, isAuthenticated]);
+
+  if (!isAuthenticated) {
+    return <LoginPage showLogoutBanner={showLogoutBanner} onLogin={handleLogin} />;
+  }
 
   function renderPage() {
     switch (currentPage) {
@@ -96,21 +119,21 @@ export default function App() {
       case "reports-orders-list":
         return <OrderList isDarkMode={isDarkMode} />;
       case "reports-draft-orders":
-        return <DraftOrderList />;
+        return <DraftOrderList isDarkMode={isDarkMode} />;
       case "reports-summary":
-        return <OrderSummaryReport />;
+        return <OrderSummaryReport isDarkMode={isDarkMode} />;
       case "reports-consents":
-        return <ElectronicConsents />;
+        return <ElectronicConsents isDarkMode={isDarkMode} />;
       case "reports-adverse-worksheets":
-        return <AdverseWorksheets />;
+        return <AdverseWorksheets isDarkMode={isDarkMode} />;
       case "reports-adverse-log":
-        return <AdverseActionLog />;
+        return <AdverseActionLog isDarkMode={isDarkMode} />;
       case "reports-analytics":
-        return <AnalyticsDashboard />;
+        return <AnalyticsDashboard isDarkMode={isDarkMode} />;
       case "reports-hr":
-        return <HRSoftwareIntegrations />;
+        return <HRSoftwareIntegrations isDarkMode={isDarkMode} />;
       case "reports-disputes":
-        return <DisputesList />;
+        return <DisputesList isDarkMode={isDarkMode} />;
       case "applicants":
         return <ApplicantManager isDarkMode={isDarkMode} />;
       case "applicant-invite-templates":
@@ -140,7 +163,7 @@ export default function App() {
       case "activity-report":
         return <ActivityReportPage isDarkMode={isDarkMode} />;
       default:
-        return <PlaceholderPage title={PAGE_TITLES[currentPage] ?? currentPage} />;
+        return <PlaceholderPage title={PAGE_TITLES[currentPage] ?? currentPage} isDarkMode={isDarkMode} />;
     }
   }
 
@@ -166,6 +189,7 @@ export default function App() {
         isDarkMode={isDarkMode}
         onThemeToggle={() => setIsDarkMode(!isDarkMode)}
         onNavigate={setCurrentPage}
+        onLogout={handleLogout}
       />
 
       {/* Body: sidebar + content */}

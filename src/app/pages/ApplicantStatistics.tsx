@@ -285,7 +285,7 @@ export function ApplicantStatistics({ isDarkMode = false }: { isDarkMode?: boole
           </button>
         </div>
       </div>
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

@@ -378,7 +378,7 @@ export function ManageBranches({ isDarkMode = false }: { isDarkMode?: boolean })
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
 
       {/* --- MODALS --- */}
       

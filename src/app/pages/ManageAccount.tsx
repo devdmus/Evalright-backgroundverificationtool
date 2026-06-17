@@ -177,7 +177,7 @@ export function ManageAccount({ isDarkMode = false }: { isDarkMode?: boolean }) 
         <div
           style={{
             display: "flex",
-            borderBottom: "1px solid #E0E0E0",
+            borderBottom: isDarkMode ? "1px solid #333333" : "1px solid #E0E0E0",
             marginBottom: "24px",
           }}
         >
@@ -641,7 +641,7 @@ export function ManageAccount({ isDarkMode = false }: { isDarkMode?: boolean }) 
         )}
       </div>
 
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
 
       {/* CSS Fade-in Animation */}
       <style>{`

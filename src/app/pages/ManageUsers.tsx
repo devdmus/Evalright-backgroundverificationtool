@@ -630,7 +630,7 @@ export function ManageUsers({ isDarkMode = false }: { isDarkMode?: boolean }) {
             </div>
           </form>
         </div>
-        <Footer />
+        <Footer isDarkMode={isDarkMode} />
       </div>
     );
   }
@@ -1058,7 +1058,7 @@ export function ManageUsers({ isDarkMode = false }: { isDarkMode?: boolean }) {
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

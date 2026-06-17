@@ -613,7 +613,7 @@ export function HomePage({ isDarkMode = false, onNavigate }: HomePageProps) {
         </div>
       </div>
 
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

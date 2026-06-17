@@ -1,6 +1,7 @@
 ﻿import { useState, useRef, useEffect } from "react";
 import { RotateCcw, ArrowRight, Search, Save, ChevronLeft, ChevronRight, ChevronDown, X } from "lucide-react";
 import { Footer } from "../components/Footer";
+import { getPageTheme } from "../theme/pageTheme";
 
 interface OrderCreationProps {
   isInvitation?: boolean;
@@ -218,6 +219,8 @@ const STATES_LIST = [
 const GENERATION_LIST = ["None", "Jr", "Sr", "II", "III", "IV"];
 
 export function OrderCreation({ isInvitation = false, showInvitationBanner = false, isDarkMode = false, onNavigate }: OrderCreationProps) {
+  const t = getPageTheme(isDarkMode);
+  const sectionHeaderBg = isDarkMode ? t.tableHeadBg : "#E5E7EB";
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bannerVisible, setBannerVisible] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -375,15 +378,15 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
   if (step === 3) {
     return (
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
-        <div style={{ flex: 1, padding: "40px 20px", background: "#F5F5F5", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "#FFFFFF", padding: "40px", borderRadius: "8px", boxShadow: "0 4px 6px rgba(0,0,0,0.05)", textAlign: "center", maxWidth: "500px", width: "100%" }}>
-            <div style={{ width: "64px", height: "64px", background: "#D1FAE5", color: "#059669", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "32px", margin: "0 auto 20px auto" }}>
-              Γ£ô
+        <div style={{ flex: 1, padding: "40px 20px", background: t.contentBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ background: t.cardBg, padding: "40px", borderRadius: "8px", boxShadow: t.cardShadow, border: t.cardBorder, textAlign: "center", maxWidth: "500px", width: "100%" }}>
+            <div style={{ width: "64px", height: "64px", background: isDarkMode ? "rgba(5, 150, 105, 0.2)" : "#D1FAE5", color: "#059669", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "32px", margin: "0 auto 20px auto" }}>
+              ✓
             </div>
-            <h2 style={{ fontSize: "20px", fontWeight: "600", color: "#111827", marginBottom: "12px" }}>
+            <h2 style={{ fontSize: "20px", fontWeight: "600", color: t.text, marginBottom: "12px" }}>
               Order Placed Successfully!
             </h2>
-            <p style={{ fontSize: "14px", color: "#6B7280", marginBottom: "30px", lineHeight: "1.5" }}>
+            <p style={{ fontSize: "14px", color: t.textMuted, marginBottom: "30px", lineHeight: "1.5" }}>
               The order for <strong>{firstName} {lastName}</strong> has been submitted. We have sent a confirmation email to <strong>{applicantEmail}</strong>.
             </p>
             <button
@@ -394,7 +397,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             </button>
           </div>
         </div>
-        <Footer />
+        <Footer isDarkMode={isDarkMode} />
       </div>
     );
   }
@@ -412,7 +415,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
         style={{
           flex: 1,
           padding: "20px",
-          background: "#F5F5F5",
+          background: t.contentBg,
         }}
       >
         <h4
@@ -420,7 +423,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
           style={{
             fontSize: "18px",
             fontWeight: 500,
-            color: "#B7042C",
+            color: t.titleAlt,
             fontFamily: "'Wix Madefor Display', sans-serif",
             marginBottom: "24px",
           }}
@@ -436,13 +439,13 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: "#EFF6FF",
-              border: "1px solid #BFDBFE",
+              background: t.infoBannerBg,
+              border: t.infoBannerBorder,
               borderRadius: "4px",
               padding: "10px 40px",
               marginBottom: "25px",
               fontSize: "13px",
-              color: "#1D4ED8",
+              color: t.infoBannerText,
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -456,7 +459,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 right: "12px",
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: "#93C5FD",
+                color: t.infoBannerText,
                 fontSize: "18px",
                 lineHeight: 1,
                 background: "none",
@@ -473,8 +476,8 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
           /* Oops: No Invitation Email Template Warning Screen */
           <div
             style={{
-              background: "#FFFFFF",
-              border: "1px solid #E0E0E0",
+              background: t.cardBg,
+              border: t.cardBorder,
               borderRadius: "4px",
               padding: "64px 24px",
               display: "flex",
@@ -482,13 +485,13 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               alignItems: "center",
               justifyContent: "center",
               minHeight: "260px",
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+              boxShadow: t.cardShadow,
             }}
           >
             <div
               style={{
                 fontSize: "15px",
-                color: "#333333",
+                color: t.text,
                 marginBottom: "24px",
                 textAlign: "center",
                 lineHeight: "1.5",
@@ -527,18 +530,18 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
           </div>
         ) : step === 1 ? (
           /* Step 1: Searches Selection */
-          <div style={{ background: "#FFFFFF", borderRadius: "4px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+          <div style={{ background: t.cardBg, borderRadius: "4px", boxShadow: t.cardShadow, border: t.cardBorder }}>
             {/* Header Bar */}
             <div
               style={{
                 height: "44px",
-                background: "#E5E7EB",
+                background: sectionHeaderBg,
                 display: "flex",
                 alignItems: "center",
                 paddingLeft: "20px",
                 fontSize: "15px",
                 fontWeight: 600,
-                color: "#4B5563",
+                color: t.heading,
                 borderRadius: "4px 4px 0 0",
                 letterSpacing: "0.5px",
               }}
@@ -550,8 +553,8 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             <div
               style={{
                 padding: "16px 20px",
-                background: "#FFFFFF",
-                borderBottom: "1px solid #E5E7EB",
+                background: t.cardBg,
+                borderBottom: t.tableRowBorder,
               }}
             >
               <div style={{ position: "relative", width: "100%" }}>
@@ -575,8 +578,9 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     height: "42px",
                     padding: "0 16px 0 44px",
                     fontSize: "14px",
-                    color: "#1F2937",
-                    border: "1px solid #D1D5DB",
+                    background: t.inputBg,
+                    color: t.text,
+                    border: t.inputBorder,
                     borderRadius: "4px",
                     outline: "none",
                   }}
@@ -588,7 +592,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             <div
               style={{
                 padding: "24px 20px",
-                background: "#FFFFFF",
+                background: t.cardBg,
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
                 gap: "24px",
@@ -909,18 +913,18 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
           </div>
         ) : (
           /* Step 2: Enter Applicant Information */
-          <div style={{ background: "#FFFFFF", borderRadius: "4px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+          <div style={{ background: t.cardBg, borderRadius: "4px", boxShadow: t.cardShadow, border: t.cardBorder }}>
             {/* Enter Applicant Information Header Banner */}
             <div
               style={{
                 height: "44px",
-                background: "#E5E7EB",
+                background: sectionHeaderBg,
                 display: "flex",
                 alignItems: "center",
                 paddingLeft: "20px",
                 fontSize: "15px",
                 fontWeight: 600,
-                color: "#4B5563",
+                color: t.heading,
                 borderRadius: "4px 4px 0 0",
                 letterSpacing: "0.5px",
                 textTransform: "uppercase",
@@ -933,7 +937,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             <div
               style={{
                 padding: "24px 20px",
-                background: "#FFFFFF",
+                background: t.cardBg,
                 display: "flex",
                 flexDirection: "column",
                 gap: "20px",
@@ -948,7 +952,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   alignItems: "center",
                 }}
               >
-                <FloatingInput label="First Name" value={firstName} onChange={setFirstName} required />
+                <FloatingInput label="First Name" value={firstName} onChange={setFirstName} required isDarkMode={isDarkMode} />
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <FloatingInput
                     label="Middle Name"
@@ -956,6 +960,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     onChange={setMiddleName}
                     required={!middleNameDisabled}
                     disabled={middleNameDisabled}
+                    isDarkMode={isDarkMode}
                   />
                   <label
                     style={{
@@ -963,7 +968,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                       alignItems: "center",
                       gap: "4px",
                       fontSize: "13px",
-                      color: "#4B5563",
+                      color: t.textSecondary,
                       cursor: "pointer",
                       userSelect: "none",
                       whiteSpace: "nowrap",
@@ -983,32 +988,34 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     None
                   </label>
                 </div>
-                <FloatingInput label="Last Name" value={lastName} onChange={setLastName} required />
+                <FloatingInput label="Last Name" value={lastName} onChange={setLastName} required isDarkMode={isDarkMode} />
                 <FloatingSelect
                   label="Generation"
                   value={generation}
                   options={GENERATION_LIST}
                   onChange={setGeneration}
+                  isDarkMode={isDarkMode}
                 />
               </div>
 
               {/* Row 2 */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "16px" }}>
-                <FloatingDatePicker label="Date of Birth" value={dob} onChange={setDob} required />
-                <FloatingInput label="Social Security Number" value={ssn} onChange={setSsn} required placeholder="XXX-XX-XXXX" />
-                <FloatingInput label="Street Address" value={streetAddress} onChange={setStreetAddress} required />
-                <FloatingInput label="Zip Code" value={zipCode} onChange={setZipCode} required />
+                <FloatingDatePicker label="Date of Birth" value={dob} onChange={setDob} required isDarkMode={isDarkMode} />
+                <FloatingInput label="Social Security Number" value={ssn} onChange={setSsn} required placeholder="XXX-XX-XXXX" isDarkMode={isDarkMode} />
+                <FloatingInput label="Street Address" value={streetAddress} onChange={setStreetAddress} required isDarkMode={isDarkMode} />
+                <FloatingInput label="Zip Code" value={zipCode} onChange={setZipCode} required isDarkMode={isDarkMode} />
               </div>
 
               {/* Row 3 */}
               <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "16px" }}>
-                <FloatingInput label="Reference" value={reference} onChange={setReference} />
+                <FloatingInput label="Reference" value={reference} onChange={setReference} isDarkMode={isDarkMode} />
                 <FloatingSelect
                   label="Job Position State"
                   value={jobState}
                   options={STATES_LIST}
                   onChange={setJobState}
                   required
+                  isDarkMode={isDarkMode}
                 />
               </div>
             </div>
@@ -1017,13 +1024,13 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             <div
               style={{
                 height: "44px",
-                background: "#E5E7EB",
+                background: sectionHeaderBg,
                 display: "flex",
                 alignItems: "center",
                 paddingLeft: "20px",
                 fontSize: "15px",
                 fontWeight: 600,
-                color: "#4B5563",
+                color: t.heading,
                 letterSpacing: "0.5px",
                 textTransform: "uppercase",
               }}
@@ -1032,7 +1039,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             </div>
 
             {/* Additional Options Container */}
-            <div style={{ padding: "24px 20px", background: "#FFFFFF", borderRadius: "0 0 4px 4px" }}>
+            <div style={{ padding: "24px 20px", background: t.cardBg, borderRadius: "0 0 4px 4px" }}>
               {/* Email row */}
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <div style={{ width: "300px" }}>
@@ -1041,6 +1048,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     value={applicantEmail}
                     onChange={setApplicantEmail}
                     required
+                    isDarkMode={isDarkMode}
                   />
                 </div>
                 <label
@@ -1049,7 +1057,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     alignItems: "center",
                     gap: "8px",
                     fontSize: "14px",
-                    color: "#4B5563",
+                    color: t.textSecondary,
                     cursor: "pointer",
                     userSelect: "none",
                   }}
@@ -1084,7 +1092,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   htmlFor="rush-order"
                   style={{
                     fontSize: "13px",
-                    color: "#555555",
+                    color: t.heading,
                     lineHeight: "1.5",
                     cursor: "pointer",
                     userSelect: "none",
@@ -1115,7 +1123,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               justifyContent: "center",
               gap: "16px",
               padding: "40px 0",
-              background: "#F5F5F5",
+              background: t.contentBg,
             }}
           >
             {/* Start Over */}
@@ -1127,11 +1135,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 gap: "8px",
                 height: "40px",
                 padding: "0 20px",
-                background: "#E5E7EB",
+                background: isDarkMode ? t.tabInactiveBg : "#E5E7EB",
                 border: "none",
                 borderRadius: "4px",
                 fontSize: "14px",
-                color: "#374151",
+                color: t.text,
                 cursor: "pointer",
                 fontWeight: 500,
               }}
@@ -1171,7 +1179,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               justifyContent: "center",
               gap: "16px",
               padding: "40px 0",
-              background: "#F5F5F5",
+              background: t.contentBg,
             }}
           >
             {/* Start Over */}
@@ -1263,10 +1271,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             style={{
               width: "720px",
               maxWidth: "90%",
-              background: "#FFFFFF",
+              background: t.cardBg,
               borderRadius: "4px",
-              boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+              boxShadow: isDarkMode ? "0 10px 25px rgba(0,0,0,0.5)" : "0 10px 25px rgba(0,0,0,0.15)",
               overflow: "hidden",
+              border: t.cardBorder,
             }}
           >
             {/* Modal Header */}
@@ -1332,7 +1341,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               {/* Agreement checkbox row */}
               <div
                 style={{
-                  borderTop: "1px solid #E5E7EB",
+                  borderTop: t.tableRowBorder,
                   paddingTop: "20px",
                   display: "flex",
                   alignItems: "center",
@@ -1346,7 +1355,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     gap: "10px",
                     cursor: "pointer",
                     fontSize: "14px",
-                    color: "#374151",
+                    color: t.text,
                     userSelect: "none",
                   }}
                 >
@@ -1403,7 +1412,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   style={{
                     height: "40px",
                     padding: "0 24px",
-                    background: minorAgreementChecked ? "#C70039" : "#E5E7EB",
+                    background: minorAgreementChecked ? "#C70039" : (isDarkMode ? t.tabInactiveBg : "#E5E7EB"),
                     color: minorAgreementChecked ? "#FFFFFF" : "#9CA3AF",
                     border: "none",
                     borderRadius: "4px",
@@ -1443,7 +1452,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
         </div>
       )}
 
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }
@@ -1509,9 +1518,12 @@ interface FloatingDatePickerProps {
   value: string;
   onChange: (val: string) => void;
   required?: boolean;
+  isDarkMode?: boolean;
 }
 
-function FloatingDatePicker({ label, value, onChange, required = false }: FloatingDatePickerProps) {
+function FloatingDatePicker({ label, value, onChange, required = false, isDarkMode = false }: FloatingDatePickerProps) {
+  const t = getPageTheme(isDarkMode);
+  const rangeBg = isDarkMode ? "#3A3D45" : "#EAEAEA";
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -1598,8 +1610,8 @@ function FloatingDatePicker({ label, value, onChange, required = false }: Floati
         style={{
           position: "relative",
           height: "56px",
-          background: "#FFFFFF",
-          border: `1px solid ${isOpen ? "#B7042C" : "#D1D5DB"}`,
+          background: t.inputBg,
+          border: `1px solid ${isOpen ? "#B7042C" : (isDarkMode ? "#333333" : "#D1D5DB")}`,
           borderRadius: "4px",
           width: "100%",
           transition: "border-color 0.15s ease",
@@ -1614,7 +1626,7 @@ function FloatingDatePicker({ label, value, onChange, required = false }: Floati
             top: isActive ? "8px" : "50%",
             transform: isActive ? "none" : "translateY(-50%)",
             fontSize: isActive ? "11px" : "14px",
-            color: "#888888",
+            color: t.textMuted,
             transition: "all 0.15s ease",
             pointerEvents: "none",
             userSelect: "none",
@@ -1636,7 +1648,7 @@ function FloatingDatePicker({ label, value, onChange, required = false }: Floati
             background: "transparent",
             padding: isActive ? "22px 12px 6px 12px" : "0 12px",
             fontSize: "14px",
-            color: "#374151",
+            color: t.text,
             boxSizing: "border-box",
             cursor: "pointer",
           }}
@@ -1650,10 +1662,10 @@ function FloatingDatePicker({ label, value, onChange, required = false }: Floati
             top: "calc(100% + 4px)",
             left: "0",
             width: "320px",
-            background: "#FFFFFF",
-            border: "1px solid #cbd5e1",
+            background: t.cardBg,
+            border: t.inputBorder,
             borderRadius: "4px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            boxShadow: isDarkMode ? "0 4px 12px rgba(0,0,0,0.4)" : "0 4px 12px rgba(0,0,0,0.15)",
             zIndex: 1000,
             boxSizing: "border-box",
             paddingBottom: "8px",
@@ -1746,7 +1758,7 @@ function FloatingDatePicker({ label, value, onChange, required = false }: Floati
               padding: "8px 8px 4px 8px",
               fontWeight: 600,
               fontSize: "13px",
-              color: "#4B5563",
+              color: t.label,
             }}
           >
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
@@ -1769,7 +1781,7 @@ function FloatingDatePicker({ label, value, onChange, required = false }: Floati
               const isToday = dateStr === todayStr;
 
               let dayBg = "transparent";
-              let dayColor = "#374151";
+              let dayColor = t.text;
               let dayWeight = "normal";
               let dayBorder = "none";
 
@@ -1779,9 +1791,9 @@ function FloatingDatePicker({ label, value, onChange, required = false }: Floati
                 dayWeight = "bold";
               } else if (isToday) {
                 dayBorder = "1px solid #C70039";
-                dayColor = "#374151";
+                dayColor = t.text;
               } else if (!isCurrentMonth) {
-                dayColor = "#D1D5DB";
+                dayColor = t.textMuted;
               }
 
               return (
@@ -1833,6 +1845,7 @@ interface FloatingInputProps {
   disabled?: boolean;
   type?: string;
   placeholder?: string;
+  isDarkMode?: boolean;
 }
 
 function FloatingInput({
@@ -1843,7 +1856,9 @@ function FloatingInput({
   disabled = false,
   type = "text",
   placeholder = "",
+  isDarkMode = false,
 }: FloatingInputProps) {
+  const t = getPageTheme(isDarkMode);
   const [focused, setFocused] = useState(false);
   const isActive = focused || value !== "";
 
@@ -1852,8 +1867,8 @@ function FloatingInput({
       style={{
         position: "relative",
         height: "56px",
-        background: disabled ? "#F3F4F6" : "#FFFFFF",
-        border: `1px solid ${focused ? "#B7042C" : "#D1D5DB"}`,
+        background: disabled ? t.inputBgMuted : t.inputBg,
+        border: `1px solid ${focused ? "#B7042C" : (isDarkMode ? "#333333" : "#D1D5DB")}`,
         borderRadius: "4px",
         width: "100%",
         transition: "border-color 0.15s ease",
@@ -1867,7 +1882,7 @@ function FloatingInput({
           top: isActive ? "8px" : "50%",
           transform: isActive ? "none" : "translateY(-50%)",
           fontSize: isActive ? "11px" : "14px",
-          color: "#888888",
+          color: t.textMuted,
           transition: "all 0.15s ease",
           pointerEvents: "none",
           userSelect: "none",
@@ -1892,7 +1907,7 @@ function FloatingInput({
           background: "transparent",
           padding: isActive ? "22px 12px 6px 12px" : "0 12px",
           fontSize: "14px",
-          color: "#374151",
+          color: t.text,
           boxSizing: "border-box",
           cursor: disabled ? "not-allowed" : "text",
         }}
@@ -1908,9 +1923,11 @@ interface FloatingSelectProps {
   options: string[];
   onChange: (val: string) => void;
   required?: boolean;
+  isDarkMode?: boolean;
 }
 
-function FloatingSelect({ label, value, options, onChange, required = false }: FloatingSelectProps) {
+function FloatingSelect({ label, value, options, onChange, required = false, isDarkMode = false }: FloatingSelectProps) {
+  const t = getPageTheme(isDarkMode);
   const [focused, setFocused] = useState(false);
   const isActive = focused || value !== "";
 
@@ -1919,8 +1936,8 @@ function FloatingSelect({ label, value, options, onChange, required = false }: F
       style={{
         position: "relative",
         height: "56px",
-        background: "#FFFFFF",
-        border: `1px solid ${focused ? "#B7042C" : "#D1D5DB"}`,
+        background: t.inputBg,
+        border: `1px solid ${focused ? "#B7042C" : (isDarkMode ? "#333333" : "#D1D5DB")}`,
         borderRadius: "4px",
         width: "100%",
         transition: "border-color 0.15s ease",
@@ -1934,7 +1951,7 @@ function FloatingSelect({ label, value, options, onChange, required = false }: F
           top: isActive ? "8px" : "50%",
           transform: isActive ? "none" : "translateY(-50%)",
           fontSize: isActive ? "11px" : "14px",
-          color: "#888888",
+          color: t.textMuted,
           transition: "all 0.15s ease",
           pointerEvents: "none",
           userSelect: "none",
@@ -1956,7 +1973,7 @@ function FloatingSelect({ label, value, options, onChange, required = false }: F
           background: "transparent",
           padding: isActive ? "22px 12px 6px 12px" : "0 12px",
           fontSize: "14px",
-          color: "#374151",
+          color: t.text,
           boxSizing: "border-box",
           cursor: "pointer",
           appearance: "none",

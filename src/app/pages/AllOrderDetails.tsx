@@ -2,6 +2,7 @@
 import { Eye, Upload, ChevronDown } from "lucide-react";
 import { ORDERS, type SearchStatus, type OrderRecord, VERIFICATION_TYPES, US_STATES } from "../data/mockData";
 import { Footer } from "../components/Footer";
+import { getPageTheme } from "../theme/pageTheme";
 
 interface Filters {
   searchId: string;
@@ -34,54 +35,65 @@ const EMPTY_FILTERS: Filters = {
   age: "", applicantEmail: "", criminalRecordsFound: "", orderedBy: "",
 };
 
-const CELL_STYLE: React.CSSProperties = {
-  background: "#FFFFFF",
-  border: "1px solid #E2E8F0",
-  borderRadius: "4px",
-  padding: "8px 12px",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "center",
-  height: "58px",
-  boxSizing: "border-box",
-  position: "relative",
-};
+function getCellStyle(isDarkMode: boolean): React.CSSProperties {
+  const t = getPageTheme(isDarkMode);
+  return {
+    background: t.inputBg,
+    border: t.inputBorder,
+    borderRadius: "4px",
+    padding: "8px 12px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    height: "58px",
+    boxSizing: "border-box",
+    position: "relative",
+  };
+}
 
-const CELL_LABEL_STYLE: React.CSSProperties = {
-  fontSize: "12px",
-  color: "#8A8A8A",
-  fontWeight: 400,
-  lineHeight: "1.2",
-  marginBottom: "3px",
-  textAlign: "left",
-};
+function getCellLabelStyle(isDarkMode: boolean): React.CSSProperties {
+  const t = getPageTheme(isDarkMode);
+  return {
+    fontSize: "12px",
+    color: t.textMuted,
+    fontWeight: 400,
+    lineHeight: "1.2",
+    marginBottom: "3px",
+    textAlign: "left",
+  };
+}
 
-const INPUT_ELEMENT_STYLE: React.CSSProperties = {
-  border: "none",
-  outline: "none",
-  background: "transparent",
-  width: "100%",
-  fontSize: "14px",
-  color: "#374151",
-  padding: "0",
-  margin: "0",
-  fontFamily: "inherit",
-};
+function getInputElementStyle(isDarkMode: boolean): React.CSSProperties {
+  const t = getPageTheme(isDarkMode);
+  return {
+    border: "none",
+    outline: "none",
+    background: "transparent",
+    width: "100%",
+    fontSize: "14px",
+    color: t.text,
+    padding: "0",
+    margin: "0",
+    fontFamily: "inherit",
+  };
+}
 
 function InputField({
   label,
   value,
   onChange,
+  isDarkMode = false,
 }: {
   label: string;
   value: string;
   onChange: (val: string) => void;
+  isDarkMode?: boolean;
 }) {
   return (
-    <div style={CELL_STYLE}>
-      <label style={CELL_LABEL_STYLE}>{label}</label>
+    <div style={getCellStyle(isDarkMode)}>
+      <label style={getCellLabelStyle(isDarkMode)}>{label}</label>
       <input
-        style={INPUT_ELEMENT_STYLE}
+        style={getInputElementStyle(isDarkMode)}
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />
@@ -99,9 +111,11 @@ interface CustomDropdownProps {
   value: string;
   options: Option[];
   onChange: (value: string) => void;
+  isDarkMode?: boolean;
 }
 
-function CustomDropdown({ label, value, options, onChange }: CustomDropdownProps) {
+function CustomDropdown({ label, value, options, onChange, isDarkMode = false }: CustomDropdownProps) {
+  const t = getPageTheme(isDarkMode);
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -123,14 +137,14 @@ function CustomDropdown({ label, value, options, onChange }: CustomDropdownProps
     <div
       ref={containerRef}
       onClick={() => setIsOpen(!isOpen)}
-      style={{ ...CELL_STYLE, cursor: "pointer" }}
+      style={{ ...getCellStyle(isDarkMode), cursor: "pointer" }}
     >
-      <label style={CELL_LABEL_STYLE}>{label}</label>
+      <label style={getCellLabelStyle(isDarkMode)}>{label}</label>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", userSelect: "none" }}>
         <span
           style={{
             fontSize: "14px",
-            color: "#374151",
+            color: t.text,
             fontWeight: 400,
             whiteSpace: "nowrap",
             overflow: "hidden",
@@ -139,7 +153,7 @@ function CustomDropdown({ label, value, options, onChange }: CustomDropdownProps
         >
           {selectedOption ? selectedOption.label : value}
         </span>
-        <ChevronDown size={14} style={{ color: "#6B7280", marginLeft: "4px", flexShrink: 0 }} />
+        <ChevronDown size={14} style={{ color: t.textMuted, marginLeft: "4px", flexShrink: 0 }} />
       </div>
 
       {isOpen && (
@@ -149,14 +163,14 @@ function CustomDropdown({ label, value, options, onChange }: CustomDropdownProps
             top: "calc(100% + 2px)",
             left: "-1px",
             width: "calc(100% + 2px)",
-            background: "#FFFFFF",
-            border: "1px solid #cbd5e1",
+            background: t.cardBg,
+            border: t.inputBorder,
             borderRadius: "4px",
             boxSizing: "border-box",
             zIndex: 1000,
             maxHeight: "240px",
             overflowY: "auto",
-            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+            boxShadow: isDarkMode ? "0 4px 6px rgba(0,0,0,0.4)" : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
           }}
         >
           {options.map((opt) => {
@@ -166,6 +180,7 @@ function CustomDropdown({ label, value, options, onChange }: CustomDropdownProps
                 key={opt.value}
                 label={opt.label}
                 isSelected={isSelected}
+                isDarkMode={isDarkMode}
                 onClick={() => {
                   onChange(opt.value);
                   setIsOpen(false);
@@ -183,11 +198,14 @@ function DropdownItem({
   label,
   isSelected,
   onClick,
+  isDarkMode = false,
 }: {
   label: string;
   isSelected: boolean;
   onClick: () => void;
+  isDarkMode?: boolean;
 }) {
+  const t = getPageTheme(isDarkMode);
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -202,8 +220,8 @@ function DropdownItem({
         padding: "8px 12px",
         fontSize: "14px",
         fontFamily: "'Wix Madefor Display', sans-serif",
-        color: isHovered || isSelected ? "#FFFFFF" : "#4B5563",
-        background: isHovered || isSelected ? "#7b7b7b" : "#FFFFFF",
+        color: isHovered || isSelected ? "#FFFFFF" : t.textSecondary,
+        background: isHovered || isSelected ? (isDarkMode ? "#4B5563" : "#7b7b7b") : t.cardBg,
         cursor: "pointer",
         transition: "background 0.1s ease, color 0.1s ease",
       }}
@@ -407,6 +425,7 @@ const SEARCH_TYPE_OPTIONS = [
 ];
 
 export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }) {
+  const t = getPageTheme(isDarkMode);
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
@@ -512,7 +531,7 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
         style={{
           flex: 1,
           padding: "16px 20px",
-          background: "#F5F5F5",
+          background: t.contentBg,
           overflowY: "auto",
         }}
       >
@@ -521,7 +540,7 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
           style={{
             fontSize: "20px",
             fontWeight: 500,
-            color: "rgb(199, 0, 57)",
+            color: t.title,
             marginBottom: "14px",
           }}
         >
@@ -538,33 +557,33 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
           }}
         >
           {/* Row 1 */}
-          <InputField label="Search ID" value={filters.searchId} onChange={(val) => set("searchId", val)} />
-          <InputField label="Report ID" value={filters.reportId} onChange={(val) => set("reportId", val)} />
-          <CustomDropdown label="Status" value={filters.status} options={STATUS_OPTIONS} onChange={(val) => set("status", val)} />
-          <CustomDropdown label="Search Type / Name" value={filters.searchType} options={searchTypeOptions} onChange={(val) => set("searchType", val)} />
+          <InputField label="Search ID" value={filters.searchId} onChange={(val) => set("searchId", val)} isDarkMode={isDarkMode} />
+          <InputField label="Report ID" value={filters.reportId} onChange={(val) => set("reportId", val)} isDarkMode={isDarkMode} />
+          <CustomDropdown label="Status" value={filters.status} options={STATUS_OPTIONS} onChange={(val) => set("status", val)} isDarkMode={isDarkMode} />
+          <CustomDropdown label="Search Type / Name" value={filters.searchType} options={searchTypeOptions} onChange={(val) => set("searchType", val)} isDarkMode={isDarkMode} />
 
           {/* Row 2 */}
-          <InputField label="First Name" value={filters.firstName} onChange={(val) => set("firstName", val)} />
-          <InputField label="Last Name" value={filters.lastName} onChange={(val) => set("lastName", val)} />
-          <InputField label="SSN" value={filters.ssn} onChange={(val) => set("ssn", val)} />
-          <InputField label="DOB" value={filters.dob} onChange={(val) => set("dob", val)} />
+          <InputField label="First Name" value={filters.firstName} onChange={(val) => set("firstName", val)} isDarkMode={isDarkMode} />
+          <InputField label="Last Name" value={filters.lastName} onChange={(val) => set("lastName", val)} isDarkMode={isDarkMode} />
+          <InputField label="SSN" value={filters.ssn} onChange={(val) => set("ssn", val)} isDarkMode={isDarkMode} />
+          <InputField label="DOB" value={filters.dob} onChange={(val) => set("dob", val)} isDarkMode={isDarkMode} />
 
           {/* Row 3 */}
-          <InputField label="County" value={filters.county} onChange={(val) => set("county", val)} />
-          <InputField label="State" value={filters.state} onChange={(val) => set("state", val)} />
-          <InputField label="Order Reference" value={filters.orderReference} onChange={(val) => set("orderReference", val)} />
-          <InputField label="Order Date From" value={filters.orderDateFrom} onChange={(val) => set("orderDateFrom", val)} />
+          <InputField label="County" value={filters.county} onChange={(val) => set("county", val)} isDarkMode={isDarkMode} />
+          <InputField label="State" value={filters.state} onChange={(val) => set("state", val)} isDarkMode={isDarkMode} />
+          <InputField label="Order Reference" value={filters.orderReference} onChange={(val) => set("orderReference", val)} isDarkMode={isDarkMode} />
+          <InputField label="Order Date From" value={filters.orderDateFrom} onChange={(val) => set("orderDateFrom", val)} isDarkMode={isDarkMode} />
 
           {/* Row 4 */}
-          <InputField label="Order Date To" value={filters.orderDateTo} onChange={(val) => set("orderDateTo", val)} />
-          <CustomDropdown label="Sort Order" value={filters.sortOrder} options={SORT_ORDER_OPTIONS} onChange={(val) => set("sortOrder", val)} />
-          <CustomDropdown label="Searches per page" value={filters.perPage} options={PER_PAGE_OPTIONS} onChange={(val) => set("perPage", val)} />
-          <CustomDropdown label="Age" value={filters.age} options={AGE_OPTIONS} onChange={(val) => set("age", val)} />
+          <InputField label="Order Date To" value={filters.orderDateTo} onChange={(val) => set("orderDateTo", val)} isDarkMode={isDarkMode} />
+          <CustomDropdown label="Sort Order" value={filters.sortOrder} options={SORT_ORDER_OPTIONS} onChange={(val) => set("sortOrder", val)} isDarkMode={isDarkMode} />
+          <CustomDropdown label="Searches per page" value={filters.perPage} options={PER_PAGE_OPTIONS} onChange={(val) => set("perPage", val)} isDarkMode={isDarkMode} />
+          <CustomDropdown label="Age" value={filters.age} options={AGE_OPTIONS} onChange={(val) => set("age", val)} isDarkMode={isDarkMode} />
 
           {/* Row 5 */}
-          <InputField label="Applicant Email" value={filters.applicantEmail} onChange={(val) => set("applicantEmail", val)} />
-          <CustomDropdown label="Criminal Records Found" value={filters.criminalRecordsFound} options={CRIMINAL_RECORDS_OPTIONS} onChange={(val) => set("criminalRecordsFound", val)} />
-          <CustomDropdown label="Ordered By" value={filters.orderedBy} options={ORDERED_BY_OPTIONS} onChange={(val) => set("orderedBy", val)} />
+          <InputField label="Applicant Email" value={filters.applicantEmail} onChange={(val) => set("applicantEmail", val)} isDarkMode={isDarkMode} />
+          <CustomDropdown label="Criminal Records Found" value={filters.criminalRecordsFound} options={CRIMINAL_RECORDS_OPTIONS} onChange={(val) => set("criminalRecordsFound", val)} isDarkMode={isDarkMode} />
+          <CustomDropdown label="Ordered By" value={filters.orderedBy} options={ORDERED_BY_OPTIONS} onChange={(val) => set("orderedBy", val)} isDarkMode={isDarkMode} />
         </div>
 
         {/* ΓöÇΓöÇ Buttons ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
@@ -594,9 +613,9 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
           <button
             onClick={handleReset}
             style={{
-              background: "#FFFFFF",
-              color: "#C70039",
-              border: "1px solid #C70039",
+              background: t.cardBg,
+              color: t.link,
+              border: `1px solid ${t.link}`,
               borderRadius: "4px",
               padding: "10px 24px",
               fontSize: "14px",
@@ -654,7 +673,7 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
               textAlign: "center",
               fontSize: "15px",
               fontWeight: "bold",
-              color: "#C70039",
+              color: t.title,
               margin: "24px 0",
               fontFamily: "'Wix Madefor Display', sans-serif",
             }}
@@ -667,10 +686,10 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
         {searched && sorted.length > 0 && (
           <div
             style={{
-              background: "#FFFFFF",
-              border: "1px solid #E5E7EB",
+              background: t.cardBg,
+              border: t.cardBorder,
               borderRadius: "4px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+              boxShadow: t.cardShadow,
               marginBottom: "20px",
             }}
           >
@@ -681,8 +700,8 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
                 justifyContent: "space-between",
                 alignItems: "center",
                 padding: "8px 16px",
-                background: "#F5F5F5",
-                borderBottom: "1px solid #E5E7EB",
+                background: isDarkMode ? t.tableHeadBg : t.contentBg,
+                borderBottom: t.tableRowBorder,
                 borderTopLeftRadius: "4px",
                 borderTopRightRadius: "4px",
               }}
@@ -691,8 +710,7 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
                 style={{
                   fontSize: "14px",
                   fontWeight: 600,
-                  color: "#6B7280",
-
+                  color: t.textMuted,
                 }}
               >
                 Search Results
@@ -700,23 +718,22 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
 
               {/* Page select dropdown */}
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ fontSize: "13px", color: "#6C7589", }}>Page:</span>
+                <span style={{ fontSize: "13px", color: t.textMuted }}>Page:</span>
                 <select
                   value={page}
                   onChange={(e) => setPage(parseInt(e.target.value))}
                   style={{
-                    background: "#FFFFFF",
-                    border: "1px solid #D1D5DB",
+                    background: t.inputBg,
+                    border: t.inputBorder,
                     borderRadius: "4px",
                     fontSize: "11px",
                     fontWeight: 500,
                     padding: "2px 20px 2px 8px",
-                    color: "#333333",
+                    color: t.text,
                     outline: "none",
                     cursor: "pointer",
-
                     appearance: "none",
-                    backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%23555555' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
+                    backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='${isDarkMode ? "%239CA3AF" : "%23555555"}' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: "right 6px center",
                   }}
@@ -738,13 +755,13 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
                     textAlign: "center",
                     padding: "40px",
                     fontSize: "12px",
-                    color: "#6C7589",
+                    color: t.textMuted,
                   }}
                 >
                   No records match your filters.
                 </div>
               ) : (
-                paginated.map((o) => (
+                paginated.map((o, idx) => (
                   <div key={o.searchId} style={{ display: "flex", flexDirection: "column" }}>
                     <div
                       onClick={() => setExpandedSearchId(expandedSearchId === o.searchId ? null : o.searchId)}
@@ -753,21 +770,21 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
                         alignItems: "center",
                         justifyContent: "space-between",
                         padding: "10px 16px",
-                        borderBottom: "1px solid #E5E7EB",
-                        background: "#FFFFFF",
+                        borderBottom: t.tableRowBorder,
+                        background: idx % 2 === 0 ? t.tableRowEven : t.tableRowOdd,
                         cursor: "pointer",
                       }}
                     >
                       {/* Left: Search ID */}
                       <div style={{ fontSize: "13px", width: "160px" }}>
-                        <span style={{ color: "#9CA3AF", fontWeight: 400 }}>Search ID: </span>
-                        <span style={{ color: "#4B5563", fontWeight: 600 }}>{o.searchId}</span>
+                        <span style={{ color: t.textMuted, fontWeight: 400 }}>Search ID: </span>
+                        <span style={{ color: t.textSecondary, fontWeight: 600 }}>{o.searchId}</span>
                       </div>
 
                       {/* Center: Applicant name + Verification type */}
                       <div style={{ fontSize: "13px", flex: 1, textAlign: "left", paddingLeft: "20px" }}>
-                        <span style={{ color: "#4B5563", fontWeight: 600 }}>{o.applicantName}</span>
-                        <span style={{ color: "#9CA3AF" }}> : {o.verificationType}</span>
+                        <span style={{ color: t.textSecondary, fontWeight: 600 }}>{o.applicantName}</span>
+                        <span style={{ color: t.textMuted }}> : {o.verificationType}</span>
                       </div>
 
                       {/* Right: Status badge */}
@@ -776,9 +793,9 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
                       </div>
                     </div>
                     {expandedSearchId === o.searchId && (
-                      <div style={{ padding: "16px 20px", background: "#FFFFFF", borderBottom: "1px solid #E5E7EB", fontSize: "12px" }}>
+                      <div style={{ padding: "16px 20px", background: t.cardBg, borderBottom: t.tableRowBorder, fontSize: "12px", color: t.textSecondary }}>
                         {/* Row 1: Order Details */}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "10px", background: "#F5F5F5", padding: "10px", marginBottom: "16px", color: "#555" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "10px", background: isDarkMode ? t.tableHeadBg : t.contentBg, padding: "10px", marginBottom: "16px", color: t.heading }}>
                           <div><strong style={{ fontWeight: 600 }}>Order Date:</strong> {o.orderDate}</div>
                           <div><strong style={{ fontWeight: 600 }}>DOB:</strong> {o.dob || "05/17/1996"}</div>
                           <div><strong style={{ fontWeight: 600 }}>SSN:</strong> {o.ssn || "111-11-1111"}</div>
@@ -787,59 +804,59 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
 
                         {/* Row 2: Links */}
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "10px", marginBottom: "12px" }}>
-                          <div style={{ color: "#555" }}>Order by: {o.orderedBy}</div>
-                          <div style={{ color: "rgb(199, 0, 57)", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+                          <div style={{ color: t.textSecondary }}>Order by: {o.orderedBy}</div>
+                          <div style={{ color: t.link, cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
                             <Eye size={13} /> View Report #{o.reportId}
                           </div>
-                          <div style={{ color: "rgb(199, 0, 57)", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+                          <div style={{ color: t.link, cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
                             <Eye size={13} /> View Search #{o.searchId}
                           </div>
-                          <div style={{ color: "rgb(199, 0, 57)", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+                          <div style={{ color: t.link, cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
                             <Eye size={13} /> View Pricing
                           </div>
                         </div>
 
                         {/* Row 3: Links */}
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "10px", marginBottom: "24px" }}>
-                          <div style={{ color: "rgb(199, 0, 57)", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+                          <div style={{ color: t.link, cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
                             <Upload size={13} /> Upload Document
                           </div>
-                          <div style={{ color: "rgb(199, 0, 57)", cursor: "pointer" }}>+ Add Search to this Report</div>
-                          <div style={{ gridColumn: "3 / 5", color: "rgb(199, 0, 57)", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+                          <div style={{ color: t.link, cursor: "pointer" }}>+ Add Search to this Report</div>
+                          <div style={{ gridColumn: "3 / 5", color: t.link, cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
                             <Eye size={13} /> View Employment Verification Info
                           </div>
                         </div>
 
                         {/* Files Uploaded Section */}
-                        <div style={{ background: "#D9D9D9", padding: "6px 12px", fontWeight: 600, color: "#555", marginBottom: "12px" }}>
+                        <div style={{ background: isDarkMode ? t.badgeBg : "#D9D9D9", padding: "6px 12px", fontWeight: 600, color: t.heading, marginBottom: "12px" }}>
                           FILES UPLOADED
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px", paddingLeft: "12px", color: "#555" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px", paddingLeft: "12px", color: t.textSecondary }}>
                           <div style={{ display: "flex", justifyContent: "space-between" }}>
                             <span>#1 Authorization_Disclosure_Form_{o.applicantName.replace(" ", "_")}_07-15-2025.pdf</span>
-                            <span style={{ color: "#888" }}>Type: PDF | E-Signed on: 2025-07-15 13:54:18 - Online (Order /w Invite)</span>
+                            <span style={{ color: t.textMuted }}>Type: PDF | E-Signed on: 2025-07-15 13:54:18 - Online (Order /w Invite)</span>
                           </div>
                           <div style={{ display: "flex", justifyContent: "space-between" }}>
                             <span>#2 Authorization_Disclosure_Form_Suresh_Kumar_01-18-2024.pdf</span>
-                            <span style={{ color: "#888" }}>Type: PDF | E-Signed on: 2024-01-18 14:12:51 - Online (Order /w Invite Process)</span>
+                            <span style={{ color: t.textMuted }}>Type: PDF | E-Signed on: 2024-01-18 14:12:51 - Online (Order /w Invite Process)</span>
                           </div>
                         </div>
 
                         {/* Upload File Section */}
-                        <div style={{ background: "#D9D9D9", padding: "6px 12px", fontWeight: 600, color: "#555", marginBottom: "12px" }}>
+                        <div style={{ background: isDarkMode ? t.badgeBg : "#D9D9D9", padding: "6px 12px", fontWeight: 600, color: t.heading, marginBottom: "12px" }}>
                           SELECT A FILE TO UPLOAD
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", gap: "12px", paddingLeft: "12px" }}>
                           <div>
                             <input type="file" id={`upload-${o.searchId}`} style={{ display: "none" }} />
                             <label htmlFor={`upload-${o.searchId}`} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "12px" }}>
-                              <div style={{ padding: "6px 16px", border: "1px solid #D1D5DB", background: "#FFFFFF", borderRadius: "3px", color: "#333" }}>Choose File</div>
-                              <span style={{ color: "#888" }}>No file chosen</span>
+                              <div style={{ padding: "6px 16px", border: t.inputBorder, background: t.inputBg, borderRadius: "3px", color: t.text }}>Choose File</div>
+                              <span style={{ color: t.textMuted }}>No file chosen</span>
                             </label>
-                            <div style={{ fontSize: "11px", color: "#888", marginTop: "8px" }}>Allowed File Extensions: jpg/jpeg, png, doc/docx, pdf</div>
+                            <div style={{ fontSize: "11px", color: t.textMuted, marginTop: "8px" }}>Allowed File Extensions: jpg/jpeg, png, doc/docx, pdf</div>
                           </div>
                           <div>
-                            <button style={{ background: "rgb(199, 0, 57)", color: "white", border: "none", padding: "8px 16px", borderRadius: "4px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontWeight: 500 }}>
+                            <button style={{ background: t.link, color: "white", border: "none", padding: "8px 16px", borderRadius: "4px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontWeight: 500 }}>
                               Upload File <Upload size={14} />
                             </button>
                           </div>
@@ -854,7 +871,7 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
         )}
       </div>
 
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

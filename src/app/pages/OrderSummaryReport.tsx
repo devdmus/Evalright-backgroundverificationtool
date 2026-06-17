@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { ORDERS } from "../data/mockData";
 import { Footer } from "../components/Footer";
+import { getPageTheme } from "../theme/pageTheme";
 
 interface CalendarDay {
   dateStr: string;
@@ -62,9 +63,12 @@ function getCalendarGrid(year: number, month: number): CalendarDay[] {
 interface DateRangePickerProps {
   value: string;
   onChange: (val: string) => void;
+  isDarkMode?: boolean;
 }
 
-function DateRangePicker({ value, onChange }: DateRangePickerProps) {
+function DateRangePicker({ value, onChange, isDarkMode = false }: DateRangePickerProps) {
+  const t = getPageTheme(isDarkMode);
+  const rangeBg = isDarkMode ? "#3A3D45" : "#EAEAEA";
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -130,8 +134,8 @@ function DateRangePicker({ value, onChange }: DateRangePickerProps) {
       <div
         onClick={() => setIsOpen(!isOpen)}
         style={{
-          background: "#FFFFFF",
-          border: "1px solid #cbd5e1",
+          background: t.inputBg,
+          border: t.inputBorder,
           borderRadius: "4px",
           padding: "6px 12px",
           display: "flex",
@@ -144,10 +148,10 @@ function DateRangePicker({ value, onChange }: DateRangePickerProps) {
           userSelect: "none",
         }}
       >
-        <label style={{ fontSize: "12px", color: "#9CA3AF", fontWeight: 400, marginBottom: "2px", cursor: "pointer" }}>
+        <label style={{ fontSize: "12px", color: t.textMuted, fontWeight: 400, marginBottom: "2px", cursor: "pointer" }}>
           Order Date Range
         </label>
-        <div style={{ fontSize: "14px", color: value ? "#333" : "#9CA3AF", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        <div style={{ fontSize: "14px", color: value ? t.text : t.textMuted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {value || ""}
         </div>
       </div>
@@ -159,10 +163,10 @@ function DateRangePicker({ value, onChange }: DateRangePickerProps) {
             top: "calc(100% + 8px)",
             left: "0",
             width: "320px",
-            background: "#FFFFFF",
-            border: "1px solid #cbd5e1",
+            background: t.cardBg,
+            border: t.inputBorder,
             borderRadius: "4px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            boxShadow: isDarkMode ? "0 4px 12px rgba(0,0,0,0.4)" : "0 4px 12px rgba(0,0,0,0.1)",
             zIndex: 1000,
             boxSizing: "border-box",
             paddingBottom: "8px",
@@ -223,7 +227,7 @@ function DateRangePicker({ value, onChange }: DateRangePickerProps) {
               padding: "8px 8px 4px 8px",
               fontWeight: 600,
               fontSize: "13px",
-              color: "#4B5563",
+              color: t.label,
             }}
           >
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
@@ -254,15 +258,15 @@ function DateRangePicker({ value, onChange }: DateRangePickerProps) {
 
               let cellBg = "transparent";
               if (inRange) {
-                cellBg = "#EAEAEA";
+                cellBg = rangeBg;
               } else if (isStart && endDateStr) {
-                cellBg = "linear-gradient(90deg, transparent 50%, #EAEAEA 50%)";
+                cellBg = `linear-gradient(90deg, transparent 50%, ${rangeBg} 50%)`;
               } else if (isEnd) {
-                cellBg = "linear-gradient(90deg, #EAEAEA 50%, transparent 50%)";
+                cellBg = `linear-gradient(90deg, ${rangeBg} 50%, transparent 50%)`;
               }
 
               let dayBg = "transparent";
-              let dayColor = "#374151";
+              let dayColor = t.text;
               let dayWeight = "normal";
 
               if (isStart || isEnd) {
@@ -270,10 +274,10 @@ function DateRangePicker({ value, onChange }: DateRangePickerProps) {
                 dayColor = "#FFFFFF";
                 dayWeight = "bold";
               } else if (inRange) {
-                dayColor = "#C70039";
+                dayColor = t.link;
                 dayWeight = "500";
               } else if (!isCurrentMonth) {
-                dayColor = "#D1D5DB";
+                dayColor = t.textMuted;
               }
 
               return (
@@ -315,7 +319,8 @@ function DateRangePicker({ value, onChange }: DateRangePickerProps) {
   );
 }
 
-export function OrderSummaryReport() {
+export function OrderSummaryReport({ isDarkMode = false }: { isDarkMode?: boolean }) {
+  const t = getPageTheme(isDarkMode);
   const [scope, setScope] = useState<"all" | "logged-in">("all");
   const [dateRange, setDateRange] = useState("");
 
@@ -366,21 +371,21 @@ export function OrderSummaryReport() {
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, fontFamily: "'Wix Madefor Display', sans-serif" }}>
-      <div style={{ flex: 1, padding: "16px 20px", background: "#F5F5F5", overflowY: "auto" }}>
+      <div style={{ flex: 1, padding: "16px 20px", background: t.contentBg, overflowY: "auto" }}>
         
         {/* Page Title */}
-        <h1 style={{ fontSize: "20px", fontWeight: 500, color: "rgb(199, 0, 57)", marginBottom: "14px" }}>
+        <h1 style={{ fontSize: "20px", fontWeight: 500, color: t.title, marginBottom: "14px" }}>
           Order Summary Report
         </h1>
 
         {/* Card Container */}
         <div
           style={{
-            background: "#FFFFFF",
-            border: "1px solid #E5E7EB",
+            background: t.cardBg,
+            border: t.cardBorder,
             borderRadius: "4px",
             padding: "24px",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+            boxShadow: t.cardShadow,
             display: "flex",
             flexDirection: "column",
             gap: "24px",
@@ -388,7 +393,7 @@ export function OrderSummaryReport() {
         >
           {/* Scope selection block */}
           <div>
-            <div style={{ fontSize: "14px", color: "#4B5563", fontWeight: 500, marginBottom: "12px" }}>
+            <div style={{ fontSize: "14px", color: t.textSecondary, fontWeight: 500, marginBottom: "12px" }}>
               Scope
             </div>
             <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
@@ -403,7 +408,7 @@ export function OrderSummaryReport() {
                     width: "18px",
                     height: "18px",
                     borderRadius: "50%",
-                    border: scope === "all" ? "2px solid #C70039" : "2px solid #D1D5DB",
+                    border: scope === "all" ? "2px solid #C70039" : `2px solid ${isDarkMode ? "#4B5563" : "#D1D5DB"}`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -414,7 +419,7 @@ export function OrderSummaryReport() {
                     <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#C70039" }} />
                   )}
                 </div>
-                <span style={{ fontSize: "14px", color: "#374151" }}>All users</span>
+                <span style={{ fontSize: "14px", color: t.text }}>All users</span>
               </label>
 
               {/* Logged in user only option */}
@@ -427,7 +432,7 @@ export function OrderSummaryReport() {
                     width: "18px",
                     height: "18px",
                     borderRadius: "50%",
-                    border: scope === "logged-in" ? "2px solid #C70039" : "2px solid #D1D5DB",
+                    border: scope === "logged-in" ? "2px solid #C70039" : `2px solid ${isDarkMode ? "#4B5563" : "#D1D5DB"}`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -438,7 +443,7 @@ export function OrderSummaryReport() {
                     <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#C70039" }} />
                   )}
                 </div>
-                <span style={{ fontSize: "14px", color: "#374151" }}>Currently logged-in user only</span>
+                <span style={{ fontSize: "14px", color: t.text }}>Currently logged-in user only</span>
               </label>
 
             </div>
@@ -446,7 +451,7 @@ export function OrderSummaryReport() {
 
           {/* Date range picker block */}
           <div>
-            <DateRangePicker value={dateRange} onChange={setDateRange} />
+            <DateRangePicker value={dateRange} onChange={setDateRange} isDarkMode={isDarkMode} />
           </div>
 
           {/* Action button block */}
@@ -474,7 +479,7 @@ export function OrderSummaryReport() {
 
         </div>
       </div>
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

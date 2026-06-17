@@ -322,7 +322,7 @@ export function ApplicantInviteTemplates({ isDarkMode = false, onNavigate }: { i
           </div>
 
         </div>
-        <Footer />
+        <Footer isDarkMode={isDarkMode} />
       </div>
     );
   }
@@ -598,7 +598,7 @@ export function ApplicantInviteTemplates({ isDarkMode = false, onNavigate }: { i
           </div>
         )}
       </div>
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

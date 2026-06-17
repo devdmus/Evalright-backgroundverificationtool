@@ -195,7 +195,7 @@ export function Invoices({ isDarkMode = false }: { isDarkMode?: boolean }) {
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

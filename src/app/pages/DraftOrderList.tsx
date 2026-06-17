@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { Footer } from "../components/Footer";
+import { getListPageStyles } from "../theme/listPageStyles";
 
 interface DraftRecord {
   id: string;
@@ -12,16 +13,25 @@ interface DraftRecord {
 // Default to empty to match screenshot exactly
 const MOCK_DRAFTS: DraftRecord[] = [];
 
-function SortIcon({ active, direction }: { active: boolean; direction: "asc" | "desc" }) {
+function SortIcon({
+  active,
+  direction,
+  colors,
+}: {
+  active: boolean;
+  direction: "asc" | "desc";
+  colors: { asc: string; desc: string };
+}) {
   return (
     <span style={{ marginLeft: "6px", display: "inline-flex", flexDirection: "column", verticalAlign: "middle", opacity: active ? 1 : 0.35 }}>
-      <span style={{ fontSize: "8px", height: "5px", lineHeight: "1", color: active && direction === "asc" ? "#111827" : "#A0AEC0" }}>▲</span>
-      <span style={{ fontSize: "8px", height: "5px", lineHeight: "1", color: active && direction === "desc" ? "#111827" : "#A0AEC0", marginTop: "2px" }}>▼</span>
+      <span style={{ fontSize: "8px", height: "5px", lineHeight: "1", color: colors.asc }}>▲</span>
+      <span style={{ fontSize: "8px", height: "5px", lineHeight: "1", color: colors.desc, marginTop: "2px" }}>▼</span>
     </span>
   );
 }
 
-export function DraftOrderList() {
+export function DraftOrderList({ isDarkMode = false }: { isDarkMode?: boolean }) {
+  const s = getListPageStyles(isDarkMode);
   const [drafts, setDrafts] = useState<DraftRecord[]>(MOCK_DRAFTS);
   const [perPage, setPerPage] = useState(10);
   const [search, setSearch] = useState("");
@@ -78,35 +88,17 @@ export function DraftOrderList() {
   const paginated = sorted.slice((page - 1) * perPage, page * perPage);
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, fontFamily: "'Wix Madefor Display', sans-serif" }}>
-      <div style={{ flex: 1, padding: "16px 20px", background: "#F5F5F5", overflowY: "auto" }}>
-        
-        {/* Page Title */}
-        <h1 style={{ fontSize: "20px", fontWeight: 500, color: "rgb(199, 0, 57)", marginBottom: "14px" }}>
-          Draft List
-        </h1>
+    <div style={s.outer}>
+      <div style={s.content}>
+        <h1 style={s.title}>Draft List</h1>
 
-        {/* Card Container */}
-        <div style={{ background: "#FFFFFF", border: "1px solid #E5E7EB", borderRadius: "4px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-          
-          {/* Table Controls Row */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-            
-            {/* Entries Selection */}
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", color: "#4B5563" }}>
+        <div style={s.card}>
+          <div style={s.controlsRow}>
+            <div style={s.controlsLabel}>
               <select
                 value={perPage}
                 onChange={(e) => { setPerPage(parseInt(e.target.value)); setPage(1); }}
-                style={{
-                  background: "#FFFFFF",
-                  border: "1px solid #cbd5e1",
-                  borderRadius: "4px",
-                  padding: "4px 8px",
-                  fontSize: "14px",
-                  color: "#333",
-                  outline: "none",
-                  cursor: "pointer",
-                }}
+                style={s.select}
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>
@@ -116,65 +108,50 @@ export function DraftOrderList() {
               <span>entries per page</span>
             </div>
 
-            {/* Live Search Input */}
             <div style={{ position: "relative", width: "240px" }}>
-              <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "#9CA3AF", display: "flex", alignItems: "center" }}>
+              <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: s.t.textMuted, display: "flex", alignItems: "center" }}>
                 <Search size={15} />
               </span>
               <input
                 placeholder="Search..."
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px 8px 32px",
-                  fontSize: "14px",
-                  background: "#F2F4F6",
-                  border: "1px solid #cbd5e1",
-                  borderRadius: "4px",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
+                style={s.search}
               />
             </div>
           </div>
 
-          {/* Main Table */}
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
               <thead>
-                <tr style={{ background: "#F3F4F6", borderBottom: "2px solid #E5E7EB" }}>
-                  <th onClick={() => handleSort("applicantName")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Applicant <SortIcon active={sortField === "applicantName"} direction={sortDirection} />
+                <tr style={s.theadRow}>
+                  <th onClick={() => handleSort("applicantName")} style={s.th}>
+                    Applicant <SortIcon active={sortField === "applicantName"} direction={sortDirection} colors={s.sortColors(sortField === "applicantName", sortDirection)} />
                   </th>
-                  <th onClick={() => handleSort("searchesOrdered")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Searches Ordered <SortIcon active={sortField === "searchesOrdered"} direction={sortDirection} />
+                  <th onClick={() => handleSort("searchesOrdered")} style={s.th}>
+                    Searches Ordered <SortIcon active={sortField === "searchesOrdered"} direction={sortDirection} colors={s.sortColors(sortField === "searchesOrdered", sortDirection)} />
                   </th>
-                  <th onClick={() => handleSort("dateCreated")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Date Created <SortIcon active={sortField === "dateCreated"} direction={sortDirection} />
+                  <th onClick={() => handleSort("dateCreated")} style={s.th}>
+                    Date Created <SortIcon active={sortField === "dateCreated"} direction={sortDirection} colors={s.sortColors(sortField === "dateCreated", sortDirection)} />
                   </th>
-                  <th style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563" }}>
-                    Action
-                  </th>
+                  <th style={s.thStatic}>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {paginated.length === 0 ? (
                   <tr>
-                    <td colSpan={4} style={{ textAlign: "center", padding: "32px", fontSize: "14px", color: "#6B7280" }}>
+                    <td colSpan={4} style={s.emptyCell}>
                       No records found
                     </td>
                   </tr>
                 ) : (
                   paginated.map((d, idx) => (
-                    <tr key={d.id} style={{ borderBottom: "1px solid #F3F4F6", background: idx % 2 === 0 ? "#FFFFFF" : "#F9FAFB" }}>
-                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#111827" }}>{d.applicantName}</td>
-                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#4B5563" }}>{d.searchesOrdered}</td>
-                      <td style={{ padding: "12px 16px", fontSize: "13px", color: "#4B5563" }}>{d.dateCreated}</td>
-                      <td style={{ padding: "12px 16px" }}>
-                        <button style={{ background: "none", border: "none", color: "#C70039", fontWeight: 500, fontSize: "13px", cursor: "pointer" }}>
-                          Continue
-                        </button>
+                    <tr key={d.id} style={s.row(idx)}>
+                      <td style={{ ...s.td, color: s.t.text }}>{d.applicantName}</td>
+                      <td style={s.td}>{d.searchesOrdered}</td>
+                      <td style={s.td}>{d.dateCreated}</td>
+                      <td style={s.td}>
+                        <button style={s.actionLink}>Continue</button>
                       </td>
                     </tr>
                   ))
@@ -183,38 +160,23 @@ export function DraftOrderList() {
             </table>
           </div>
 
-          {/* Pagination Row */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "20px", fontSize: "14px", color: "#4B5563" }}>
+          <div style={s.pagination}>
             <div>
               Showing {startIndex} to {endIndex} of {totalEntries} entries
             </div>
-            
+
             <div style={{ display: "flex", gap: "4px" }}>
               <button
                 disabled={page === 1}
                 onClick={() => setPage(1)}
-                style={{
-                  padding: "6px 8px",
-                  border: "none",
-                  background: "transparent",
-                  color: page === 1 ? "#D1D5DB" : "#4B5563",
-                  cursor: page === 1 ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                }}
+                style={s.navBtn(page === 1)}
               >
                 «
               </button>
               <button
                 disabled={page === 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                style={{
-                  padding: "6px 8px",
-                  border: "none",
-                  background: "transparent",
-                  color: page === 1 ? "#D1D5DB" : "#4B5563",
-                  cursor: page === 1 ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                }}
+                style={s.navBtn(page === 1)}
               >
                 &lt;
               </button>
@@ -223,15 +185,7 @@ export function DraftOrderList() {
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  style={{
-                    padding: "6px 12px",
-                    border: p === page ? "1px solid #C70039" : "1px solid #E5E7EB",
-                    background: p === page ? "#C70039" : "#FFFFFF",
-                    color: p === page ? "#FFFFFF" : "#4B5563",
-                    borderRadius: "4px",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                  }}
+                  style={s.pageBtn(p === page)}
                 >
                   {p}
                 </button>
@@ -240,37 +194,22 @@ export function DraftOrderList() {
               <button
                 disabled={page === totalPages || totalPages === 0}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                style={{
-                  padding: "6px 8px",
-                  border: "none",
-                  background: "transparent",
-                  color: (page === totalPages || totalPages === 0) ? "#D1D5DB" : "#4B5563",
-                  cursor: (page === totalPages || totalPages === 0) ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                }}
+                style={s.navBtn(page === totalPages || totalPages === 0)}
               >
                 &gt;
               </button>
               <button
                 disabled={page === totalPages || totalPages === 0}
                 onClick={() => setPage(totalPages)}
-                style={{
-                  padding: "6px 8px",
-                  border: "none",
-                  background: "transparent",
-                  color: (page === totalPages || totalPages === 0) ? "#D1D5DB" : "#4B5563",
-                  cursor: (page === totalPages || totalPages === 0) ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                }}
+                style={s.navBtn(page === totalPages || totalPages === 0)}
               >
                 »
               </button>
             </div>
           </div>
-
         </div>
       </div>
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

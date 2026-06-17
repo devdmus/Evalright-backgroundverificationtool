@@ -505,7 +505,7 @@ export function ReportsOrders({ isDarkMode = false }: { isDarkMode?: boolean }) 
         )}
       </div>
 
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

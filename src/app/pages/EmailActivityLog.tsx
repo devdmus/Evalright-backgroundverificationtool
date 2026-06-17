@@ -285,7 +285,7 @@ export function EmailActivityLog({ isDarkMode = false }: { isDarkMode?: boolean 
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
 
       {viewingEmail && (
         <div
