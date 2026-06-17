@@ -188,7 +188,7 @@ export default function App() {
         isActivityReportActive={currentPage === "activity-report"}
         isDarkMode={isDarkMode}
         onThemeToggle={() => setIsDarkMode(!isDarkMode)}
-        onNavigate={setCurrentPage}
+        onNavigate={(page) => setCurrentPage(page as PageKey)}
         onLogout={handleLogout}
       />
 
