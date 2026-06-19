@@ -3,6 +3,7 @@ import { Header } from "./components/Header";
 import { Sidebar, PageKey } from "./components/Sidebar";
 import { HomePage } from "./pages/HomePage";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
+import { ClientOrdersPage } from "./pages/ClientOrdersPage";
 
 const USER_NAME = "Raghu Adaveni";
 
@@ -42,6 +43,8 @@ export default function App() {
     switch (currentPage) {
       case "home":
         return <HomePage isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
+      case "client-orders":
+        return <ClientOrdersPage isDarkMode={isDarkMode} />;
       default:
         return <PlaceholderPage title={PAGE_TITLES[currentPage] ?? currentPage} />;
     }
