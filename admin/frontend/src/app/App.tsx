@@ -2,34 +2,49 @@ import { useState, useEffect } from "react";
 import { Header } from "./components/Header";
 import { Sidebar, PageKey } from "./components/Sidebar";
 import { HomePage } from "./pages/HomePage";
+import { ClientManagement } from "./pages/ClientManagement";
+import { ClientSummary } from "./pages/ClientSummary";
+import { SetPricing } from "./pages/SetPricing";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
 
 const USER_NAME = "Raghu Adaveni";
 
 const PAGE_TITLES: Record<PageKey, string> = {
   home: "Affiliate Home",
-  clients: "Clients",
+  "client-management": "Client Management",
+  "add-new-client": "Add New Client",
+  "client-invoices": "Client Invoices",
+  "mass-mail": "Mass Mail",
+  "client-summary": "Client Summary",
+  "set-pricing": "Set Pricing",
   "client-orders": "Client Orders",
-  reports: "Reports",
+  "reports-orders": "Order Reports",
+  "reports-clients": "Client Reports",
   invoices: "Invoices",
   "account-settings": "Account Settings",
-  "support-center": "Support Center",
+  "client-groups": "Client Groups",
+  "signup-pages": "Signup Pages",
+  "billing-setup": "Billing Setup",
+  "manage-sales-operators": "Manage Sales Operators",
+  "manage-email-templates": "Manage E-mail Templates",
+  "setup-welcome-email": "Setup Welcome Email",
+  "support-bulk-orders": "Bulk Order Requests",
+  "support-documents": "Forms & Documents",
   announcements: "Announcements",
   "activity-report": "Activity Report",
 };
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageKey>("home");
+  const [selectedClientId, setSelectedClientId] = useState<string | undefined>();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Dynamically update browser tab title
   useEffect(() => {
     const pageLabel = PAGE_TITLES[currentPage] ?? currentPage;
     document.title = `EvalRight Admin - ${pageLabel}`;
   }, [currentPage]);
 
-  // Apply dark mode class to HTML element
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add("dark");
@@ -38,12 +53,29 @@ export default function App() {
     }
   }, [isDarkMode]);
 
+  function handleViewClient(clientId: string) {
+    setSelectedClientId(clientId);
+    setCurrentPage("client-summary");
+  }
+
   function renderPage() {
     switch (currentPage) {
       case "home":
-        return <HomePage isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
+        return <HomePage isDarkMode={isDarkMode} onNavigate={setCurrentPage} onViewClient={handleViewClient} />;
+      case "client-management":
+        return <ClientManagement isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
+      case "client-summary":
+        return (
+          <ClientSummary
+            isDarkMode={isDarkMode}
+            clientId={selectedClientId}
+            onNavigate={setCurrentPage}
+          />
+        );
+      case "set-pricing":
+        return <SetPricing isDarkMode={isDarkMode} />;
       default:
-        return <PlaceholderPage title={PAGE_TITLES[currentPage] ?? currentPage} />;
+        return <PlaceholderPage title={PAGE_TITLES[currentPage] ?? currentPage} isDarkMode={isDarkMode} />;
     }
   }
 
@@ -58,7 +90,6 @@ export default function App() {
         fontFamily: "'Wix Madefor Display', sans-serif",
       }}
     >
-      {/* Fixed top header */}
       <Header
         userName={USER_NAME}
         onMenuToggle={() => setSidebarOpen((o) => !o)}
@@ -72,7 +103,6 @@ export default function App() {
         onNavigate={(page) => setCurrentPage(page as PageKey)}
       />
 
-      {/* Body: sidebar + content */}
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
         <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} isOpen={sidebarOpen} isDarkMode={isDarkMode} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "auto" }}>
