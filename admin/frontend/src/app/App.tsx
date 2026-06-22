@@ -6,6 +6,7 @@ import { ClientManagement } from "./pages/ClientManagement";
 import { ClientSummary } from "./pages/ClientSummary";
 import { SetPricing } from "./pages/SetPricing";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
+import { ClientOrdersPage } from "./pages/ClientOrdersPage";
 
 const USER_NAME = "Raghu Adaveni";
 
@@ -69,11 +70,13 @@ export default function App() {
           <ClientSummary
             isDarkMode={isDarkMode}
             clientId={selectedClientId}
-            onNavigate={setCurrentPage}
+            onNavigate={(page) => setCurrentPage(page as PageKey)}
           />
         );
       case "set-pricing":
         return <SetPricing isDarkMode={isDarkMode} />;
+      case "client-orders":
+        return <ClientOrdersPage isDarkMode={isDarkMode} />;
       default:
         return <PlaceholderPage title={PAGE_TITLES[currentPage] ?? currentPage} isDarkMode={isDarkMode} />;
     }
