@@ -116,21 +116,23 @@ export function ClientSummary({ isDarkMode = false, clientId, initialTab = "Summ
   }, [clientId]);
 
   function handleQuickAction(label: string) {
-
     if (label.startsWith("Set Pricing") && onNavigate) {
-
       onNavigate("set-pricing");
-
       return;
-
     }
 
-    if (label === "View Transactions") {
+    const tabMap: Record<string, string> = {
+      "Add New Order": "Orders",
+      "View Orders": "Orders",
+      "View Transactions": "Transactions",
+      "Reset Pricing": "Billing",
+      "Close Client Account": "Profile",
+    };
 
-      setActiveTab("Transactions");
-
+    const tab = tabMap[label];
+    if (tab) {
+      setActiveTab(tab);
     }
-
   }
 
 

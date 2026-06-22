@@ -7,6 +7,7 @@ import { ClientSummary } from "./pages/ClientSummary";
 import { SetPricing } from "./pages/SetPricing";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
 import { ClientOrdersPage } from "./pages/ClientOrdersPage";
+import { AddNewClient } from "./pages/AddNewClient";
 
 const USER_NAME = "Raghu Adaveni";
 
@@ -65,6 +66,8 @@ export default function App() {
         return <HomePage isDarkMode={isDarkMode} onNavigate={setCurrentPage} onViewClient={handleViewClient} />;
       case "client-management":
         return <ClientManagement isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
+      case "add-new-client":
+        return <AddNewClient isDarkMode={isDarkMode} />;
       case "client-summary":
         return (
           <ClientSummary

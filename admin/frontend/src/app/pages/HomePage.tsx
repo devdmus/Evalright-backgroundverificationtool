@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lock, ArrowRight } from "lucide-react";
+import { Lock, ArrowRight, Save } from "lucide-react";
 import { Footer } from "../components/Footer";
 import { RECENT_CLIENTS, NO_SALES_CLIENTS, CLIENT_LIST, DEMO_CLIENT } from "../data/mockData";
 
@@ -38,6 +38,11 @@ function getClientIdByName(name: string): string {
 
 export function HomePage({ isDarkMode = false, onNavigate, onViewClient }: HomePageProps) {
   const [widgetsLocked, setWidgetsLocked] = useState(true);
+  const [myNotes, setMyNotes] = useState("");
+
+  const cardBg = isDarkMode ? "#252830" : "#ffffff";
+  const borderColor = isDarkMode ? "#333333" : "#E5E7EB";
+  const accentColor = isDarkMode ? "#DF2A57" : "#C70039";
 
   return (
     <div
@@ -349,6 +354,7 @@ export function HomePage({ isDarkMode = false, onNavigate, onViewClient }: HomeP
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
             gap: "20px",
+            marginBottom: "20px",
           }}
         >
           {/* Clients Recent Card */}
@@ -574,6 +580,87 @@ export function HomePage({ isDarkMode = false, onNavigate, onViewClient }: HomeP
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+
+        {/* ── My Notes ─────────────────────────────────────────────────────── */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "20px",
+          }}
+        >
+          <div
+            style={{
+              background: cardBg,
+              border: `1px solid ${borderColor}`,
+              borderRadius: "6px",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                padding: "16px 20px",
+                borderBottom: `1px solid ${isDarkMode ? "#333333" : "#F3F4F6"}`,
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  color: isDarkMode ? "#E5E7EB" : "#333333",
+                  margin: 0,
+                }}
+              >
+                My Notes
+              </h2>
+            </div>
+
+            <div style={{ padding: "16px 20px 20px" }}>
+              <textarea
+                value={myNotes}
+                onChange={(e) => setMyNotes(e.target.value)}
+                placeholder="Notes"
+                rows={6}
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  fontSize: "13px",
+                  border: `1px solid ${borderColor}`,
+                  borderRadius: "4px",
+                  background: isDarkMode ? "#1A1C21" : "#FFFFFF",
+                  color: isDarkMode ? "#E5E7EB" : "#333333",
+                  boxSizing: "border-box",
+                  resize: "vertical",
+                  fontFamily: "inherit",
+                  marginBottom: "16px",
+                  minHeight: "120px",
+                }}
+              />
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <button
+                  style={{
+                    height: "34px",
+                    padding: "0 16px",
+                    background: accentColor,
+                    color: "#FFFFFF",
+                    border: "none",
+                    borderRadius: "4px",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <Save size={14} />
+                  Save Note
+                </button>
+              </div>
             </div>
           </div>
         </div>
