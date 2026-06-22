@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { Lock, ArrowRight, Eye, RefreshCw } from "lucide-react";
+import { Lock, ArrowRight } from "lucide-react";
 import { Footer } from "../components/Footer";
-
-// ── Static Data ──────────────────────────────────────────────────────────────
+import { RECENT_CLIENTS, NO_SALES_CLIENTS, CLIENT_LIST, DEMO_CLIENT } from "../data/mockData";
 
 const OVERVIEW_LEFT = [
-  { label: "Today's Orders", value: "0", color: "#2196F3" },
+  { label: "Today's Orders", value: "2", color: "#2196F3" },
   { label: "Today's Pending Orders", value: "0", color: "#FFB300" },
-  { label: "Today's Closed Orders", value: "0", color: "#4CAF50" },
-  { label: "Overdue Invoices", value: "18", color: "#F44336" },
+  { label: "Today's Closed Orders", value: "92", color: "#4CAF50" },
+  { label: "Overdue Invoices", value: "11", color: "#F44336" },
   { label: "Percent A La Carte Orders", value: "33%", color: "#2196F3" },
 ];
 
@@ -26,30 +25,18 @@ const AGING_ITEMS = [
   { label: "90+ Days", value: "$1,572.98", color: "#9C27B0" },
 ];
 
-const RECENT_CLIENTS = [
-  { name: "Mannat Technolgies", date: "2026-05-08", contact: "Sri K.", phone: "(817) 993-1117", sales: "$0.00" },
-  { name: "CLOUD SYSTEMS LLC", date: "2026-05-08", contact: "Muralidhar P.", phone: "(980) 298-0438", sales: "$163.97" },
-  { name: "VIGILIQ LLC", date: "2026-05-07", contact: "Bhanu S.", phone: "(965) 065-9500", sales: "$0.00" },
-  { name: "Intellan Technologies LLC", date: "2026-05-07", contact: "Suresh K.", phone: "(609) 851-9867", sales: "$179.00" },
-  { name: "Jarvis Business Solutions LLC", date: "2026-05-07", contact: "Sri A.", phone: "(000) 030-1616", sales: "$42.50" },
-  { name: "BV&S LLC", date: "2026-05-05", contact: "Anjali P.", phone: "(201) 948-2831", sales: "$0.00" },
-];
-
-const NO_SALES_CLIENTS = [
-  { name: "Mannat Technologies", date: "2026-05-08", contact: "sri K.", phone: "(817) 993-1117" },
-  { name: "VIGILIQ LLC", date: "2026-05-07", contact: "BHANU S.", phone: "(965) 065-9500" },
-  { name: "Merlin Solutions LLC", date: "2026-04-27", contact: "Juuhi A.", phone: "(832) 229-6131" },
-  { name: "Alephys LLC", date: "2026-04-15", contact: "Ravi M.", phone: "(713) 568-6585" },
-  { name: "Episdata Inc", date: "2026-04-09", contact: "Sri C.", phone: "(412) 996-2307" },
-  { name: "Revel Consultants", date: "2026-04-07", contact: "Srinivas M.", phone: "(469) 481-6315" },
-];
-
 interface HomePageProps {
   isDarkMode?: boolean;
   onNavigate?: (page: any) => void;
+  onViewClient?: (clientId: string) => void;
 }
 
-export function HomePage({ isDarkMode = false, onNavigate }: HomePageProps) {
+function getClientIdByName(name: string): string {
+  const match = CLIENT_LIST.find((c) => c.companyName === name);
+  return match?.id ?? DEMO_CLIENT.id;
+}
+
+export function HomePage({ isDarkMode = false, onNavigate, onViewClient }: HomePageProps) {
   const [widgetsLocked, setWidgetsLocked] = useState(true);
 
   return (
@@ -433,7 +420,7 @@ export function HomePage({ isDarkMode = false, onNavigate }: HomePageProps) {
                           color: isDarkMode ? "#DF2A57" : "#C70039",
                           cursor: "pointer",
                         }}
-                        onClick={() => onNavigate && onNavigate("clients")}
+                        onClick={() => onViewClient?.(getClientIdByName(client.name))}
                       >
                         {client.name}
                       </td>
@@ -551,7 +538,7 @@ export function HomePage({ isDarkMode = false, onNavigate }: HomePageProps) {
                           color: isDarkMode ? "#DF2A57" : "#C70039",
                           cursor: "pointer",
                         }}
-                        onClick={() => onNavigate && onNavigate("clients")}
+                        onClick={() => onViewClient?.(getClientIdByName(client.name))}
                       >
                         {client.name}
                       </td>
@@ -591,7 +578,7 @@ export function HomePage({ isDarkMode = false, onNavigate }: HomePageProps) {
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

@@ -2,6 +2,8 @@
 import { ChevronLeft, ChevronRight, Search, ChevronDown } from "lucide-react";
 import { ORDERS, STATUS_STYLES } from "../data/mockData";
 import { Footer } from "../components/Footer";
+import { getPageTheme } from "../theme/pageTheme";
+import { getListPageStyles } from "../theme/listPageStyles";
 
 function getAmountVal(verificationType: string): number {
   switch (verificationType) {
@@ -19,11 +21,12 @@ function getAmountVal(verificationType: string): number {
   }
 }
 
-function SortIcon({ active, direction }: { active: boolean; direction: "asc" | "desc" }) {
+function SortIcon({ active, direction, isDarkMode = false }: { active: boolean; direction: "asc" | "desc"; isDarkMode?: boolean }) {
+  const colors = getListPageStyles(isDarkMode).sortColors(active, direction);
   return (
     <span style={{ marginLeft: "6px", display: "inline-flex", flexDirection: "column", verticalAlign: "middle", opacity: active ? 1 : 0.35 }}>
-      <span style={{ fontSize: "8px", height: "5px", lineHeight: "1", color: active && direction === "asc" ? "#111827" : "#A0AEC0" }}>Γû▓</span>
-      <span style={{ fontSize: "8px", height: "5px", lineHeight: "1", color: active && direction === "desc" ? "#111827" : "#A0AEC0", marginTop: "2px" }}>Γû╝</span>
+      <span style={{ fontSize: "8px", height: "5px", lineHeight: "1", color: colors.asc }}>▲</span>
+      <span style={{ fontSize: "8px", height: "5px", lineHeight: "1", color: colors.desc, marginTop: "2px" }}>▼</span>
     </span>
   );
 }
@@ -97,9 +100,12 @@ interface DateRangePickerProps {
   value: string;
   onChange: (val: string) => void;
   onLoad: () => void;
+  isDarkMode?: boolean;
 }
 
-function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
+function DateRangePicker({ value, onChange, onLoad, isDarkMode = false }: DateRangePickerProps) {
+  const t = getPageTheme(isDarkMode);
+  const rangeBg = isDarkMode ? "#3A3D45" : "#EAEAEA";
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -168,8 +174,8 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
       <div
         onClick={() => setIsOpen(!isOpen)}
         style={{
-          background: "#FFFFFF",
-          border: "1px solid #cbd5e1",
+          background: t.inputBg,
+          border: t.inputBorder,
           borderRadius: "4px",
           padding: "6px 12px",
           display: "flex",
@@ -182,10 +188,10 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
           userSelect: "none",
         }}
       >
-        <label style={{ fontSize: "12px", color: "#9CA3AF", fontWeight: 400, marginBottom: "2px", cursor: "pointer" }}>
+        <label style={{ fontSize: "12px", color: t.textMuted, fontWeight: 400, marginBottom: "2px", cursor: "pointer" }}>
           Order Date Range
         </label>
-        <div style={{ fontSize: "14px", color: "#333", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        <div style={{ fontSize: "14px", color: t.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {value}
         </div>
       </div>
@@ -215,10 +221,10 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
             top: "calc(100% + 8px)",
             left: "0",
             width: "320px",
-            background: "#FFFFFF",
-            border: "1px solid #cbd5e1",
+            background: t.cardBg,
+            border: t.inputBorder,
             borderRadius: "4px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            boxShadow: isDarkMode ? "0 4px 12px rgba(0,0,0,0.4)" : "0 4px 12px rgba(0,0,0,0.1)",
             zIndex: 1000,
             boxSizing: "border-box",
             paddingBottom: "8px",
@@ -293,7 +299,7 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
               padding: "8px 8px 4px 8px",
               fontWeight: 600,
               fontSize: "13px",
-              color: "#4B5563",
+              color: t.label,
             }}
           >
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
@@ -322,19 +328,18 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
                 dateStr > startDateStr &&
                 dateStr < endDateStr;
 
-              // Styles for range background highlight
               let cellBg = "transparent";
               if (inRange) {
-                cellBg = "#EAEAEA";
+                cellBg = rangeBg;
               } else if (isStart && endDateStr) {
-                cellBg = "linear-gradient(90deg, transparent 50%, #EAEAEA 50%)";
+                cellBg = `linear-gradient(90deg, transparent 50%, ${rangeBg} 50%)`;
               } else if (isEnd) {
-                cellBg = "linear-gradient(90deg, #EAEAEA 50%, transparent 50%)";
+                cellBg = `linear-gradient(90deg, ${rangeBg} 50%, transparent 50%)`;
               }
 
               // Styles for the day circle indicator
               let dayBg = "transparent";
-              let dayColor = "#374151";
+              let dayColor = t.text;
               let dayWeight = "normal";
 
               if (isStart || isEnd) {
@@ -342,10 +347,10 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
                 dayColor = "#FFFFFF";
                 dayWeight = "bold";
               } else if (inRange) {
-                dayColor = "#C70039";
+                dayColor = t.link;
                 dayWeight = "500";
               } else if (!isCurrentMonth) {
-                dayColor = "#D1D5DB";
+                dayColor = t.textMuted;
               }
 
               return (
@@ -388,6 +393,7 @@ function DateRangePicker({ value, onChange, onLoad }: DateRangePickerProps) {
 }
 
 export function OrderList({ isDarkMode = false }: { isDarkMode?: boolean }) {
+  const s = getListPageStyles(isDarkMode);
   const [dateRangeInput, setDateRangeInput] = useState("2026-03-12 to 2026-06-12");
   const [appliedDateRange, setAppliedDateRange] = useState({ startDate: "2026-03-12", endDate: "2026-03-12" });
   const [perPage, setPerPage] = useState(10);
@@ -469,16 +475,16 @@ export function OrderList({ isDarkMode = false }: { isDarkMode?: boolean }) {
   const paginated = sorted.slice((page - 1) * perPage, page * perPage);
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, fontFamily: "'Wix Madefor Display', sans-serif" }}>
-      <div style={{ flex: 1, padding: "16px 20px", background: isDarkMode ? "#252830" : "#F5F5F5", overflowY: "auto" }}>
+    <div style={s.outer}>
+      <div style={s.content}>
         
         {/* Page Title */}
-        <h1 style={{ fontSize: "20px", fontWeight: 500, color: isDarkMode ? "#DF2A57" : "rgb(199, 0, 57)", marginBottom: "14px" }}>
+        <h1 style={s.title}>
           Orders List
         </h1>
 
         {/* Card Container */}
-        <div style={{ background: isDarkMode ? "#1A1C21" : "#FFFFFF", border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB", borderRadius: "4px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+        <div style={s.card}>
           
           {/* Date Range Row */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
@@ -486,27 +492,19 @@ export function OrderList({ isDarkMode = false }: { isDarkMode?: boolean }) {
               value={dateRangeInput}
               onChange={setDateRangeInput}
               onLoad={handleLoadByRange}
+              isDarkMode={isDarkMode}
             />
           </div>
 
           {/* Table Controls Row */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+          <div style={s.controlsRow}>
             
             {/* Entries Selection */}
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", color: "#4B5563" }}>
+            <div style={s.controlsLabel}>
               <select
                 value={perPage}
                 onChange={(e) => { setPerPage(parseInt(e.target.value)); setPage(1); }}
-                style={{
-                  background: "#FFFFFF",
-                  border: "1px solid #cbd5e1",
-                  borderRadius: "4px",
-                  padding: "4px 8px",
-                  fontSize: "14px",
-                  color: "#333",
-                  outline: "none",
-                  cursor: "pointer",
-                }}
+                style={s.select}
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>
@@ -518,23 +516,14 @@ export function OrderList({ isDarkMode = false }: { isDarkMode?: boolean }) {
 
             {/* Live Search Input */}
             <div style={{ position: "relative", width: "240px" }}>
-              <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "#9CA3AF", display: "flex", alignItems: "center" }}>
+              <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: s.t.textMuted, display: "flex", alignItems: "center" }}>
                 <Search size={15} />
               </span>
               <input
                 placeholder="Search..."
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px 8px 32px",
-                  fontSize: "14px",
-                  background: "#F2F4F6",
-                  border: "1px solid #cbd5e1",
-                  borderRadius: "4px",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
+                style={s.search}
               />
             </div>
           </div>
@@ -543,23 +532,23 @@ export function OrderList({ isDarkMode = false }: { isDarkMode?: boolean }) {
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
               <thead>
-                <tr style={{ background: "#F3F4F6", borderBottom: "2px solid #E5E7EB" }}>
-                  <th onClick={() => handleSort("searchId")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Order ID <SortIcon active={sortField === "searchId"} direction={sortDirection} />
+                <tr style={s.theadRow}>
+                  <th onClick={() => handleSort("searchId")} style={s.th}>
+                    Order ID <SortIcon active={sortField === "searchId"} direction={sortDirection} isDarkMode={isDarkMode} />
                   </th>
-                  <th onClick={() => handleSort("applicantName")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Applicant Name <SortIcon active={sortField === "applicantName"} direction={sortDirection} />
+                  <th onClick={() => handleSort("applicantName")} style={s.th}>
+                    Applicant Name <SortIcon active={sortField === "applicantName"} direction={sortDirection} isDarkMode={isDarkMode} />
                   </th>
-                  <th onClick={() => handleSort("orderDate")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Order Date <SortIcon active={sortField === "orderDate"} direction={sortDirection} />
+                  <th onClick={() => handleSort("orderDate")} style={s.th}>
+                    Order Date <SortIcon active={sortField === "orderDate"} direction={sortDirection} isDarkMode={isDarkMode} />
                   </th>
-                  <th onClick={() => handleSort("amount")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Amount <SortIcon active={sortField === "amount"} direction={sortDirection} />
+                  <th onClick={() => handleSort("amount")} style={s.th}>
+                    Amount <SortIcon active={sortField === "amount"} direction={sortDirection} isDarkMode={isDarkMode} />
                   </th>
-                  <th onClick={() => handleSort("status")} style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563", cursor: "pointer", userSelect: "none" }}>
-                    Order Status <SortIcon active={sortField === "status"} direction={sortDirection} />
+                  <th onClick={() => handleSort("status")} style={s.th}>
+                    Order Status <SortIcon active={sortField === "status"} direction={sortDirection} isDarkMode={isDarkMode} />
                   </th>
-                  <th style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#4B5563" }}>
+                  <th style={s.thStatic}>
                     Actions
                   </th>
                 </tr>
@@ -567,7 +556,7 @@ export function OrderList({ isDarkMode = false }: { isDarkMode?: boolean }) {
               <tbody>
                 {paginated.length === 0 ? (
                   <tr>
-                    <td colSpan={6} style={{ textAlign: "center", padding: "32px", fontSize: "14px", color: "#6B7280" }}>
+                    <td colSpan={6} style={s.emptyCell}>
                       No records found
                     </td>
                   </tr>
@@ -575,11 +564,11 @@ export function OrderList({ isDarkMode = false }: { isDarkMode?: boolean }) {
                   paginated.map((o, idx) => {
                     const amount = getAmountVal(o.verificationType);
                     return (
-                      <tr key={o.searchId} style={{ borderBottom: "1px solid #F3F4F6", background: idx % 2 === 0 ? "#FFFFFF" : "#F9FAFB" }}>
-                        <td style={{ padding: "12px 16px", fontSize: "13px", color: "#3B1D7D", fontWeight: 600 }}>{o.searchId}</td>
-                        <td style={{ padding: "12px 16px", fontSize: "13px", color: "#111827" }}>{o.applicantName}</td>
-                        <td style={{ padding: "12px 16px", fontSize: "13px", color: "#4B5563" }}>{o.orderDate}</td>
-                        <td style={{ padding: "12px 16px", fontSize: "13px", color: "#111827" }}>${amount.toFixed(2)}</td>
+                      <tr key={o.searchId} style={s.row(idx)}>
+                        <td style={{ ...s.tdPrimary, color: isDarkMode ? "#A78BFA" : "#3B1D7D" }}>{o.searchId}</td>
+                        <td style={s.tdPrimary}>{o.applicantName}</td>
+                        <td style={s.td}>{o.orderDate}</td>
+                        <td style={s.tdPrimary}>${amount.toFixed(2)}</td>
                         <td style={{ padding: "12px 16px" }}>
                           <span style={{
                             display: "inline-block",
@@ -595,7 +584,7 @@ export function OrderList({ isDarkMode = false }: { isDarkMode?: boolean }) {
                           </span>
                         </td>
                         <td style={{ padding: "12px 16px" }}>
-                          <button style={{ background: "none", border: "none", color: "#C70039", fontWeight: 500, fontSize: "13px", cursor: "pointer" }}>
+                          <button style={s.actionLink}>
                             View
                           </button>
                         </td>
@@ -608,7 +597,7 @@ export function OrderList({ isDarkMode = false }: { isDarkMode?: boolean }) {
           </div>
 
           {/* Pagination Row */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "20px", fontSize: "14px", color: "#4B5563" }}>
+          <div style={s.pagination}>
             <div>
               Showing {startIndex} to {endIndex} of {totalEntries} entries
             </div>
@@ -617,28 +606,14 @@ export function OrderList({ isDarkMode = false }: { isDarkMode?: boolean }) {
               <button
                 disabled={page === 1}
                 onClick={() => setPage(1)}
-                style={{
-                  padding: "6px 8px",
-                  border: "none",
-                  background: "transparent",
-                  color: page === 1 ? "#D1D5DB" : "#4B5563",
-                  cursor: page === 1 ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                }}
+                style={s.navBtn(page === 1)}
               >
-                ┬½
+                «
               </button>
               <button
                 disabled={page === 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                style={{
-                  padding: "6px 8px",
-                  border: "none",
-                  background: "transparent",
-                  color: page === 1 ? "#D1D5DB" : "#4B5563",
-                  cursor: page === 1 ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                }}
+                style={s.navBtn(page === 1)}
               >
                 &lt;
               </button>
@@ -647,15 +622,7 @@ export function OrderList({ isDarkMode = false }: { isDarkMode?: boolean }) {
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  style={{
-                    padding: "6px 12px",
-                    border: p === page ? "1px solid #C70039" : "1px solid #E5E7EB",
-                    background: p === page ? "#C70039" : "#FFFFFF",
-                    color: p === page ? "#FFFFFF" : "#4B5563",
-                    borderRadius: "4px",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                  }}
+                  style={s.pageBtn(p === page)}
                 >
                   {p}
                 </button>
@@ -664,37 +631,23 @@ export function OrderList({ isDarkMode = false }: { isDarkMode?: boolean }) {
               <button
                 disabled={page === totalPages || totalPages === 0}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                style={{
-                  padding: "6px 8px",
-                  border: "none",
-                  background: "transparent",
-                  color: (page === totalPages || totalPages === 0) ? "#D1D5DB" : "#4B5563",
-                  cursor: (page === totalPages || totalPages === 0) ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                }}
+                style={s.navBtn(page === totalPages || totalPages === 0)}
               >
                 &gt;
               </button>
               <button
                 disabled={page === totalPages || totalPages === 0}
                 onClick={() => setPage(totalPages)}
-                style={{
-                  padding: "6px 8px",
-                  border: "none",
-                  background: "transparent",
-                  color: (page === totalPages || totalPages === 0) ? "#D1D5DB" : "#4B5563",
-                  cursor: (page === totalPages || totalPages === 0) ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                }}
+                style={s.navBtn(page === totalPages || totalPages === 0)}
               >
-                ┬╗
+                »
               </button>
             </div>
           </div>
 
         </div>
       </div>
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

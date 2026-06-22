@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Filter, Search, Edit2, ChevronDown, Check, ChevronLeft, ChevronRight, ArrowLeft, Download } from "lucide-react";
+import { Footer } from "../components/Footer";
 
 interface InvoiceItem {
   id: string;
@@ -1146,38 +1147,15 @@ export function ClientInvoicesPage({ isDarkMode = false }: ClientInvoicesPagePro
           flexDirection: "column",
           minHeight: 0,
           background: bodyBg,
-          padding: "20px 24px",
           overflowY: "auto",
           overflowX: "hidden",
           fontFamily: "'Wix Madefor Display', sans-serif",
         }}
       >
-        {renderInvoiceDetail()}
-
-        {/* Footer */}
-        <div
-          style={{
-            marginTop: "auto",
-            paddingTop: "24px",
-            paddingBottom: "8px",
-            borderTop: "1px solid " + (isDarkMode ? "#333333" : "#E5E7EB"),
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            fontSize: "12px",
-            color: textMuted,
-          }}
-        >
-          <span>© 2026 EvalRight</span>
-          <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
-            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              📞 1-800-935-9025
-            </span>
-            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              ✉️ support@evalright.com
-            </span>
-          </div>
+        <div style={{ flex: 1, padding: "20px 24px", display: "flex", flexDirection: "column" }}>
+          {renderInvoiceDetail()}
         </div>
+        <Footer isDarkMode={isDarkMode} />
       </div>
     );
   }
@@ -1190,12 +1168,12 @@ export function ClientInvoicesPage({ isDarkMode = false }: ClientInvoicesPagePro
         flexDirection: "column",
         minHeight: 0,
         background: bodyBg,
-        padding: "20px 24px",
         overflowY: "auto",
         overflowX: "hidden",
         fontFamily: "'Wix Madefor Display', sans-serif",
       }}
     >
+      <div style={{ flex: 1, padding: "20px 24px", display: "flex", flexDirection: "column" }}>
       {/* Page Title */}
       <h1
         style={{
@@ -1889,31 +1867,8 @@ export function ClientInvoicesPage({ isDarkMode = false }: ClientInvoicesPagePro
           </table>
         </div>
       </div>
-
-      {/* Footer */}
-      <div
-        style={{
-          marginTop: "auto",
-          paddingTop: "24px",
-          paddingBottom: "8px",
-          borderTop: "1px solid " + (isDarkMode ? "#333333" : "#E5E7EB"),
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          fontSize: "12px",
-          color: textMuted,
-        }}
-      >
-        <span>© 2026 EvalRight</span>
-        <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
-          <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            📞 1-800-935-9025
-          </span>
-          <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            ✉️ support@evalright.com
-          </span>
-        </div>
       </div>
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

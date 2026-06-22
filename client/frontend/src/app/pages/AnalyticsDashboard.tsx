@@ -1,12 +1,15 @@
 import { Footer } from "../components/Footer";
+import { getPageTheme } from "../theme/pageTheme";
 
-export function AnalyticsDashboard() {
+export function AnalyticsDashboard({ isDarkMode = false }: { isDarkMode?: boolean }) {
+  const t = getPageTheme(isDarkMode);
+
   const cardStyle: React.CSSProperties = {
-    background: "#FFFFFF",
-    border: "1px solid #E5E7EB",
+    background: t.cardBg,
+    border: t.cardBorder,
     borderRadius: "4px",
     padding: "20px 24px",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+    boxShadow: t.cardShadow,
     display: "flex",
     flexDirection: "column",
     gap: "16px",
@@ -16,39 +19,36 @@ export function AnalyticsDashboard() {
   const cardTitleStyle: React.CSSProperties = {
     fontSize: "14px",
     fontWeight: 500,
-    color: "#4B5563",
+    color: t.label,
     margin: 0,
   };
 
   const cardValueStyle: React.CSSProperties = {
     fontSize: "14px",
-    color: "#6B7280",
+    color: t.textMuted,
     margin: 0,
   };
 
   const percentageValueStyle: React.CSSProperties = {
     fontSize: "16px",
     fontWeight: 600,
-    color: "#374151",
+    color: t.text,
     margin: 0,
   };
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, fontFamily: "'Wix Madefor Display', sans-serif" }}>
-      <div style={{ flex: 1, padding: "16px 20px", background: "#F5F5F5", overflowY: "auto", display: "flex", flexDirection: "column", gap: "20px" }}>
-        
-        {/* Page Title */}
-        <h1 style={{ fontSize: "20px", fontWeight: 500, color: "rgb(199, 0, 57)", marginBottom: "0px" }}>
+      <div style={{ flex: 1, padding: "16px 20px", background: t.contentBg, overflowY: "auto", display: "flex", flexDirection: "column", gap: "20px" }}>
+        <h1 style={{ fontSize: "20px", fontWeight: 500, color: t.title, marginBottom: "0px" }}>
           Analytics Dashboard
         </h1>
 
-        {/* Breadcrumb Tag */}
         <div>
           <div
             style={{
               display: "inline-block",
-              background: "#E5E7EB",
-              color: "#374151",
+              background: t.badgeBg,
+              color: t.text,
               padding: "6px 12px",
               borderRadius: "3px",
               fontSize: "13px",
@@ -59,10 +59,7 @@ export function AnalyticsDashboard() {
           </div>
         </div>
 
-        {/* Main Dashboard Panel */}
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          
-          {/* Section Banner Header */}
           <div
             style={{
               background: "#C70039",
@@ -77,23 +74,21 @@ export function AnalyticsDashboard() {
             Analytics Dashboard
           </div>
 
-          {/* Row 1: Average Unique Counties / Alias Names */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
             <div style={cardStyle}>
               <h2 style={cardTitleStyle}>Average Unique Counties per Applicant</h2>
               <p style={cardValueStyle}>
-                Over the last year: <strong style={{ color: "#374151" }}>2.24</strong>
+                Over the last year: <strong style={{ color: t.text }}>2.24</strong>
               </p>
             </div>
             <div style={cardStyle}>
               <h2 style={cardTitleStyle}>Average Unique Alias Names per Applicant</h2>
               <p style={cardValueStyle}>
-                Over the last year: <strong style={{ color: "#374151" }}>3.52</strong>
+                Over the last year: <strong style={{ color: t.text }}>3.52</strong>
               </p>
             </div>
           </div>
 
-          {/* Row 2: Searches Completed in < 1, 8, 24 Hours */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
             <div style={cardStyle}>
               <h2 style={cardTitleStyle}>Searches Completed in &lt; 1 Hour</h2>
@@ -109,17 +104,15 @@ export function AnalyticsDashboard() {
             </div>
           </div>
 
-          {/* Row 3: Percentage Leading to Adverse Action */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "16px" }}>
             <div style={cardStyle}>
               <h2 style={cardTitleStyle}>Percentage of Completed Reports Leading to Adverse Action</h2>
               <p style={percentageValueStyle}>0.75%</p>
             </div>
           </div>
-
         </div>
       </div>
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

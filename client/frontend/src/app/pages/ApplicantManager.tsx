@@ -535,7 +535,7 @@ export function ApplicantManager({ isDarkMode = false }: { isDarkMode?: boolean 
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

@@ -575,7 +575,7 @@ export function SetupRandomDrugChecks({ isDarkMode = false }: { isDarkMode?: boo
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
     </div>
   );
 }

@@ -268,7 +268,7 @@ export function BulkOrderRequests({ isDarkMode = false }: { isDarkMode?: boolean
             </p>
           </div>
         </div>
-        <Footer />
+        <Footer isDarkMode={isDarkMode} />
       </div>
     );
   }
@@ -488,7 +488,7 @@ export function BulkOrderRequests({ isDarkMode = false }: { isDarkMode?: boolean
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer isDarkMode={isDarkMode} />
 
       {isModalOpen && (
         <div
