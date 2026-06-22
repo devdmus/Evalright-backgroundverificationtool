@@ -1,19 +1,19 @@
 import { Phone, Mail } from "lucide-react";
 
-export function Footer() {
+export function Footer({ isDarkMode = false }: { isDarkMode?: boolean }) {
   return (
     <footer
       style={{
-        borderTop: "1px solid #E5E7EB",
+        borderTop: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
         padding: "0 24px",
         height: "44px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         flexShrink: 0,
-        background: "#FFFFFF",
+        background: isDarkMode ? "#252830" : "#FFFFFF",
         fontSize: "14px",
-        color: "#777777",
+        color: isDarkMode ? "#9CA3AF" : "#777777",
       }}
     >
       <span>© 2026 EvalRight</span>
