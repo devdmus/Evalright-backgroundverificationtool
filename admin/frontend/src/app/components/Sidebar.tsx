@@ -14,6 +14,10 @@ import {
 export type PageKey =
   | "home"
   | "clients"
+  | "client-management"
+  | "add-client"
+  | "client-invoices"
+  | "mass-mail"
   | "client-orders"
   | "reports"
   | "invoices"
@@ -34,11 +38,22 @@ interface NavGroup {
   icon: React.ReactNode;
   page?: PageKey;
   hasChevron?: boolean;
+  subItems?: { label: string; page: PageKey }[];
 }
 
 const mainNavGroups: NavGroup[] = [
   { label: "Home", icon: <Home size={18} />, page: "home" },
-  { label: "Clients", icon: <Users size={18} />, page: "clients", hasChevron: true },
+  {
+    label: "Clients",
+    icon: <Users size={18} />,
+    hasChevron: true,
+    subItems: [
+      { label: "Client Management", page: "client-management" },
+      { label: "Add New Client", page: "add-client" },
+      { label: "Client Invoices", page: "client-invoices" },
+      { label: "Mass Mail", page: "mass-mail" },
+    ],
+  },
   { label: "Client Orders", icon: <ShoppingCart size={18} />, page: "client-orders" },
   { label: "Reports", icon: <FileText size={18} />, page: "reports", hasChevron: true },
 ];
@@ -56,6 +71,9 @@ export function Sidebar({ currentPage, onNavigate, isOpen = true, isDarkMode = f
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Keep Clients expanded by default
+  const [openGroup, setOpenGroup] = useState<string | null>("Clients");
+
   function handleNavScroll() {
     setIsScrolling(true);
     if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
@@ -70,24 +88,55 @@ export function Sidebar({ currentPage, onNavigate, isOpen = true, isDarkMode = f
   // The active background color in light mode matches the red accent with low opacity (a soft red gradient/solid overlay)
   const activeBg = isDarkMode ? "rgba(206, 212, 218, 0.15)" : "rgba(199, 0, 57, 0.08)";
   const hoverBg = isDarkMode ? "rgba(206, 212, 218, 0.1)" : "#EBEBEB";
+  const primaryBrandColor = isDarkMode ? "#DF2A57" : "#C70039";
 
   const renderNavButton = (group: NavGroup) => {
-    const active = currentPage === group.page;
+    const isSubActive = group.subItems?.some((item) => item.page === currentPage);
+    const active = currentPage === group.page || isSubActive;
+    const isExpanded = openGroup === group.label;
+
+    const buttonTextColor = active
+      ? isDarkMode
+        ? "#ffffff"
+        : isSubActive
+        ? "#ffffff"
+        : "#C70039"
+      : textColor;
+
+    const buttonBg = active
+      ? isSubActive
+        ? "#C70039"
+        : activeBg
+      : "transparent";
+
+    const buttonLeftBorder = active
+      ? isSubActive
+        ? `4px solid #C70039`
+        : `4px solid ${activeTextColor}`
+      : "4px solid transparent";
+
+    const handleParentClick = () => {
+      if (group.subItems) {
+        setOpenGroup(isExpanded ? null : group.label);
+      } else if (group.page) {
+        onNavigate(group.page);
+      }
+    };
 
     if (collapsed) {
       return (
         <button
           key={group.label}
           title={group.label}
-          onClick={() => group.page && onNavigate(group.page)}
+          onClick={handleParentClick}
           style={{
             width: "100%",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             height: "48px",
-            background: active ? activeBg : "transparent",
-            color: active ? activeTextColor : textColor,
+            background: buttonBg,
+            color: buttonTextColor,
             border: "none",
             cursor: "pointer",
             transition: "background 0.15s, color 0.15s",
@@ -105,49 +154,93 @@ export function Sidebar({ currentPage, onNavigate, isOpen = true, isDarkMode = f
     }
 
     return (
-      <button
-        key={group.label}
-        onClick={() => group.page && onNavigate(group.page)}
-        style={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0px 20px",
-          height: "42px",
-          background: active ? activeBg : "transparent",
-          color: active ? activeTextColor : textColor,
-          fontSize: "13px",
-          fontWeight: active ? 600 : 500,
-          border: "none",
-          cursor: "pointer",
-          textAlign: "left",
-          whiteSpace: "nowrap",
-          transition: "background 0.15s, color 0.15s",
-          borderLeft: active ? `4px solid ${activeTextColor}` : "4px solid transparent",
-          boxSizing: "border-box",
-        }}
-        onMouseEnter={(e) => {
-          if (!active) {
-            (e.currentTarget as HTMLButtonElement).style.background = hoverBg;
-            (e.currentTarget as HTMLButtonElement).style.color = activeTextColor;
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!active) {
-            (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-            (e.currentTarget as HTMLButtonElement).style.color = textColor;
-          }
-        }}
-      >
-        <span style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <span style={{ color: active ? activeTextColor : "inherit", display: "flex" }}>{group.icon}</span>
-          <span>{group.label}</span>
-        </span>
-        {group.hasChevron && (
-          <ChevronRight size={14} style={{ color: active ? activeTextColor : textColor, flexShrink: 0, opacity: 0.7 }} />
+      <div key={group.label} style={{ display: "flex", flexDirection: "column" }}>
+        <button
+          onClick={handleParentClick}
+          style={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0px 20px",
+            height: "42px",
+            background: buttonBg,
+            color: buttonTextColor,
+            fontSize: "13px",
+            fontWeight: active ? 600 : 500,
+            border: "none",
+            cursor: "pointer",
+            textAlign: "left",
+            whiteSpace: "nowrap",
+            transition: "background 0.15s, color 0.15s",
+            borderLeft: buttonLeftBorder,
+            boxSizing: "border-box",
+          }}
+          onMouseEnter={(e) => {
+            if (!active) {
+              (e.currentTarget as HTMLButtonElement).style.background = hoverBg;
+              (e.currentTarget as HTMLButtonElement).style.color = activeTextColor;
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!active) {
+              (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+              (e.currentTarget as HTMLButtonElement).style.color = textColor;
+            }
+          }}
+        >
+          <span style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <span style={{ color: active ? buttonTextColor : "inherit", display: "flex" }}>{group.icon}</span>
+            <span>{group.label}</span>
+          </span>
+          {group.hasChevron && (
+            <span style={{ color: buttonTextColor, flexShrink: 0, opacity: 0.7, display: "flex" }}>
+              {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            </span>
+          )}
+        </button>
+
+        {/* Submenu items */}
+        {group.subItems && isExpanded && (
+          <div style={{ display: "flex", flexDirection: "column", background: isDarkMode ? "rgba(0,0,0,0.05)" : "rgba(0,0,0,0.02)", padding: "2px 0" }}>
+            {group.subItems.map((subItem) => {
+              const isSubItemActive = currentPage === subItem.page;
+              return (
+                <button
+                  key={subItem.label}
+                  onClick={() => onNavigate(subItem.page)}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "0px 20px 0px 44px",
+                    height: "36px",
+                    background: "transparent",
+                    color: isSubItemActive ? primaryBrandColor : textColor,
+                    fontSize: "12.5px",
+                    fontWeight: isSubItemActive ? 600 : 500,
+                    border: "none",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    whiteSpace: "nowrap",
+                    transition: "color 0.15s",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.color = primaryBrandColor;
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSubItemActive) {
+                      (e.currentTarget as HTMLButtonElement).style.color = textColor;
+                    }
+                  }}
+                >
+                  {subItem.label}
+                </button>
+              );
+            })}
+          </div>
         )}
-      </button>
+      </div>
     );
   };
 
@@ -244,3 +337,4 @@ export function Sidebar({ currentPage, onNavigate, isOpen = true, isDarkMode = f
     </aside>
   );
 }
+

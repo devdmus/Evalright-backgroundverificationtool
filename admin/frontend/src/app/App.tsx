@@ -4,12 +4,17 @@ import { Sidebar, PageKey } from "./components/Sidebar";
 import { HomePage } from "./pages/HomePage";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
 import { ClientOrdersPage } from "./pages/ClientOrdersPage";
+import { ClientInvoicesPage } from "./pages/ClientInvoicesPage";
 
 const USER_NAME = "Raghu Adaveni";
 
 const PAGE_TITLES: Record<PageKey, string> = {
   home: "Affiliate Home",
   clients: "Clients",
+  "client-management": "Client Management",
+  "add-client": "Add New Client",
+  "client-invoices": "Client Invoices",
+  "mass-mail": "Mass Mail",
   "client-orders": "Client Orders",
   reports: "Reports",
   invoices: "Invoices",
@@ -45,6 +50,8 @@ export default function App() {
         return <HomePage isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
       case "client-orders":
         return <ClientOrdersPage isDarkMode={isDarkMode} />;
+      case "client-invoices":
+        return <ClientInvoicesPage isDarkMode={isDarkMode} />;
       default:
         return <PlaceholderPage title={PAGE_TITLES[currentPage] ?? currentPage} />;
     }
