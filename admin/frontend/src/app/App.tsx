@@ -8,6 +8,8 @@ import { SetPricing } from "./pages/SetPricing";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
 import { ClientOrdersPage } from "./pages/ClientOrdersPage";
 import { AddNewClient } from "./pages/AddNewClient";
+import { ClientInvoicesPage } from "./pages/ClientInvoicesPage";
+import { MassMailPage } from "./pages/MassMailPage";
 
 const USER_NAME = "Raghu Adaveni";
 
@@ -80,6 +82,10 @@ export default function App() {
         return <SetPricing isDarkMode={isDarkMode} />;
       case "client-orders":
         return <ClientOrdersPage isDarkMode={isDarkMode} />;
+      case "client-invoices":
+        return <ClientInvoicesPage isDarkMode={isDarkMode} />;
+      case "mass-mail":
+        return <MassMailPage isDarkMode={isDarkMode} />;
       default:
         return <PlaceholderPage title={PAGE_TITLES[currentPage] ?? currentPage} isDarkMode={isDarkMode} />;
     }

@@ -16,6 +16,9 @@ interface OrderItem {
   county: string;
   state: string;
   date: string;
+  orderTime?: string;
+  zipCode?: string;
+  orderedBy?: string;
 }
 
 const MOCK_ORDERS: OrderItem[] = [
@@ -78,6 +81,24 @@ const MOCK_ORDERS: OrderItem[] = [
     county: "Santa Clara",
     state: "CA",
     date: "2026-06-17",
+  },
+  {
+    id: "9634920",
+    reportId: "1849270",
+    client: "Ammaluit CORP",
+    firstName: "Tarun",
+    lastName: "Ramani",
+    searchType: "(AF) LabCorp - 10 Panel",
+    status: "Pending",
+    badgeColor: "yellow",
+    ssn: "018-86-5846",
+    dob: "2002-08-28",
+    county: "Bellingham",
+    state: "MA",
+    zipCode: "02019",
+    date: "2026-06-16",
+    orderTime: "01:14 PM",
+    orderedBy: "Brad Kiran",
   },
   {
     id: "9638910",
@@ -180,6 +201,7 @@ const CLIENT_OPTIONS = [
   { value: "Intellan Technologies LLC", label: "Intellan Technologies LLC" },
   { value: "Jarvis Business Solutions LLC", label: "Jarvis Business Solutions LLC" },
   { value: "BV&S LLC", label: "BV&S LLC" },
+  { value: "Ammaluit CORP", label: "Ammaluit CORP" },
 ];
 
 const STATUS_OPTIONS = [
@@ -192,6 +214,7 @@ const STATUS_OPTIONS = [
 
 const SEARCH_TYPE_OPTIONS = [
   { value: "All", label: "All Searches" },
+  { value: "(AF) LabCorp - 10 Panel", label: "(AF) LabCorp - 10 Panel" },
   { value: "Nationwide Criminal Database Search", label: "Nationwide Criminal Database Search" },
   { value: "SSN Verification (CBSV)", label: "SSN Verification (CBSV)" },
   { value: "County Criminal Search", label: "County Criminal Search" },
@@ -367,6 +390,36 @@ interface ClientOrdersPageProps {
 export function ClientOrdersPage({ isDarkMode = false }: ClientOrdersPageProps) {
   // Banner state
   const [showBanner, setShowBanner] = useState(true);
+
+  // Expanded row state
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>("9634920");
+
+  // Active report modal state
+  const [activeReportId, setActiveReportId] = useState<string | null>(null);
+
+  // Active order selector
+  const activeOrder = useMemo(() => {
+    return MOCK_ORDERS.find(o => o.reportId === activeReportId) || null;
+  }, [activeReportId]);
+
+  // Date and DOB formatting helpers
+  const formatDateString = (dateStr: string) => {
+    if (!dateStr) return "";
+    const parts = dateStr.split("-");
+    if (parts.length === 3) {
+      return `${parts[1]}-${parts[2]}-${parts[0]}`;
+    }
+    return dateStr;
+  };
+
+  const formatDobString = (dobStr: string) => {
+    if (!dobStr) return "";
+    const parts = dobStr.split("-");
+    if (parts.length === 3) {
+      return `${parts[1]}/${parts[2]}/${parts[0]}`;
+    }
+    return dobStr;
+  };
 
   // Form states
   const [client, setClient] = useState("All");
@@ -1114,53 +1167,168 @@ export function ClientOrdersPage({ isDarkMode = false }: ClientOrdersPageProps) 
                   }
                 }
 
+                const isExpanded = expandedOrderId === order.id;
+
                 return (
                   <div
                     key={order.id}
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "12px 20px",
                       borderBottom: idx === filteredOrders.length - 1 ? "none" : cardBorder,
                       background: cardBg,
-                      transition: "background 0.1s ease",
+                      display: "flex",
+                      flexDirection: "column",
                     }}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800/15"
                   >
-                    {/* Left: Search ID */}
-                    <div style={{ width: "20%", minWidth: "150px", fontSize: "13.5px", color: textLabel }}>
-                      Search ID: <span style={{ fontWeight: 600, color: textPrimary }}>{order.id}</span>
-                    </div>
-
-                    {/* Middle: Candidate & Search Type */}
-                    <div style={{ flex: 1, padding: "0 20px", fontSize: "13.5px", color: textPrimary }}>
-                      <span style={{ fontWeight: 600 }}>{order.firstName} {order.lastName}</span>
-                      <span style={{ color: textLabel }}> : {order.searchType}</span>
-                    </div>
-
-                    {/* Right Middle: Client */}
-                    <div style={{ width: "15%", minWidth: "120px", fontSize: "13.5px", color: textLabel }}>
-                      {order.client}
-                    </div>
-
-                    {/* Right: Status Badge */}
+                    {/* Header row (clickable to toggle expansion) */}
                     <div
+                      onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
                       style={{
-                        background: badgeBg,
-                        color: badgeColorText,
-                        padding: "4px 12px",
-                        borderRadius: "4px",
-                        fontSize: "11px",
-                        fontWeight: 700,
-                        letterSpacing: "0.05em",
-                        textAlign: "center",
-                        minWidth: "75px",
-                        textTransform: "uppercase",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "16px 20px",
+                        cursor: "pointer",
+                        transition: "background 0.1s ease",
+                        userSelect: "none",
                       }}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800/15"
                     >
-                      {order.status}
+                      {/* Left: Search ID */}
+                      <div style={{ width: "20%", minWidth: "150px", fontSize: "13.5px", color: textLabel }}>
+                        Search ID: <span style={{ fontWeight: 600, color: textPrimary }}>{order.id}</span>
+                      </div>
+
+                      {/* Middle: Candidate & Search Type */}
+                      <div style={{ flex: 1, padding: "0 20px", fontSize: "13.5px", color: textPrimary }}>
+                        <span style={{ fontWeight: 600 }}>{order.firstName} {order.lastName}</span>
+                        <span style={{ color: textLabel }}> : {order.searchType}</span>
+                      </div>
+
+                      {/* Right Middle: Client */}
+                      <div style={{ width: "15%", minWidth: "120px", fontSize: "13.5px", color: textLabel }}>
+                        {order.client}
+                      </div>
+
+                      {/* Right: Status Badge */}
+                      <div
+                        style={{
+                          background: badgeBg,
+                          color: badgeColorText,
+                          padding: "4px 12px",
+                          borderRadius: "4px",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          letterSpacing: "0.05em",
+                          textAlign: "center",
+                          minWidth: "75px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {order.status}
+                      </div>
                     </div>
+
+                    {/* Detail Section (rendered when expanded) */}
+                    {isExpanded && (
+                      <div
+                        style={{
+                          padding: "0 20px 20px 20px",
+                          background: cardBg,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "14px",
+                        }}
+                      >
+                        {/* Grey block */}
+                        <div
+                          style={{
+                            background: isDarkMode ? "#1A1C21" : "#F4F5F7",
+                            border: isDarkMode ? "1px solid #333" : "1px solid #E5E7EB",
+                            borderRadius: "4px",
+                            padding: "12px 20px",
+                            display: "grid",
+                            gridTemplateColumns: "1.5fr 1fr 1fr 1.2fr",
+                            gap: "16px",
+                            alignItems: "center",
+                          }}
+                        >
+                          {/* Order Date */}
+                          <div style={{ fontSize: "13.5px", color: textLabel }}>
+                            Order Date: <span style={{ fontWeight: 600, color: textPrimary }}>{formatDateString(order.date)} {order.orderTime || "10:30 AM"}</span>
+                          </div>
+
+                          {/* DOB */}
+                          <div style={{ fontSize: "13.5px", color: textLabel }}>
+                            DOB: <span style={{ fontWeight: 600, color: textPrimary }}>{formatDobString(order.dob)}</span>
+                          </div>
+
+                          {/* SSN */}
+                          <div style={{ fontSize: "13.5px", color: textLabel }}>
+                            SSN: <span style={{ fontWeight: 600, color: textPrimary }}>{order.ssn}</span>
+                          </div>
+
+                          {/* Location */}
+                          <div style={{ fontSize: "13.5px", fontWeight: 600, color: textPrimary, textAlign: "left" }}>
+                            {order.county}, {order.state} {order.zipCode || "00000"}
+                          </div>
+                        </div>
+
+                        {/* Action Row */}
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            paddingTop: "4px",
+                          }}
+                        >
+                          {/* Order by */}
+                          <div style={{ fontSize: "13.5px", color: textLabel }}>
+                            Order by: <span style={{ fontWeight: 600, color: textPrimary }}>{order.orderedBy || "System"}</span>
+                          </div>
+
+                          {/* Buttons */}
+                          <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
+                            {/* View Pricing */}
+                            <button
+                              style={{
+                                background: "transparent",
+                                border: "none",
+                                color: isDarkMode ? "#A3A3A3" : "#555555",
+                                fontSize: "13.5px",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                                padding: "0",
+                                textDecoration: "underline",
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.color = isDarkMode ? "#FFFFFF" : "#000000")}
+                              onMouseLeave={(e) => (e.currentTarget.style.color = isDarkMode ? "#A3A3A3" : "#555555")}
+                            >
+                              View Pricing
+                            </button>
+
+                            {/* View Report */}
+                            <button
+                              onClick={() => setActiveReportId(order.reportId)}
+                              style={{
+                                background: "transparent",
+                                border: "none",
+                                color: primaryBrandColor,
+                                fontSize: "13.5px",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                                padding: "0",
+                                textDecoration: "underline",
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.color = isDarkMode ? "#FF4D79" : "#99002B")}
+                              onMouseLeave={(e) => (e.currentTarget.style.color = primaryBrandColor)}
+                            >
+                              View Report #{order.reportId}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })
@@ -1169,6 +1337,402 @@ export function ClientOrdersPage({ isDarkMode = false }: ClientOrdersPageProps) 
         </div>
       </div>
       <Footer />
+
+      {activeReportId && activeOrder && (
+        <div
+          id="printable-report-backdrop"
+          onClick={() => setActiveReportId(null)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0, 0, 0, 0.6)",
+            zIndex: 9999,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            overflowY: "auto",
+            padding: "40px 20px",
+            fontFamily: "'Wix Madefor Display', sans-serif",
+          }}
+        >
+          <style>{`
+            @media print {
+              /* Hide all body elements by default */
+              body * {
+                visibility: hidden !important;
+              }
+              /* Show only the printable report content and its children */
+              #printable-report-content,
+              #printable-report-content * {
+                visibility: visible !important;
+              }
+              /* Position report content at the top-left of page and remove constraints */
+              #printable-report-content {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                background: #FFFFFF !important;
+                color: #333333 !important;
+              }
+              /* Make sure backdrop background is transparent during print */
+              #printable-report-backdrop {
+                background: transparent !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+              }
+              /* Hide elements with the no-print class */
+              .no-print {
+                display: none !important;
+              }
+            }
+          `}</style>
+
+          {/* Modal Container */}
+          <div
+            id="printable-report-content"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "#FFFFFF",
+              color: "#333333",
+              width: "100%",
+              maxWidth: "960px",
+              borderRadius: "8px",
+              padding: "40px",
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+              gap: "24px",
+            }}
+          >
+            {/* Close Button X */}
+            <button
+              className="no-print"
+              onClick={() => setActiveReportId(null)}
+              style={{
+                position: "absolute",
+                top: "20px",
+                right: "25px",
+                background: "transparent",
+                border: "none",
+                color: "#9CA3AF",
+                fontSize: "28px",
+                fontWeight: "300",
+                cursor: "pointer",
+                padding: "4px",
+                lineHeight: "1",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#4B5563")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#9CA3AF")}
+            >
+              &times;
+            </button>
+
+            {/* Header: Logo & Download Button */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              {/* Logo */}
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <img
+                  src="/evalright-logo.jpg"
+                  alt="EvalRight Logo"
+                  style={{
+                    height: "48px",
+                    objectFit: "contain",
+                  }}
+                />
+              </div>
+
+              {/* Download PDF button */}
+              <button
+                className="no-print"
+                onClick={() => window.print()}
+                style={{
+                  background: "#7F8C8D",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: "20px",
+                  padding: "8px 20px",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <span>Download PDF version of this report</span>
+                <span style={{ display: "inline-block", border: "1px solid #FFF", borderRadius: "50%", width: "16px", height: "16px", fontSize: "10px", lineHeight: "14px", textAlign: "center" }}>↓</span>
+              </button>
+            </div>
+
+            {/* 3-Column Header Block */}
+            <div
+              style={{
+                background: "#F4F5F7",
+                borderRadius: "4px",
+                padding: "16px 20px",
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr 1fr",
+                gap: "24px",
+                border: "1px solid #E5E7EB",
+              }}
+            >
+              {/* Col 1 */}
+              <div style={{ fontSize: "13px", lineHeight: "1.5", color: "#374151" }}>
+                <div style={{ fontWeight: "bold", marginBottom: "4px" }}>EvalRight</div>
+                <div>3831 McCoy Dr, Suite 101,</div>
+                <div>Aurora, IL 60504</div>
+                <div style={{ marginTop: "4px" }}>1-800-935-9025</div>
+                <div>support@evalright.com</div>
+              </div>
+
+              {/* Col 2 */}
+              <div style={{ fontSize: "13px", lineHeight: "1.5", color: "#374151" }}>
+                <div style={{ fontWeight: "bold", fontSize: "15px", marginBottom: "4px" }}>Report #{activeOrder.reportId}</div>
+                <div>Order by: <span style={{ fontWeight: 600 }}>{activeOrder.orderedBy || "Brad Kiran"}</span></div>
+                <div>Ordered: <span style={{ fontWeight: 600 }}>{formatDateString(activeOrder.date)} {activeOrder.orderTime || "13:14:14"}</span></div>
+                <div>Completed: </div>
+              </div>
+
+              {/* Col 3 */}
+              <div style={{ fontSize: "13px", lineHeight: "1.5", color: "#374151" }}>
+                <div style={{ fontWeight: "bold", marginBottom: "4px" }}>{activeOrder.client}</div>
+                <div>31-00 47th Avenue Suite# 3100, 31-00</div>
+                <div>47th Avenue Suite# 3100 Long Island City,</div>
+                <div>NY 11101</div>
+                <div>Long Island City,, NY 11101</div>
+              </div>
+            </div>
+
+            {/* Applicant Information Section */}
+            <div>
+              <div
+                style={{
+                  background: "#C70039",
+                  color: "#FFFFFF",
+                  padding: "8px 12px",
+                  fontSize: "13.5px",
+                  fontWeight: "bold",
+                  borderTopLeftRadius: "4px",
+                  borderTopRightRadius: "4px",
+                }}
+              >
+                Applicant Information
+              </div>
+              <div style={{ border: "1px solid #E5E7EB", borderTop: "none", borderBottomLeftRadius: "4px", borderBottomRightRadius: "4px" }}>
+                {/* Name */}
+                <div style={{ display: "flex", borderBottom: "1px solid #E5E7EB" }}>
+                  <div style={{ width: "20%", background: "#F9FAFB", padding: "8px 12px", fontSize: "13px", color: "#6B7280", fontWeight: 600, borderRight: "1px solid #E5E7EB" }}>
+                    Name:
+                  </div>
+                  <div style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", fontWeight: 600 }}>
+                    {activeOrder.firstName} {activeOrder.lastName}
+                  </div>
+                </div>
+                {/* DOB */}
+                <div style={{ display: "flex" }}>
+                  <div style={{ width: "20%", background: "#F9FAFB", padding: "8px 12px", fontSize: "13px", color: "#6B7280", fontWeight: 600, borderRight: "1px solid #E5E7EB" }}>
+                    DOB:
+                  </div>
+                  <div style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", fontWeight: 600 }}>
+                    {formatDobString(activeOrder.dob)}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Report Summary Section */}
+            <div>
+              <div
+                style={{
+                  background: "#C70039",
+                  color: "#FFFFFF",
+                  padding: "8px 12px",
+                  fontSize: "13.5px",
+                  fontWeight: "bold",
+                  borderTopLeftRadius: "4px",
+                  borderTopRightRadius: "4px",
+                }}
+              >
+                Report Summary
+              </div>
+              <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid #E5E7EB", borderTop: "none" }}>
+                <thead>
+                  <tr style={{ background: "#F3F4F6", borderBottom: "1px solid #E5E7EB" }}>
+                    <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "12px", fontWeight: "bold", color: "#374151", width: "20%", borderRight: "1px solid #E5E7EB" }}>Search ID</th>
+                    <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "12px", fontWeight: "bold", color: "#374151", width: "55%", borderRight: "1px solid #E5E7EB" }}>Search Name</th>
+                    <th style={{ textAlign: "left", padding: "8px 12px", fontSize: "12px", fontWeight: "bold", color: "#374151", width: "25%" }}>Search Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeOrder.reportId === "1849270" ? (
+                    <>
+                      <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", borderRight: "1px solid #E5E7EB" }}>9634922</td>
+                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", borderRight: "1px solid #E5E7EB" }}>SSN Verification (CBSV)</td>
+                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#385623", fontWeight: "bold" }}>COMPLETE</td>
+                      </tr>
+                      <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", borderRight: "1px solid #E5E7EB" }}>9634920</td>
+                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", borderRight: "1px solid #E5E7EB" }}>{activeOrder.searchType}</td>
+                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#7F6000", fontWeight: "bold" }}>Pending</td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", borderRight: "1px solid #E5E7EB" }}>9634923</td>
+                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", borderRight: "1px solid #E5E7EB" }}>Statewide Criminal (7 Years) - Massachusetts</td>
+                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#7F6000", fontWeight: "bold" }}>NO RECORD</td>
+                      </tr>
+                    </>
+                  ) : (
+                    <tr>
+                      <td style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", borderRight: "1px solid #E5E7EB" }}>{activeOrder.id}</td>
+                      <td style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", borderRight: "1px solid #E5E7EB" }}>{activeOrder.searchType}</td>
+                      <td style={{ padding: "8px 12px", fontSize: "13px", color: activeOrder.status === "Closed" || activeOrder.status === "Complete" ? "#385623" : "#7F6000", fontWeight: "bold" }}>
+                        {activeOrder.status.toUpperCase()}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* SSN Validation Section */}
+            {(activeOrder.reportId === "1849270" || activeOrder.searchType.toLowerCase().includes("ssn")) && (
+              <div>
+                <div
+                  style={{
+                    background: "#374151",
+                    color: "#FFFFFF",
+                    padding: "6px 12px",
+                    fontSize: "13px",
+                    fontWeight: "bold",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    borderTopLeftRadius: "4px",
+                    borderTopRightRadius: "4px",
+                  }}
+                >
+                  <span>SSN Validation</span>
+                  <span>Search ID. {activeOrder.reportId === "1849270" ? "9634922" : activeOrder.id}</span>
+                </div>
+                <div style={{ border: "1px solid #E5E7EB", borderTop: "none", borderBottomLeftRadius: "4px", borderBottomRightRadius: "4px" }}>
+                  <div style={{ display: "flex", borderBottom: "1px solid #E5E7EB" }}>
+                    <div style={{ width: "20%", background: "#F9FAFB", padding: "8px 12px", fontSize: "13px", color: "#6B7280", fontWeight: 600, borderRight: "1px solid #E5E7EB" }}>
+                      Name Searched:
+                    </div>
+                    <div style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", fontWeight: 600, textTransform: "uppercase" }}>
+                      {activeOrder.firstName} {activeOrder.lastName}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex" }}>
+                    <div style={{ width: "20%", background: "#F9FAFB", padding: "8px 12px", fontSize: "13px", color: "#6B7280", fontWeight: 600, borderRight: "1px solid #E5E7EB" }}>
+                      Status:
+                    </div>
+                    <div style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", fontWeight: 600 }}>
+                      Valid
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Criminal/Statewide Sections */}
+            {(activeOrder.reportId === "1849270" || activeOrder.searchType.toLowerCase().includes("criminal") || activeOrder.searchType.toLowerCase().includes("statewide")) && (
+              <div>
+                <div
+                  style={{
+                    background: "#374151",
+                    color: "#FFFFFF",
+                    padding: "6px 12px",
+                    fontSize: "13px",
+                    fontWeight: "bold",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    borderTopLeftRadius: "4px",
+                    borderTopRightRadius: "4px",
+                  }}
+                >
+                  <span>Massachusetts Statewide Criminal (7 Years)</span>
+                  <span>Search ID. {activeOrder.reportId === "1849270" ? "9634923" : activeOrder.id}</span>
+                </div>
+                <div style={{ border: "1px solid #E5E7EB", borderTop: "none", borderBottomLeftRadius: "4px", borderBottomRightRadius: "4px" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <tbody>
+                      <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                        <td style={{ width: "20%", background: "#F9FAFB", padding: "8px 12px", fontSize: "13px", color: "#6B7280", fontWeight: 600, borderRight: "1px solid #E5E7EB" }}>Record verified by:</td>
+                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#111827" }}>Last name, First name, DOB</td>
+                      </tr>
+                      <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                        <td style={{ background: "#F9FAFB", padding: "8px 12px", fontSize: "13px", color: "#6B7280", fontWeight: 600, borderRight: "1px solid #E5E7EB" }}>Name on file:</td>
+                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", fontWeight: 600 }}>{activeOrder.lastName}, {activeOrder.firstName}</td>
+                      </tr>
+                      <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                        <td style={{ background: "#F9FAFB", padding: "8px 12px", fontSize: "13px", color: "#6B7280", fontWeight: 600, borderRight: "1px solid #E5E7EB" }}>D.O.B. on file:</td>
+                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", fontWeight: 600 }}>{formatDobString(activeOrder.dob)}</td>
+                      </tr>
+                      <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                        <td style={{ background: "#F9FAFB", padding: "8px 12px", fontSize: "13px", color: "#6B7280", fontWeight: 600, borderRight: "1px solid #E5E7EB" }}>Search Status:</td>
+                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#385623", fontWeight: "bold" }}>COMPLETE</td>
+                      </tr>
+                      <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                        <td style={{ background: "#F9FAFB", padding: "8px 12px", fontSize: "13px", color: "#6B7280", fontWeight: 600, borderRight: "1px solid #E5E7EB" }}>Completion Date:</td>
+                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#111827" }}>2026-06-16 13:15:06</td>
+                      </tr>
+                      {/* Grey bar */}
+                      <tr>
+                        <td colSpan={2} style={{ background: "#E5E7EB", padding: "8px 12px", fontSize: "13px", fontWeight: "bold", color: "#374151", textAlign: "left" }}>
+                          No Records.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan={2} style={{ padding: "12px 12px 6px 12px", fontSize: "12px", fontWeight: "bold", color: "#7F6000" }}>
+                          NO RECORD
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Bottom Actions */}
+            <div className="no-print" style={{ display: "flex", justifyContent: "flex-end", marginTop: "12px" }}>
+              <button
+                onClick={() => setActiveReportId(null)}
+                style={{
+                  background: "#2D1B6B",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: "4px",
+                  padding: "10px 24px",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  boxShadow: "0 2px 4px rgba(45, 27, 107, 0.15)",
+                  transition: "background 0.15s ease",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#1F124D")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "#2D1B6B")}
+              >
+                Close Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

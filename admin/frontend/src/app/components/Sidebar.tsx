@@ -167,6 +167,7 @@ export function Sidebar({ currentPage, onNavigate, isOpen = true, isDarkMode = f
   const activeTextColor = isDarkMode ? "#ffffff" : "#C70039";
   const activeBg = isDarkMode ? "rgba(206, 212, 218, 0.15)" : "rgba(199, 0, 57, 0.08)";
   const hoverBg = isDarkMode ? "rgba(206, 212, 218, 0.1)" : "#EBEBEB";
+  const primaryBrandColor = isDarkMode ? "#DF2A57" : "#C70039";
 
   function renderNavGroup(group: NavGroup) {
     const active = isGroupActive(group);
