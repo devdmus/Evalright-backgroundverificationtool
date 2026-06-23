@@ -78,6 +78,17 @@ export function ClientManagement({ isDarkMode = false, onViewClient }: ClientMan
   const totalPages = Math.max(1, Math.ceil(totalEntries / perPage));
   const paginated = filtered.slice((page - 1) * perPage, page * perPage);
 
+  const linkBtnStyle: React.CSSProperties = {
+    background: "none",
+    border: "none",
+    color: "#C70039",
+    fontWeight: 600,
+    fontSize: "13px",
+    cursor: "pointer",
+    padding: 0,
+    textAlign: "left",
+  };
+
   const inputStyle: React.CSSProperties = {
     width: "100%",
     height: "38px",
@@ -223,6 +234,8 @@ export function ClientManagement({ isDarkMode = false, onViewClient }: ClientMan
                 <option value={10}>10</option>
                 <option value={25}>25</option>
                 <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value={totalEntries || 681}>Show All</option>
               </select>
               <span>entries per page</span>
             </div>
@@ -281,22 +294,20 @@ export function ClientManagement({ isDarkMode = false, onViewClient }: ClientMan
                       background: idx % 2 === 0 ? "transparent" : (isDarkMode ? "rgba(255,255,255,0.02)" : "#FAFAFA"),
                     }}
                   >
-                    <td style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: "#C70039" }}>
-                      {client.id}
+                    <td style={{ padding: "12px 16px", fontSize: "13px" }}>
+                      <button
+                        type="button"
+                        onClick={() => onViewClient?.(client.id)}
+                        style={linkBtnStyle}
+                      >
+                        {client.id}
+                      </button>
                     </td>
                     <td style={{ padding: "12px 16px", fontSize: "13px" }}>
                       <button
+                        type="button"
                         onClick={() => onViewClient?.(client.id)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          color: "#C70039",
-                          fontWeight: 600,
-                          fontSize: "13px",
-                          cursor: "pointer",
-                          padding: 0,
-                          textAlign: "left",
-                        }}
+                        style={linkBtnStyle}
                       >
                         {client.companyName}
                       </button>

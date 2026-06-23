@@ -7,6 +7,7 @@ import { ClientSummary } from "./pages/ClientSummary";
 import { SetPricing } from "./pages/SetPricing";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
 import { ClientOrdersPage } from "./pages/ClientOrdersPage";
+import { AddNewClient } from "./pages/AddNewClient";
 import { ClientInvoicesPage } from "./pages/ClientInvoicesPage";
 import { MassMailPage } from "./pages/MassMailPage";
 
@@ -14,7 +15,6 @@ const USER_NAME = "Raghu Adaveni";
 
 const PAGE_TITLES: Record<PageKey, string> = {
   home: "Affiliate Home",
-  clients: "Clients",
   "client-management": "Client Management",
   "add-new-client": "Add New Client",
   "client-invoices": "Client Invoices",
@@ -68,6 +68,8 @@ export default function App() {
         return <HomePage isDarkMode={isDarkMode} onNavigate={setCurrentPage} onViewClient={handleViewClient} />;
       case "client-management":
         return <ClientManagement isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
+      case "add-new-client":
+        return <AddNewClient isDarkMode={isDarkMode} />;
       case "client-summary":
         return (
           <ClientSummary
