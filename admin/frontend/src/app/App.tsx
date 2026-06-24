@@ -18,7 +18,23 @@ import { CommissionManager } from "./pages/CommissionManager";
 import { DailyUsageReport } from "./pages/DailyUsageReport";
 import { InactiveClientReport } from "./pages/InactiveClientReport";
 import { JurisdictionReport } from "./pages/JurisdictionReport";
-import { OrderLossReport } from "./pages/OrderLossReport";
+import { OrderLossReportPage } from "./pages/OrderLossReportPage";
+import { SalesReportBySalespersonPage } from "./pages/SalesReportBySalespersonPage";
+import { ResearcherReportPage } from "./pages/ResearcherReportPage";
+import { SalesReportPage } from "./pages/SalesReportPage";
+import { GeographicCriminalReportPage } from "./pages/GeographicCriminalReportPage";
+import { IncomeHistoryPage } from "./pages/IncomeHistoryPage";
+import { PackageOrderTrendPage } from "./pages/PackageOrderTrendPage";
+import { ALaCarteOrderFrequencyPage } from "./pages/ALaCarteOrderFrequencyPage";
+import { MonthlyRevenueReportPage } from "./pages/MonthlyRevenueReportPage";
+import { MyInvoicesPage } from "./pages/MyInvoicesPage";
+import { AccountSettingsPage } from "./pages/AccountSettingsPage";
+import { ClientGroupsPage } from "./pages/ClientGroupsPage";
+import { SignupPagesPage } from "./pages/SignupPagesPage";
+import { BillingSetupPage } from "./pages/BillingSetupPage";
+import { ManageSalesOperatorsPage } from "./pages/ManageSalesOperatorsPage";
+import { ManageEmailTemplatesPage } from "./pages/ManageEmailTemplatesPage";
+import { SetupWelcomeEmailPage } from "./pages/SetupWelcomeEmailPage";
 
 const USER_NAME = "Raghu Adaveni";
 
@@ -31,25 +47,24 @@ const PAGE_TITLES: Record<PageKey, string> = {
   "client-summary": "Client Summary",
   "set-pricing": "Set Pricing",
   "client-orders": "Client Orders",
-  "reports-orders": "Order Reports",
-  "reports-clients": "Client Reports",
-  "accounts-receivable": "Accounts Receivable Report",
-  "reports-activity": "Activity",
+  "accounts-receivable": "Accounts Receivable",
+  "reports-activity": "Activity Report",
   "reports-client-group-activity": "Client Group Activity",
   "reports-client-payments": "Client Payments",
   "reports-commission-manager": "Commission Manager",
   "reports-daily-usage": "Daily Usage",
   "reports-inactive-client": "Inactive Client",
   "reports-jurisdiction": "Jurisdiction",
-  "reports-order-loss": "Order Loss",
+  "reports-order-loss": "Order Loss Report",
   "reports-sales-by-salesperson": "Sales Report by Salesperson",
   "reports-researchers": "Researchers",
-  "reports-sales": "Sales",
+  "reports-sales": "Sales Report",
   "reports-geographic-criminal": "Geographic Criminal Report",
   "reports-income-history": "Income History",
   "reports-package-order-trend": "Package Order Trend",
-  "reports-alacarte-frequency": "A La Carte Order Frequency",
-  invoices: "Invoices",
+  "reports-a-la-carte-frequency": "A La Carte Order Frequency",
+  "reports-monthly-revenue": "Monthly Revenue Report",
+  invoices: "My Invoices",
   "account-settings": "Account Settings",
   "client-groups": "Client Groups",
   "signup-pages": "Signup Pages",
@@ -135,7 +150,39 @@ export default function App() {
       case "reports-jurisdiction":
         return <JurisdictionReport isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
       case "reports-order-loss":
-        return <OrderLossReport isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
+        return <OrderLossReportPage isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
+      case "reports-sales-by-salesperson":
+        return <SalesReportBySalespersonPage isDarkMode={isDarkMode} />;
+      case "reports-researchers":
+        return <ResearcherReportPage isDarkMode={isDarkMode} />;
+      case "reports-sales":
+        return <SalesReportPage isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
+      case "reports-geographic-criminal":
+        return <GeographicCriminalReportPage isDarkMode={isDarkMode} />;
+      case "reports-income-history":
+        return <IncomeHistoryPage isDarkMode={isDarkMode} />;
+      case "reports-package-order-trend":
+        return <PackageOrderTrendPage isDarkMode={isDarkMode} />;
+      case "reports-a-la-carte-frequency":
+        return <ALaCarteOrderFrequencyPage isDarkMode={isDarkMode} />;
+      case "reports-monthly-revenue":
+        return <MonthlyRevenueReportPage isDarkMode={isDarkMode} />;
+      case "invoices":
+        return <MyInvoicesPage isDarkMode={isDarkMode} />;
+      case "account-settings":
+        return <AccountSettingsPage isDarkMode={isDarkMode} />;
+      case "client-groups":
+        return <ClientGroupsPage isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
+      case "signup-pages":
+        return <SignupPagesPage isDarkMode={isDarkMode} />;
+      case "billing-setup":
+        return <BillingSetupPage isDarkMode={isDarkMode} />;
+      case "manage-sales-operators":
+        return <ManageSalesOperatorsPage isDarkMode={isDarkMode} />;
+      case "manage-email-templates":
+        return <ManageEmailTemplatesPage isDarkMode={isDarkMode} />;
+      case "setup-welcome-email":
+        return <SetupWelcomeEmailPage isDarkMode={isDarkMode} />;
       default:
         return <PlaceholderPage title={PAGE_TITLES[currentPage] ?? currentPage} isDarkMode={isDarkMode} />;
     }
