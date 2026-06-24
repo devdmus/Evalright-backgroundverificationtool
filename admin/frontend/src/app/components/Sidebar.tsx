@@ -22,6 +22,22 @@ export type PageKey =
   | "client-orders"
   | "reports-orders"
   | "reports-clients"
+  | "accounts-receivable"
+  | "reports-activity"
+  | "reports-client-group-activity"
+  | "reports-client-payments"
+  | "reports-commission-manager"
+  | "reports-daily-usage"
+  | "reports-inactive-client"
+  | "reports-jurisdiction"
+  | "reports-order-loss"
+  | "reports-sales-by-salesperson"
+  | "reports-researchers"
+  | "reports-sales"
+  | "reports-geographic-criminal"
+  | "reports-income-history"
+  | "reports-package-order-trend"
+  | "reports-alacarte-frequency"
   | "invoices"
   | "account-settings"
   | "client-groups"
@@ -71,8 +87,22 @@ const mainNavGroups: NavGroup[] = [
     label: "Reports",
     icon: <FileText size={18} />,
     children: [
-      { label: "Order Reports", page: "reports-orders" },
-      { label: "Client Reports", page: "reports-clients" },
+      { label: "Accounts Receivable", page: "accounts-receivable" },
+      { label: "Activity", page: "reports-activity" },
+      { label: "Client Group Activity", page: "reports-client-group-activity" },
+      { label: "Client Payments", page: "reports-client-payments" },
+      { label: "Commission Manager", page: "reports-commission-manager" },
+      { label: "Daily Usage", page: "reports-daily-usage" },
+      { label: "Inactive Client", page: "reports-inactive-client" },
+      { label: "Jurisdiction", page: "reports-jurisdiction" },
+      { label: "Order Loss", page: "reports-order-loss" },
+      { label: "Sales Report by Salesperson", page: "reports-sales-by-salesperson" },
+      { label: "Researchers", page: "reports-researchers" },
+      { label: "Sales", page: "reports-sales" },
+      { label: "Geographic Criminal Report", page: "reports-geographic-criminal" },
+      { label: "Income History", page: "reports-income-history" },
+      { label: "Package Order Trend", page: "reports-package-order-trend" },
+      { label: "A La Carte Order Frequency", page: "reports-alacarte-frequency" },
     ],
   },
 ];
@@ -106,7 +136,26 @@ const accountNavGroups: NavGroup[] = [
 const clientsPages = new Set<PageKey>([
   "client-management", "add-new-client", "client-invoices", "mass-mail", "client-summary",
 ]);
-const reportsPages = new Set<PageKey>(["reports-orders", "reports-clients"]);
+const reportsPages = new Set<PageKey>([
+  "reports-orders",
+  "reports-clients",
+  "accounts-receivable",
+  "reports-activity",
+  "reports-client-group-activity",
+  "reports-client-payments",
+  "reports-commission-manager",
+  "reports-daily-usage",
+  "reports-inactive-client",
+  "reports-jurisdiction",
+  "reports-order-loss",
+  "reports-sales-by-salesperson",
+  "reports-researchers",
+  "reports-sales",
+  "reports-geographic-criminal",
+  "reports-income-history",
+  "reports-package-order-trend",
+  "reports-alacarte-frequency",
+]);
 const accountSettingsPages = new Set<PageKey>([
   "account-settings",
   "client-groups",
