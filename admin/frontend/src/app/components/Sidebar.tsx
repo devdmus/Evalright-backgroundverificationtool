@@ -20,7 +20,7 @@ export type PageKey =
   | "client-summary"
   | "set-pricing"
   | "client-orders"
-  | "reports-accounts-receivable"
+  | "accounts-receivable"
   | "reports-activity"
   | "reports-client-group-activity"
   | "reports-client-payments"
@@ -86,7 +86,7 @@ const mainNavGroups: NavGroup[] = [
     label: "Reports",
     icon: <FileText size={18} />,
     children: [
-      { label: "Accounts Receivable", page: "reports-accounts-receivable" },
+      { label: "Accounts Receivable", page: "accounts-receivable" },
       { label: "Activity", page: "reports-activity" },
       { label: "Client Group Activity", page: "reports-client-group-activity" },
       { label: "Client Payments", page: "reports-client-payments" },
@@ -137,7 +137,7 @@ const clientsPages = new Set<PageKey>([
   "client-management", "add-new-client", "client-invoices", "mass-mail", "client-summary",
 ]);
 const reportsPages = new Set<PageKey>([
-  "reports-accounts-receivable",
+  "accounts-receivable",
   "reports-activity",
   "reports-client-group-activity",
   "reports-client-payments",

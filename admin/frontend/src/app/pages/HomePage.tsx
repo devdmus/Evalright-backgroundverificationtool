@@ -19,10 +19,10 @@ const OVERVIEW_RIGHT = [
 ];
 
 const AGING_ITEMS = [
-  { label: "0 - 30 Days", value: "$884.23", color: "#4CAF50" },
-  { label: "31 - 60 Days", value: "$746.47", color: "#FFB300" },
-  { label: "61 - 90 Days", value: "$592.88", color: "#F44336" },
-  { label: "90+ Days", value: "$1,572.98", color: "#9C27B0" },
+  { label: "0 - 30 Days", value: "₹884.23", color: "#4CAF50" },
+  { label: "31 - 60 Days", value: "₹746.47", color: "#FFB300" },
+  { label: "61 - 90 Days", value: "₹592.88", color: "#F44336" },
+  { label: "90+ Days", value: "₹1,572.98", color: "#9C27B0" },
 ];
 
 interface HomePageProps {

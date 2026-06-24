@@ -10,6 +10,14 @@ import { ClientOrdersPage } from "./pages/ClientOrdersPage";
 import { AddNewClient } from "./pages/AddNewClient";
 import { ClientInvoicesPage } from "./pages/ClientInvoicesPage";
 import { MassMailPage } from "./pages/MassMailPage";
+import { AccountsReceivableReport } from "./pages/AccountsReceivableReport";
+import { ActivityReport } from "./pages/ActivityReport";
+import { ClientGroupActivity } from "./pages/ClientGroupActivity";
+import { ClientPayments } from "./pages/ClientPayments";
+import { CommissionManager } from "./pages/CommissionManager";
+import { DailyUsageReport } from "./pages/DailyUsageReport";
+import { InactiveClientReport } from "./pages/InactiveClientReport";
+import { JurisdictionReport } from "./pages/JurisdictionReport";
 import { OrderLossReportPage } from "./pages/OrderLossReportPage";
 import { SalesReportBySalespersonPage } from "./pages/SalesReportBySalespersonPage";
 import { ResearcherReportPage } from "./pages/ResearcherReportPage";
@@ -39,7 +47,7 @@ const PAGE_TITLES: Record<PageKey, string> = {
   "client-summary": "Client Summary",
   "set-pricing": "Set Pricing",
   "client-orders": "Client Orders",
-  "reports-accounts-receivable": "Accounts Receivable",
+  "accounts-receivable": "Accounts Receivable",
   "reports-activity": "Activity Report",
   "reports-client-group-activity": "Client Group Activity",
   "reports-client-payments": "Client Payments",
@@ -118,6 +126,29 @@ export default function App() {
         return <ClientInvoicesPage isDarkMode={isDarkMode} />;
       case "mass-mail":
         return <MassMailPage isDarkMode={isDarkMode} />;
+      case "accounts-receivable":
+        return <AccountsReceivableReport isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
+      case "reports-activity":
+      case "activity-report":
+        return <ActivityReport isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
+      case "reports-client-group-activity":
+        return <ClientGroupActivity isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
+      case "reports-client-payments":
+        return (
+          <ClientPayments
+            isDarkMode={isDarkMode}
+            onViewClient={handleViewClient}
+            onNavigate={setCurrentPage}
+          />
+        );
+      case "reports-commission-manager":
+        return <CommissionManager isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
+      case "reports-daily-usage":
+        return <DailyUsageReport isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
+      case "reports-inactive-client":
+        return <InactiveClientReport isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
+      case "reports-jurisdiction":
+        return <JurisdictionReport isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
       case "reports-order-loss":
         return <OrderLossReportPage isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
       case "reports-sales-by-salesperson":

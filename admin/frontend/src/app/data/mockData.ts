@@ -248,12 +248,12 @@ export const DEMO_CLIENT: ClientRecord = {
 };
 
 export const RECENT_CLIENTS = [
-  { name: "Caliber Management LLC", date: "2026-06-16", contact: "Suresh Ramakoti", phone: "(984) 895-5782", sales: "$48.00" },
-  { name: "Akash SoftSystems Inc", date: "2026-06-16", contact: "Raghavendra P.", phone: "(814) 735-5568", sales: "$279.50" },
-  { name: "Acaisoft Solutions", date: "2026-06-16", contact: "Admin User", phone: "(555) 123-4567", sales: "$0.00" },
-  { name: "Biafosys Inc", date: "2026-06-16", contact: "Admin User", phone: "(555) 234-5678", sales: "$0.00" },
-  { name: "Jeevan Technologies", date: "2026-06-16", contact: "Admin User", phone: "(555) 345-6789", sales: "$0.00" },
-  { name: "ValueVista Soft Solutions Inc", date: "2026-06-16", contact: "Admin User", phone: "(555) 456-7890", sales: "$0.00" },
+  { name: "Caliber Management LLC", date: "2026-06-16", contact: "Suresh Ramakoti", phone: "(984) 895-5782", sales: "₹48.00" },
+  { name: "Akash SoftSystems Inc", date: "2026-06-16", contact: "Raghavendra P.", phone: "(814) 735-5568", sales: "₹279.50" },
+  { name: "Acaisoft Solutions", date: "2026-06-16", contact: "Admin User", phone: "(555) 123-4567", sales: "₹0.00" },
+  { name: "Biafosys Inc", date: "2026-06-16", contact: "Admin User", phone: "(555) 234-5678", sales: "₹0.00" },
+  { name: "Jeevan Technologies", date: "2026-06-16", contact: "Admin User", phone: "(555) 345-6789", sales: "₹0.00" },
+  { name: "ValueVista Soft Solutions Inc", date: "2026-06-16", contact: "Admin User", phone: "(555) 456-7890", sales: "₹0.00" },
 ];
 
 export const NO_SALES_CLIENTS = [
@@ -492,7 +492,7 @@ export const CLIENT_INVOICES: ClientInvoice[] = [
     branch: "",
     invoiceDate: "2026-06-01",
     dueDate: "2026-06-01",
-    total: "$0.00",
+    total: "₹0.00",
     status: "PAID",
     companyName: "Evalright Demo Account",
     approvedBy: "Automatic",
@@ -504,7 +504,7 @@ export const CLIENT_INVOICES: ClientInvoice[] = [
     branch: "",
     invoiceDate: "2026-06-01",
     dueDate: "2026-06-01",
-    total: "$0.00",
+    total: "₹0.00",
     status: "PAID",
     companyName: "Evalright Demo Account",
     approvedBy: "Automatic",
