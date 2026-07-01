@@ -1,6 +1,6 @@
-﻿import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Search, ChevronDown } from "lucide-react";
-import { ORDERS, STATUS_STYLES } from "../data/mockData";
+import { ORDERS, STATUS_STYLES, OrderRecord, SearchStatus } from "../data/mockData";
 import { Footer } from "../components/Footer";
 import { getPageTheme } from "../theme/pageTheme";
 import { getListPageStyles } from "../theme/listPageStyles";
@@ -420,8 +420,35 @@ export function OrderList({ isDarkMode = false }: { isDarkMode?: boolean }) {
     setPage(1);
   }
 
+  const [orders, setOrders] = useState<OrderRecord[]>(() => {
+    const saved = localStorage.getItem("evalright_orders");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return ORDERS;
+  });
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem("evalright_orders");
+      if (saved) {
+        try {
+          setOrders(JSON.parse(saved));
+        } catch (e) {}
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    const interval = setInterval(handleStorageChange, 1000);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
+
   // Filter orders
-  const filtered = ORDERS.filter((o) => {
+  const filtered = orders.filter((o: OrderRecord) => {
     // Date range
     if (appliedDateRange.startDate && o.orderDate < appliedDateRange.startDate) return false;
     if (appliedDateRange.endDate && o.orderDate > appliedDateRange.endDate) return false;

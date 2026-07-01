@@ -39,7 +39,7 @@ export function ClientInvoicesTab({ isDarkMode = false }: ClientInvoicesTabProps
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const paged = filtered.slice((page - 1) * perPage, page * perPage);
-  const totalAmount = filtered.reduce((sum, inv) => sum + parseFloat(inv.total.replace(/[$,]/g, "") || "0"), 0);
+  const totalAmount = filtered.reduce((sum, inv) => sum + parseFloat(inv.total.replace(/[₹$,]/g, "") || "0"), 0);
 
   function openInvoice(invoice: ClientInvoice) {
     setSelectedInvoice(invoice);
@@ -150,7 +150,7 @@ export function ClientInvoicesTab({ isDarkMode = false }: ClientInvoicesTabProps
                 { label: "Company Name", value: selectedInvoice.companyName, color: accentColor },
                 { label: "Invoice Date", value: "06/01/2026" },
                 { label: "Invoice Due Date", value: "06/01/2026" },
-                { label: "Balance", value: "$0.00", color: "#9ACD32" },
+                { label: "Balance", value: "₹0.00", color: "#9ACD32" },
                 { label: "Approved By", value: selectedInvoice.approvedBy },
                 { label: "Approved On", value: selectedInvoice.approvedOn },
                 { label: "Credit Card on File", value: "No users found with valid credit card" },
@@ -266,9 +266,9 @@ export function ClientInvoicesTab({ isDarkMode = false }: ClientInvoicesTabProps
 
               <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "24px" }}>
                 <div style={{ fontSize: "13px", color: textColor, textAlign: "right" }}>
-                  <div style={{ marginBottom: "4px" }}>Sub Total: $0.00</div>
-                  <div style={{ marginBottom: "4px" }}>Credit: $0.00</div>
-                  <div style={{ fontWeight: 600 }}>Total: $0.00</div>
+                  <div style={{ marginBottom: "4px" }}>Sub Total: ₹0.00</div>
+                  <div style={{ marginBottom: "4px" }}>Credit: ₹0.00</div>
+                  <div style={{ fontWeight: 600 }}>Total: ₹0.00</div>
                 </div>
               </div>
 
@@ -366,7 +366,7 @@ export function ClientInvoicesTab({ isDarkMode = false }: ClientInvoicesTabProps
             <>
               <CreditSection
                 title="Add Credit to Invoice"
-                available="$0.00 Available"
+                available="₹0.00 Available"
                 buttonLabel="Add"
                 accentColor={accentColor}
                 borderColor={borderColor}
@@ -376,7 +376,7 @@ export function ClientInvoicesTab({ isDarkMode = false }: ClientInvoicesTabProps
               <div style={{ borderTop: `1px solid ${borderColor}`, margin: "24px 0" }} />
               <CreditSection
                 title="Remove Credit from Invoice"
-                available="$0.00 Available"
+                available="₹0.00 Available"
                 buttonLabel="Remove"
                 accentColor={accentColor}
                 borderColor={borderColor}
@@ -640,7 +640,7 @@ export function ClientInvoicesTab({ isDarkMode = false }: ClientInvoicesTabProps
             ))}
             <tr style={{ background: headerBg, fontWeight: 600 }}>
               <td colSpan={4} style={{ padding: "12px 16px" }} />
-              <td style={{ padding: "12px 16px", color: textColor }}>Total: ${totalAmount.toFixed(2)}</td>
+              <td style={{ padding: "12px 16px", color: textColor }}>Total: ₹{totalAmount.toFixed(2)}</td>
               <td colSpan={2} />
             </tr>
           </tbody>

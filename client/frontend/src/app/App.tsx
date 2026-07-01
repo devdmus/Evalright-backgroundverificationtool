@@ -22,6 +22,7 @@ import { Invoices } from "./pages/Invoices";
 import { FormsDocuments } from "./pages/FormsDocuments";
 import { EmailActivityLog } from "./pages/EmailActivityLog";
 import { ApplicantInviteTemplates } from "./pages/ApplicantInviteTemplates";
+import { InviteForm } from "./pages/InviteForm";
 import { ApplicantStatistics } from "./pages/ApplicantStatistics";
 import { AnnouncementsPage } from "./pages/AnnouncementsPage";
 import { ActivityReportPage } from "./pages/ActivityReportPage";
@@ -62,6 +63,7 @@ const PAGE_TITLES: Record<PageKey, string> = {
   "email-activity": "Email Activity Log",
   announcements: "Announcements",
   "activity-report": "Activity Report",
+  "invite-form": "Invite Form",
 };
 
 export default function App() {
@@ -135,7 +137,7 @@ export default function App() {
       case "reports-disputes":
         return <DisputesList isDarkMode={isDarkMode} />;
       case "applicants":
-        return <ApplicantManager isDarkMode={isDarkMode} />;
+        return <ApplicantManager isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
       case "applicant-invite-templates":
         return <ApplicantInviteTemplates isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
       case "applicant-statistics":
@@ -157,7 +159,9 @@ export default function App() {
       case "forms-documents":
         return <FormsDocuments isDarkMode={isDarkMode} />;
       case "email-activity":
-        return <EmailActivityLog isDarkMode={isDarkMode} />;
+        return <EmailActivityLog isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
+      case "invite-form":
+        return <InviteForm isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
       case "announcements":
         return <AnnouncementsPage isDarkMode={isDarkMode} />;
       case "activity-report":
@@ -165,6 +169,10 @@ export default function App() {
       default:
         return <PlaceholderPage title={PAGE_TITLES[currentPage] ?? currentPage} isDarkMode={isDarkMode} />;
     }
+  }
+
+  if (currentPage === "invite-form") {
+    return <InviteForm isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
   }
 
   return (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Undo,
   Redo,
@@ -71,6 +71,28 @@ function EditorInput({ label, value, onChange, placeholder, helperText, isDarkMo
   );
 }
 
+const defaultHtmlContent = `
+  <p>Hello [applicant_first_name],</p>
+  <p style="margin-top: 16px;">Below you will find a link to authorize and initiate a background check, which is required as a condition of employment.</p>
+  <p style="margin-top: 16px;">Please save this email and keep it handy as it contains instructions for entering information to process the background check.</p>
+  <p style="margin-top: 16px;">
+    <b>First, please click this link to read and print the <span style="color: rgb(199, 0, 57);">Fair Credit Reporting Act Summary of Rights</span>.</b>
+  </p>
+  <p style="margin-top: 16px;">We perform these background checks on each of our candidates to verify information included in the application, and to ensure eligibility for employment.</p>
+  <p style="margin-top: 16px;">
+    The background check will be conducted by our third party screening partner. Please provide all requested information for fields highlighted in <b>RED</b> and make sure to double-check your data entry to ensure correct spelling and correct numerical sequences. Failure to do this will delay your background check.
+  </p>
+  <p style="margin-top: 24px; color: #555555;">
+    <b>&gt;&gt;&gt; Please review your name and ensure it appears exactly as it does on your Social Security card or driver's license. If the name does not match please reach out to the employer.</b>
+  </p>
+  <p style="margin-top: 24px;">
+    <b style="color: #666666;">&gt;&gt;&gt; ALSO, WHEN ENTERING INFORMATION, PROVIDE AS MUCH DETAIL AS POSSIBLE. FAILURE TO PROVIDE ALL REQUESTED INFORMATION WILL DELAY COMPLETION OF YOUR BACKGROUND CHECK.</b>
+  </p>
+  <p style="margin-top: 24px;">
+    [INVITATION_URL]
+  </p>
+`;
+
 export function ApplicantInviteTemplates({ isDarkMode = false, onNavigate }: { isDarkMode?: boolean, onNavigate?: (page: any) => void }) {
   const [activeTab, setActiveTab] = useState<"Templates List" | "Create New Template" | "Import Sample Template">("Templates List");
   const [isEditing, setIsEditing] = useState(false);
@@ -79,27 +101,32 @@ export function ApplicantInviteTemplates({ isDarkMode = false, onNavigate }: { i
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   
   const [selectedTemplates, setSelectedTemplates] = useState<string[]>([]);
-  const [templatesList, setTemplatesList] = useState<{name: string, subject: string, fromName: string, replyTo: string, copyTo: string, content: string}[]>([]);
+  const [templatesList, setTemplatesList] = useState<{name: string, subject: string, fromName: string, replyTo: string, copyTo: string, content: string}[]>(() => {
+    const saved = localStorage.getItem("evalright_templates");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    // Pre-populate with standard sample template
+    return [
+      {
+        name: "Standard Invitation Template",
+        subject: "Invitation to initiate background check",
+        fromName: "EvalRight Support",
+        replyTo: "support@evalright.us",
+        copyTo: "",
+        content: defaultHtmlContent
+      }
+    ];
+  });
   const [editingTemplateIndex, setEditingTemplateIndex] = useState<number | null>(null);
 
-  const defaultHtmlContent = `
-    <p>Hello [applicant_first_name],</p>
-    <p style="margin-top: 16px;">Below you will find a link to authorize and initiate a background check, which is required as a condition of employment.</p>
-    <p style="margin-top: 16px;">Please save this email and keep it handy as it contains instructions for entering information to process the background check.</p>
-    <p style="margin-top: 16px;">
-      <b>First, please click this link to read and print the <span style="color: rgb(199, 0, 57);">Fair Credit Reporting Act Summary of Rights</span>.</b>
-    </p>
-    <p style="margin-top: 16px;">We perform these background checks on each of our candidates to verify information included in the application, and to ensure eligibility for employment.</p>
-    <p style="margin-top: 16px;">
-      The background check will be conducted by our third party screening partner. Please provide all requested information for fields highlighted in <b>RED</b> and make sure to double-check your data entry to ensure correct spelling and correct numerical sequences. Failure to do this will delay your background check.
-    </p>
-    <p style="margin-top: 24px; color: #555555;">
-      <b>&gt;&gt;&gt; Please review your name and ensure it appears exactly as it does on your Social Security card or driver's license. If the name does not match please reach out to the employer.</b>
-    </p>
-    <p style="margin-top: 24px;">
-      <b style="color: #666666;">&gt;&gt;&gt; ALSO, WHEN ENTERING INFORMATION, PROVIDE AS MUCH DETAIL AS POSSIBLE. FAILURE TO PROVIDE ALL REQUESTED INFORMATION WILL DELAY COMPLETION OF YOUR BACKGROUND CHECK.</b>
-    </p>
-  `;
+  useEffect(() => {
+    localStorage.setItem("evalright_templates", JSON.stringify(templatesList));
+  }, [templatesList]);
   
   const [editorContent, setEditorContent] = useState(defaultHtmlContent);
 
@@ -128,6 +155,7 @@ export function ApplicantInviteTemplates({ isDarkMode = false, onNavigate }: { i
     { token: "[company_name]", desc: "replaced with our company name" },
     { token: "[company_info]", desc: "replaced with our company information (address, phonenumber etc.)" },
     { token: "[FCRA_URL]", desc: "replaced with most recent URL to FCRA Summary of Rights" },
+    { token: "[INVITATION_URL]", desc: "replaced with the link to the applicant's dynamic form" },
   ];
 
   const handleEdit = (idx: number) => {

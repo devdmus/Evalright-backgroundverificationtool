@@ -224,7 +224,7 @@ export function ClientInvoicesPage({ isDarkMode = false }: ClientInvoicesPagePro
 
         <div>
           <span style={{ fontWeight: 500 }}>Balance: </span>
-          <span style={{ color: balanceColor, fontWeight: 600 }}>${balance.toFixed(2)}</span>
+          <span style={{ color: balanceColor, fontWeight: 600 }}>₹{balance.toFixed(2)}</span>
         </div>
 
         <div>
@@ -310,17 +310,17 @@ export function ClientInvoicesPage({ isDarkMode = false }: ClientInvoicesPagePro
               <td style={{ padding: "12px 10px" }}>Background Verification Services</td>
               <td style={{ padding: "12px 10px" }}>1</td>
               <td style={{ padding: "12px 10px", textAlign: "right" }}>
-                ${invoice.total.toFixed(2)}
+                ₹{invoice.total.toFixed(2)}
               </td>
               <td style={{ padding: "12px 10px", textAlign: "right", fontWeight: 600 }}>
-                ${invoice.total.toFixed(2)}
+                ₹{invoice.total.toFixed(2)}
               </td>
             </tr>
           </tbody>
         </table>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "300px", marginTop: "12px" }}>
-          <label style={{ fontSize: "12px", fontWeight: 500, color: textMuted }}>Adjust Rate / Price ($)</label>
+          <label style={{ fontSize: "12px", fontWeight: 500, color: textMuted }}>Adjust Rate / Price (₹)</label>
           <div style={{ display: "flex", gap: "8px" }}>
             <input
               type="number"
@@ -411,7 +411,7 @@ export function ClientInvoicesPage({ isDarkMode = false }: ClientInvoicesPagePro
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <label style={{ fontSize: "12px", fontWeight: 500, color: textMuted }}>Amount ($)</label>
+              <label style={{ fontSize: "12px", fontWeight: 500, color: textMuted }}>Amount (₹)</label>
               <input
                 type="number"
                 placeholder={balance.toFixed(2)}
@@ -471,7 +471,7 @@ export function ClientInvoicesPage({ isDarkMode = false }: ClientInvoicesPagePro
                   )
                 );
                 
-                alert(`Successfully recorded payment of $${amt.toFixed(2)} via ${paymentMethodSelect}!`);
+                alert(`Successfully recorded payment of ₹${amt.toFixed(2)} via ${paymentMethodSelect}!`);
                 setPaymentAmount("");
                 setTxnIdInput("");
               }}
@@ -503,7 +503,7 @@ export function ClientInvoicesPage({ isDarkMode = false }: ClientInvoicesPagePro
 
         <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "400px" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <label style={{ fontSize: "12px", fontWeight: 500, color: textMuted }}>Credit Note Amount ($)</label>
+            <label style={{ fontSize: "12px", fontWeight: 500, color: textMuted }}>Credit Note Amount (₹)</label>
             <input
               type="number"
               placeholder="0.00"
@@ -535,7 +535,7 @@ export function ClientInvoicesPage({ isDarkMode = false }: ClientInvoicesPagePro
                   inv.id === invoice.id ? { ...inv, total: newTotal, status: newTotal === 0 ? "PAID" : inv.status } : inv
                 )
               );
-              alert(`Successfully applied $${amt.toFixed(2)} credit to Invoice #${invoice.id}!`);
+              alert(`Successfully applied ₹${amt.toFixed(2)} credit to Invoice #${invoice.id}!`);
               setCreditAmount("");
             }}
             style={{
@@ -571,7 +571,7 @@ export function ClientInvoicesPage({ isDarkMode = false }: ClientInvoicesPagePro
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "400px" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <label style={{ fontSize: "12px", fontWeight: 500, color: textMuted }}>Refund Amount ($)</label>
+              <label style={{ fontSize: "12px", fontWeight: 500, color: textMuted }}>Refund Amount (₹)</label>
               <input
                 type="number"
                 placeholder={invoice.total.toFixed(2)}
@@ -617,7 +617,7 @@ export function ClientInvoicesPage({ isDarkMode = false }: ClientInvoicesPagePro
               onClick={() => {
                 const amt = parseFloat(refundAmount || invoice.total.toString());
                 if (isNaN(amt) || amt <= 0 || amt > invoice.total) {
-                  alert(`Please enter a valid refund amount (maximum $${invoice.total.toFixed(2)}).`);
+                  alert(`Please enter a valid refund amount (maximum ₹${invoice.total.toFixed(2)}).`);
                   return;
                 }
                 
@@ -626,7 +626,7 @@ export function ClientInvoicesPage({ isDarkMode = false }: ClientInvoicesPagePro
                     inv.id === invoice.id ? { ...inv, status: "REFUNDED" } : inv
                   )
                 );
-                alert(`Successfully processed a refund of $${amt.toFixed(2)} for Reason: "${refundReason}"!`);
+                alert(`Successfully processed a refund of ₹${amt.toFixed(2)} for Reason: "${refundReason}"!`);
                 setRefundAmount("");
               }}
               style={{
@@ -656,7 +656,7 @@ export function ClientInvoicesPage({ isDarkMode = false }: ClientInvoicesPagePro
       {
         date: formatDate(invoice.date) + " 07:30:12",
         author: "System",
-        text: `Invoice generated for ${invoice.companyName} with amount $${invoice.total.toFixed(2)}.`,
+        text: `Invoice generated for ${invoice.companyName} with amount ₹${invoice.total.toFixed(2)}.`,
       },
       ...customNotes,
     ];
@@ -1780,7 +1780,7 @@ export function ClientInvoicesPage({ isDarkMode = false }: ClientInvoicesPagePro
 
                       {/* Total */}
                       <td style={{ padding: "10px 8px", fontSize: "13.5px", color: textPrimary, fontWeight: 500 }}>
-                        ${invoice.total.toFixed(2)}
+                        ₹{invoice.total.toFixed(2)}
                       </td>
 
                       {/* Payment Method */}

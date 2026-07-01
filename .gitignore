@@ -130,3 +130,11 @@ dist-ssr
 
 # Project guidelines
 guidelines/
+
+# Backends build folders
+client/backend/dist/
+admin/backend/dist/
+
+# Backends specific environment variables
+client/backend/.env
+admin/backend/.env

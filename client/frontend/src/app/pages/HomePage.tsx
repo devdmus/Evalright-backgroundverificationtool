@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Mail, Plus, ArrowRight, Eye } from "lucide-react";
 import { Footer } from "../components/Footer";
 
@@ -210,6 +210,209 @@ export function HomePage({ isDarkMode = false, onNavigate }: HomePageProps) {
   const [emailAddr, setEmailAddr] = useState("");
   const [reference, setReference] = useState("");
 
+  const [updateTrigger, setUpdateTrigger] = useState(0);
+  const [availableTemplates, setAvailableTemplates] = useState<string[]>([]);
+  const [counts, setCounts] = useState({
+    completed: 0,
+    pending: 0,
+    draft: 0,
+    invitation: 0
+  });
+
+  useEffect(() => {
+    const saved = localStorage.getItem("evalright_templates");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setAvailableTemplates(parsed.map((p: any) => p.name));
+          return;
+        }
+      } catch (e) {}
+    }
+    setAvailableTemplates(["Standard Invitation Template"]);
+  }, []);
+
+  useEffect(() => {
+    const ordersStr = localStorage.getItem("evalright_orders");
+    let completed = 0;
+    let pending = 0;
+    if (ordersStr) {
+      try {
+        const orders = JSON.parse(ordersStr);
+        completed = orders.filter((o: any) => o.status === "CLOSED").length;
+        pending = orders.filter((o: any) => o.status === "PENDING" || o.status === "IN PROGRESS").length;
+      } catch (e) {}
+    } else {
+      completed = 15;
+      pending = 8;
+    }
+
+    const invitesStr = localStorage.getItem("evalright_invitations");
+    let invitationCount = 0;
+    if (invitesStr) {
+      try {
+        const invites = JSON.parse(invitesStr);
+        invitationCount = invites.filter((i: any) => i.status === "Active").length;
+      } catch (e) {}
+    } else {
+      invitationCount = 1;
+    }
+
+    setCounts({
+      completed,
+      pending,
+      draft: 3,
+      invitation: invitationCount
+    });
+  }, [updateTrigger]);
+
+  const dynamicStatCards = useMemo(() => [
+    {
+      id: "completed",
+      title: "COMPLETED ORDERS",
+      count: counts.completed,
+      bg: "#4CA815",
+      badge: "4.82%",
+      badgeText: "Since last month",
+    },
+    {
+      id: "pending",
+      title: "PENDING ORDERS",
+      count: counts.pending,
+      bg: "#DF2A57",
+      link: "View Pending Orders",
+    },
+    {
+      id: "draft",
+      title: "DRAFT ORDERS",
+      count: counts.draft,
+      bg: "#5A9CEF",
+      link: "View Draft Orders",
+    },
+    {
+      id: "invitation",
+      title: "ACTIVE INVITATION ORDERS",
+      count: counts.invitation,
+      bg: "#8758D1",
+      link: "View Active Invitation Orders",
+    },
+  ], [counts]);
+
+  const handleSendInvitation = () => {
+    if (!pkg || !template || !firstName.trim() || !lastName.trim() || !emailAddr.trim()) {
+      alert("Please fill in all required fields (marked with *).");
+      return;
+    }
+
+    let selectedProducts: string[] = [];
+    if (pkg === "Basic Screening") {
+      selectedProducts = ["ssn-trace", "county-criminal"];
+    } else if (pkg === "Standard") {
+      selectedProducts = ["ssn-trace", "county-criminal", "global-watchlist", "driving-history"];
+    } else if (pkg.toLowerCase().includes("federal")) {
+      selectedProducts = ["ssn-trace", "county-criminal", "federal-criminal"];
+    } else {
+      selectedProducts = ["ssn-trace", "county-criminal", "global-watchlist"];
+    }
+
+    let templateContent = "";
+    const savedTemplates = localStorage.getItem("evalright_templates");
+    if (savedTemplates) {
+      try {
+        const templates = JSON.parse(savedTemplates);
+        const matched = templates.find((t: any) => t.name === template);
+        if (matched) {
+          templateContent = matched.content;
+        }
+      } catch (e) {}
+    }
+
+    if (!templateContent) {
+      templateContent = `
+        <p>Hello [applicant_first_name],</p>
+        <p style="margin-top: 16px;">Below you will find a link to authorize and initiate a background check, which is required as a condition of employment.</p>
+        <p style="margin-top: 16px;">Please save this email and keep it handy as it contains instructions for entering information to process the background check.</p>
+        <p style="margin-top: 16px;">
+          <b>First, please click this link to read and print the <span style="color: rgb(199, 0, 57);">Fair Credit Reporting Act Summary of Rights</span>.</b>
+        </p>
+        <p style="margin-top: 24px;">
+          [INVITATION_URL]
+        </p>
+      `;
+    }
+
+    const fullName = `${firstName} ${middleName ? middleName + " " : ""}${lastName}`.trim();
+    let formattedBody = templateContent
+      .replaceAll("[applicant_first_name]", firstName)
+      .replaceAll("[applicant_last_name]", lastName)
+      .replaceAll("[applicant_name]", fullName)
+      .replaceAll("[company_name]", "EvalRight Client Corp")
+      .replaceAll("[FCRA_URL]", "https://www.evalright.com/fcra")
+      .replaceAll("[company_info]", "EvalRight Client Corp, 100 Main St, Chicago, IL");
+
+    const inviteId = "INV-" + Math.floor(100000 + Math.random() * 900000);
+    const inviteUrl = `#invite-form?id=${inviteId}`;
+    const linkHtml = `<div style="text-align: center; margin: 30px 0;">
+      <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
+    </div>`;
+
+    if (formattedBody.includes("[INVITATION_URL]")) {
+      formattedBody = formattedBody.replaceAll("[INVITATION_URL]", linkHtml);
+    } else {
+      formattedBody += `<p style="margin-top: 24px;"><b>Please click the button below to fill out your background check authorization form:</b></p>${linkHtml}`;
+    }
+
+    const newEmail = {
+      id: Math.floor(4000000 + Math.random() * 1000000),
+      subject: `Background Check Invitation - ${fullName}`,
+      recipient: emailAddr,
+      dateSent: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      displayDateSent: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      lastUpdate: "N/A",
+      body: formattedBody
+    };
+
+    const existingEmailsStr = localStorage.getItem("evalright_emails");
+    let existingEmails = [];
+    if (existingEmailsStr) {
+      try {
+        existingEmails = JSON.parse(existingEmailsStr);
+      } catch (e) {}
+    }
+    localStorage.setItem("evalright_emails", JSON.stringify([newEmail, ...existingEmails]));
+
+    const newInvite = {
+      inviteId: inviteId,
+      name: fullName,
+      email: emailAddr,
+      dateCreated: new Date().toISOString().substring(0, 10),
+      status: "Active",
+      emailActivity: "Sent",
+      selectedProducts,
+    };
+
+    const existingInvitesStr = localStorage.getItem("evalright_invitations");
+    let existingInvites = [];
+    if (existingInvitesStr) {
+      try {
+        existingInvites = JSON.parse(existingInvitesStr);
+      } catch (e) {}
+    }
+    localStorage.setItem("evalright_invitations", JSON.stringify([newInvite, ...existingInvites]));
+
+    alert(`Invitation sent successfully to ${fullName}!`);
+    
+    setPkg("");
+    setTemplate("");
+    setFirstName("");
+    setLastName("");
+    setMiddleName("");
+    setEmailAddr("");
+    setReference("");
+    setUpdateTrigger(prev => prev + 1);
+  };
+
   return (
     <div
       style={{
@@ -250,7 +453,7 @@ export function HomePage({ isDarkMode = false, onNavigate }: HomePageProps) {
             marginBottom: "16px",
           }}
         >
-          {STAT_CARDS.map((card) => (
+          {dynamicStatCards.map((card) => (
             <div
               key={card.id}
               style={{
@@ -399,7 +602,7 @@ export function HomePage({ isDarkMode = false, onNavigate }: HomePageProps) {
                 value={template}
                 onChange={(e: any) => setTemplate(e.target.value)}
                 placeholder="Select Template"
-                options={[]}
+                options={availableTemplates}
                 isDarkMode={isDarkMode}
               />
               <FloatingField
@@ -441,6 +644,7 @@ export function HomePage({ isDarkMode = false, onNavigate }: HomePageProps) {
             {/* Send Invitation button */}
             <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
               <button
+                onClick={handleSendInvitation}
                 style={{
                   background: "#C70039",
                   color: "#fff",

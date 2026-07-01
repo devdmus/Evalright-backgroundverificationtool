@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Eye, Upload, ChevronDown } from "lucide-react";
 import { ORDERS, type SearchStatus, type OrderRecord, VERIFICATION_TYPES, US_STATES } from "../data/mockData";
 import { Footer } from "../components/Footer";
@@ -452,9 +452,34 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
     setShowAlert(true);
   }
 
-  const perPage = parseInt(applied.perPage || "20");
+  const [orders, setOrders] = useState<any[]>(() => {
+    const saved = localStorage.getItem("evalright_orders");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return ORDERS;
+  });
 
-  const filtered = ORDERS.filter((o) => {
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem("evalright_orders");
+      if (saved) {
+        try {
+          setOrders(JSON.parse(saved));
+        } catch (e) {}
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    const interval = setInterval(handleStorageChange, 1000);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
+
+  const filtered = orders.filter((o: any) => {
     if (applied.searchId && !o.searchId.toLowerCase().includes(applied.searchId.toLowerCase())) return false;
     if (applied.reportId && !o.reportId.toLowerCase().includes(applied.reportId.toLowerCase())) return false;
     
@@ -513,6 +538,7 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
     return b.searchId.localeCompare(a.searchId);
   });
 
+  const perPage = parseInt(applied.perPage || "20");
   const totalPages = Math.ceil(sorted.length / perPage);
   const paginated = sorted.slice((page - 1) * perPage, page * perPage);
 

@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, ArrowUpDown, Eye, UserPlus, MoreVertical } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, ArrowUpDown, Eye, UserPlus, MoreVertical, X } from "lucide-react";
 import { Footer } from "../components/Footer";
 
 interface Applicant {
@@ -9,14 +9,64 @@ interface Applicant {
   dateCreated: string;
   status: "Active" | "Complete" | "Expired/Other";
   emailActivity: string;
+  selectedProducts?: string[];
 }
 
-export function ApplicantManager({ isDarkMode = false }: { isDarkMode?: boolean }) {
+export function ApplicantManager({ isDarkMode = false, onNavigate }: { isDarkMode?: boolean, onNavigate?: (page: any) => void }) {
   const [activeTab, setActiveTab] = useState<"Active" | "Complete" | "Expired/Other">("Active");
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
-  const [applicants] = useState<Applicant[]>([]); // Initially empty to match screenshot
+
+  const [viewingApplicant, setViewingApplicant] = useState<Applicant | null>(null);
+  const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+
+  const [applicants, setApplicants] = useState<Applicant[]>(() => {
+    const saved = localStorage.getItem("evalright_invitations");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch (e) {}
+    }
+    return [
+      {
+        inviteId: "INV-838402",
+        name: "John Doe",
+        email: "john.doe@example.com",
+        dateCreated: "2026-06-28",
+        status: "Active",
+        emailActivity: "Sent"
+      },
+      {
+        inviteId: "INV-928134",
+        name: "Jane Smith",
+        email: "jane.smith@example.com",
+        dateCreated: "2026-06-25",
+        status: "Complete",
+        emailActivity: "Sent"
+      }
+    ];
+  });
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem("evalright_invitations");
+      if (saved) {
+        try {
+          setApplicants(JSON.parse(saved));
+        } catch (e) {}
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    const interval = setInterval(handleStorageChange, 1000);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
 
   // Sorting state
   const [sortField, setSortField] = useState<keyof Applicant | null>(null);
@@ -29,6 +79,36 @@ export function ApplicantManager({ isDarkMode = false }: { isDarkMode?: boolean 
       setSortField(field);
       setSortAsc(true);
     }
+  };
+
+  const handleCancelInvite = (inviteId: string) => {
+    if (confirm("Are you sure you want to cancel and delete this background check invitation?")) {
+      const saved = localStorage.getItem("evalright_invitations");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          const filtered = parsed.filter((i: any) => i.inviteId !== inviteId);
+          localStorage.setItem("evalright_invitations", JSON.stringify(filtered));
+          setApplicants(filtered);
+        } catch (e) {}
+      }
+    }
+  };
+
+  const handleResendInvite = (applicant: Applicant) => {
+    alert(`A fresh background check email invitation has been sent to ${applicant.email}!`);
+  };
+
+  const getCompletedDetails = (applicant: Applicant) => {
+    const ordersStr = localStorage.getItem("evalright_orders");
+    if (ordersStr) {
+      try {
+        const orders = JSON.parse(ordersStr);
+        const match = orders.find((o: any) => o.applicantEmail === applicant.email || o.applicantName === applicant.name);
+        return match?.details || null;
+      } catch (e) {}
+    }
+    return null;
   };
 
   // Filter and sort logic
@@ -54,6 +134,7 @@ export function ApplicantManager({ isDarkMode = false }: { isDarkMode?: boolean 
       result = [...result].sort((a, b) => {
         const valA = a[sortField];
         const valB = b[sortField];
+        if (valA === undefined || valB === undefined) return 0;
         if (valA < valB) return sortAsc ? -1 : 1;
         if (valA > valB) return sortAsc ? 1 : -1;
         return 0;
@@ -73,11 +154,208 @@ export function ApplicantManager({ isDarkMode = false }: { isDarkMode?: boolean 
     return processedApplicants.slice((page - 1) * pageSize, page * pageSize);
   }, [processedApplicants, page, pageSize]);
 
+  const renderModal = () => {
+    if (!viewingApplicant) return null;
+    const applicant = viewingApplicant;
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          background: "rgba(0, 0, 0, 0.4)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+          padding: "24px",
+        }}
+      >
+        <div
+          style={{
+            background: isDarkMode ? "#252830" : "#FFFFFF",
+            borderRadius: "4px",
+            boxShadow: "0 4px 24px rgba(0, 0, 0, 0.15)",
+            width: "750px",
+            maxWidth: "100%",
+            maxHeight: "90vh",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            color: isDarkMode ? "#E5E7EB" : "#333333",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", background: "rgb(199, 0, 57)" }}>
+            <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "#FFFFFF" }}>
+              Applicant Details - {applicant.inviteId}
+            </h3>
+            <button
+              type="button"
+              onClick={() => setViewingApplicant(null)}
+              style={{ background: "none", border: "none", cursor: "pointer", color: "#FFFFFF", padding: "2px", display: "flex" }}
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div style={{ padding: "24px", overflowY: "auto", flex: 1, display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "24px" }}>
+            {/* Left Column: Invitation Details */}
+            <div style={{ borderRight: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB", paddingRight: "24px" }}>
+              <h4 style={{ margin: "0 0 16px 0", fontSize: "14px", fontWeight: 600, color: "rgb(199, 0, 57)", textAlign: "left" }}>Invitation Info</h4>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", fontSize: "13px", textAlign: "left" }}>
+                <div>
+                  <strong style={{ display: "block", color: isDarkMode ? "#9CA3AF" : "#666666" }}>Full Name:</strong>
+                  <span>{applicant.name}</span>
+                </div>
+                <div>
+                  <strong style={{ display: "block", color: isDarkMode ? "#9CA3AF" : "#666666" }}>Email:</strong>
+                  <span>{applicant.email}</span>
+                </div>
+                <div>
+                  <strong style={{ display: "block", color: isDarkMode ? "#9CA3AF" : "#666666" }}>Date Created:</strong>
+                  <span>{applicant.dateCreated}</span>
+                </div>
+                <div>
+                  <strong style={{ display: "block", color: isDarkMode ? "#9CA3AF" : "#666666" }}>Status:</strong>
+                  <span style={{
+                    display: "inline-block",
+                    padding: "2px 8px",
+                    borderRadius: "12px",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    marginTop: "4px",
+                    background: applicant.status === "Complete" ? "#E6F4EA" : applicant.status === "Active" ? "#E8F0FE" : "#FCE8E6",
+                    color: applicant.status === "Complete" ? "#137333" : applicant.status === "Active" ? "#1A73E8" : "#C5221F"
+                  }}>{applicant.status}</span>
+                </div>
+                <div>
+                  <strong style={{ display: "block", color: isDarkMode ? "#9CA3AF" : "#666666" }}>Email Activity:</strong>
+                  <span>{applicant.emailActivity}</span>
+                </div>
+                
+                {applicant.selectedProducts && applicant.selectedProducts.length > 0 && (
+                  <div style={{ marginTop: "12px" }}>
+                    <strong style={{ display: "block", color: isDarkMode ? "#9CA3AF" : "#666666", marginBottom: "4px" }}>Selected Background Searches:</strong>
+                    <ul style={{ margin: 0, paddingLeft: "16px", color: isDarkMode ? "#D1D5DB" : "#4B5563" }}>
+                      {applicant.selectedProducts.map((p: string) => {
+                        const known: Record<string, string> = {
+                          cdlis: "CDLIS",
+                          "county-criminal": "County Criminal Search",
+                          "driving-history": "Driving History",
+                          "education-verification": "Education Verification",
+                          "employment-verification": "Employment Verification",
+                          "labcorp-10-panel": "LabCorp - 10 Panel Drug Screen",
+                        };
+                        return <li key={p}>{known[p] || p}</li>;
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column: Submitted Details */}
+            <div>
+              <h4 style={{ margin: "0 0 16px 0", fontSize: "14px", fontWeight: 600, color: "rgb(199, 0, 57)", textAlign: "left" }}>Candidate Submission</h4>
+              
+              {applicant.status !== "Complete" ? (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "150px", color: "#8A8A8A", border: "1px dashed #E5E7EB", borderRadius: "4px" }}>
+                  <span>Pending Candidate Submission</span>
+                  <span style={{ fontSize: "11px", marginTop: "4px" }}>The candidate has not filled out the form yet.</span>
+                </div>
+              ) : (
+                (() => {
+                  const details = getCompletedDetails(applicant);
+                  if (!details) {
+                    return (
+                      <div style={{ color: "#8A8A8A", fontStyle: "italic", fontSize: "13px", textAlign: "left" }}>
+                        No form details found in storage (it may have been cleared or created prior to this feature).
+                      </div>
+                    );
+                  }
+                  return (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px", fontSize: "13px", textAlign: "left" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                        <div>
+                          <strong style={{ display: "block", color: isDarkMode ? "#9CA3AF" : "#666666" }}>Date of Birth:</strong>
+                          <span>{details.dob}</span>
+                        </div>
+                        <div>
+                          <strong style={{ display: "block", color: isDarkMode ? "#9CA3AF" : "#666666" }}>SSN (Masked):</strong>
+                          <span>{details.ssn ? details.ssn.replace(/.(?=.{4})/g, '*') : "***-**-XXXX"}</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <strong style={{ display: "block", color: isDarkMode ? "#9CA3AF" : "#666666" }}>Address:</strong>
+                        <span>{details.street}, {details.city}, {details.state} {details.zip}</span>
+                      </div>
+
+                      {details.licenseNumber && (
+                        <div style={{ background: isDarkMode ? "#1A1C21" : "#F9FAFB", padding: "10px", borderRadius: "4px" }}>
+                          <strong style={{ display: "block", color: "rgb(199, 0, 57)", marginBottom: "4px" }}>Driving License Details:</strong>
+                          <span>No: {details.licenseNumber} (State: {details.licenseState})</span>
+                        </div>
+                      )}
+
+                      {details.clinicZip && (
+                        <div style={{ background: isDarkMode ? "#1A1C21" : "#F9FAFB", padding: "10px", borderRadius: "4px" }}>
+                          <strong style={{ display: "block", color: "rgb(199, 0, 57)", marginBottom: "4px" }}>Drug Testing Info:</strong>
+                          <div>Preferred Zip: {details.clinicZip}</div>
+                          <span style={{ display: "block", fontSize: "11px", color: "#10B981", marginTop: "2px" }}>✓ Drug Screening Consent Signed</span>
+                        </div>
+                      )}
+
+                      {details.schoolName && (
+                        <div style={{ background: isDarkMode ? "#1A1C21" : "#F9FAFB", padding: "10px", borderRadius: "4px" }}>
+                          <strong style={{ display: "block", color: "rgb(199, 0, 57)", marginBottom: "4px" }}>Education History:</strong>
+                          <div>School: {details.schoolName}</div>
+                          <div>Degree: {details.degree} ({details.major || "N/A"})</div>
+                          <div>Graduated: {details.gradDate}</div>
+                        </div>
+                      )}
+
+                      {details.employerName && (
+                        <div style={{ background: isDarkMode ? "#1A1C21" : "#F9FAFB", padding: "10px", borderRadius: "4px" }}>
+                          <strong style={{ display: "block", color: "rgb(199, 0, 57)", marginBottom: "4px" }}>Employment History:</strong>
+                          <div>Employer: {details.employerName}</div>
+                          <div>Role: {details.jobTitle}</div>
+                          <div>Dates: {details.empStart} to {details.empEnd || "Present"}</div>
+                        </div>
+                      )}
+
+                      <div style={{ borderTop: "1px solid #E5E7EB", paddingTop: "12px", marginTop: "8px" }}>
+                        <span style={{ fontSize: "11px", color: "#10B981", fontWeight: "bold" }}>
+                          ✓ E-Signed by {details.signatureName} (Consent checkmark completed)
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()
+              )}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "flex-end", padding: "12px 16px", borderTop: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB" }}>
+            <button
+              type="button"
+              onClick={() => setViewingApplicant(null)}
+              style={{ background: "rgb(199, 0, 57)", color: "#FFFFFF", border: "none", padding: "8px 20px", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: "bold" }}
+            >
+              Close View
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div
       className="flex-1 flex flex-col min-h-0"
       style={{
-
         background: isDarkMode ? "#252830" : "#F6F6F6",
       }}
     >
@@ -232,7 +510,6 @@ export function ApplicantManager({ isDarkMode = false }: { isDarkMode?: boolean 
                   fontSize: "12px",
                   color: isDarkMode ? "#E5E7EB" : "#333333",
                   width: "100%",
-
                 }}
               />
             </div>
@@ -376,9 +653,10 @@ export function ApplicantManager({ isDarkMode = false }: { isDarkMode?: boolean 
                           {applicant.emailActivity}
                         </td>
                       )}
-                      <td style={{ padding: "10px 14px" }}>
-                        <div style={{ display: "flex", gap: "8px" }}>
+                      <td style={{ padding: "10px 14px", position: "relative" }}>
+                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                           <button
+                            onClick={() => setViewingApplicant(applicant)}
                             title="View Applicant"
                             style={{
                               background: "none",
@@ -395,7 +673,11 @@ export function ApplicantManager({ isDarkMode = false }: { isDarkMode?: boolean 
                             <Eye size={14} />
                           </button>
                           <button
-                            title="Resend Invite"
+                            onClick={() => {
+                              localStorage.setItem("evalright_active_invite_id", applicant.inviteId);
+                              if (onNavigate) onNavigate("invite-form");
+                            }}
+                            title="Open Applicant Form (Test/Fill)"
                             style={{
                               background: "none",
                               border: "none",
@@ -405,12 +687,13 @@ export function ApplicantManager({ isDarkMode = false }: { isDarkMode?: boolean 
                               display: "flex",
                               alignItems: "center",
                             }}
-                            onMouseEnter={(e) => (e.currentTarget.style.color = "rgb(199, 0, 57)")}
+                            onMouseEnter={(e) => (e.currentTarget.style.color = "#22c55e")}
                             onMouseLeave={(e) => (e.currentTarget.style.color = "#666666")}
                           >
                             <UserPlus size={14} />
                           </button>
                           <button
+                            onClick={() => setActiveDropdownId(activeDropdownId === applicant.inviteId ? null : applicant.inviteId)}
                             title="More Actions"
                             style={{
                               background: "none",
@@ -426,6 +709,43 @@ export function ApplicantManager({ isDarkMode = false }: { isDarkMode?: boolean 
                           >
                             <MoreVertical size={14} />
                           </button>
+
+                          {activeDropdownId === applicant.inviteId && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                right: "14px",
+                                top: "32px",
+                                background: isDarkMode ? "#252830" : "#FFFFFF",
+                                border: isDarkMode ? "1px solid #333333" : "1px solid #E5E7EB",
+                                borderRadius: "4px",
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                                zIndex: 100,
+                                minWidth: "160px",
+                                display: "flex",
+                                flexDirection: "column",
+                                overflow: "hidden",
+                              }}
+                            >
+                              <DropdownButton
+                                onClick={() => {
+                                  setActiveDropdownId(null);
+                                  handleResendInvite(applicant);
+                                }}
+                                label="Resend Email Invite"
+                                isDarkMode={isDarkMode}
+                              />
+                              <DropdownButton
+                                onClick={() => {
+                                  setActiveDropdownId(null);
+                                  handleCancelInvite(applicant.inviteId);
+                                }}
+                                label="Cancel Invitation"
+                                isDanger
+                                isDarkMode={isDarkMode}
+                              />
+                            </div>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -536,6 +856,33 @@ export function ApplicantManager({ isDarkMode = false }: { isDarkMode?: boolean 
         </div>
       </div>
       <Footer isDarkMode={isDarkMode} />
+
+      {renderModal()}
     </div>
   );
 }
+
+// ── Dropdown Hover Component helper ───────────────────────────────────────────
+const DropdownButton = ({ onClick, label, isDanger, isDarkMode }: any) => {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: hovered ? (isDarkMode ? "#313641" : "#F3F4F6") : "none",
+        border: "none",
+        padding: "8px 12px",
+        fontSize: "12px",
+        textAlign: "left",
+        color: isDanger ? "#EF4444" : (isDarkMode ? "#E5E7EB" : "#333333"),
+        cursor: "pointer",
+        width: "100%",
+      }}
+    >
+      {label}
+    </button>
+  );
+};
