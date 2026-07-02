@@ -38,15 +38,40 @@ const COLUMNS: { label: string; field: keyof EmailRecord | null; sortable: boole
   { label: "Last Update", field: "lastUpdate", sortable: true },
 ];
 
-export function EmailActivityLog({ isDarkMode = false }: { isDarkMode?: boolean }) {
-  const [emails] = useState<EmailRecord[]>(INITIAL_EMAILS);
+export function EmailActivityLog({ isDarkMode = false, onNavigate }: { isDarkMode?: boolean, onNavigate?: (page: any) => void }) {
+  const [emails] = useState<any[]>(() => {
+    const saved = localStorage.getItem("evalright_emails");
+    let savedEmails: any[] = [];
+    if (saved) {
+      try {
+        savedEmails = JSON.parse(saved);
+      } catch (e) {}
+    }
+    return [...savedEmails, ...INITIAL_EMAILS];
+  });
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState<keyof EmailRecord | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
-  const [dateRange] = useState("2026-03-15 to 2026-06-1");
-  const [viewingEmail, setViewingEmail] = useState<EmailRecord | null>(null);
+  const [dateRange] = useState("2026-03-15 to 2026-06-30");
+  const [viewingEmail, setViewingEmail] = useState<any | null>(null);
+
+  const handleEmailBodyClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    const anchor = target.closest("a");
+    if (anchor && anchor.getAttribute("href")?.includes("#invite-form")) {
+      e.preventDefault();
+      const href = anchor.getAttribute("href") || "";
+      const match = href.match(/id=([^&]+)/);
+      if (match && match[1]) {
+        localStorage.setItem("evalright_active_invite_id", match[1]);
+        if (onNavigate) {
+          onNavigate("invite-form");
+        }
+      }
+    }
+  };
 
   const handleSort = (field: keyof EmailRecord) => {
     if (sortField === field) {
@@ -343,69 +368,73 @@ export function EmailActivityLog({ isDarkMode = false }: { isDarkMode?: boolean 
               <hr style={{ border: "none", borderTop: "1px solid #E5E7EB", margin: "0 0 20px 0" }} />
 
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-                <img src="/ER.png" alt="EvalRight" style={{ height: "48px", width: "auto" }} />
-                <div>
-                  <div style={{ fontSize: "22px", fontWeight: 700, color: "rgb(199, 0, 57)", letterSpacing: "1px", fontFamily: "Georgia, serif" }}>
-                    EVALRIGHT
-                  </div>
-                  <div style={{ fontSize: "12px", color: "#4A4E69", fontStyle: "italic" }}>Screen before Hire</div>
-                </div>
+                <img src="/evalright-logo.jpg" alt="EvalRight" style={{ height: "40px", width: "auto" }} />
               </div>
 
-              <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 12px 0" }}>Dear Farooq,</p>
-              <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 12px 0", lineHeight: 1.6 }}>
-                Thank you for choosing EvalRight, where every client enjoys the easiest, fastest and most compliant employment background checks to make the best hiring decisions.
-              </p>
-              <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 16px 0", lineHeight: 1.6 }}>
-                Please read and save this message as it contains important instructions and contact information regarding client support.
-              </p>
+              {viewingEmail.body ? (
+                <div 
+                  onClick={handleEmailBodyClick}
+                  style={{ fontSize: "14px", color: isDarkMode ? "#E5E7EB" : "#333333", lineHeight: 1.6 }}
+                  dangerouslySetInnerHTML={{ __html: viewingEmail.body }}
+                />
+              ) : (
+                <>
+                  <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 12px 0" }}>Dear Farooq,</p>
+                  <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 12px 0", lineHeight: 1.6 }}>
+                    Thank you for choosing EvalRight, where every client enjoys the easiest, fastest and most compliant employment background checks to make the best hiring decisions.
+                  </p>
+                  <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 16px 0", lineHeight: 1.6 }}>
+                    Please read and save this message as it contains important instructions and contact information regarding client support.
+                  </p>
 
-              <p style={{ fontSize: "13px", fontWeight: 700, color: "#555555", margin: "0 0 8px 0" }}>Your Account Login Information!</p>
-              <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 6px 0" }}>Your User Name is: Farooq</p>
-              <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 6px 0" }}>Your Password is: Farooq@2026</p>
-              <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 16px 0" }}>
-                Login here:{" "}
-                <a href="https://clients.evalright.us/login.php" style={{ color: "#2563EB" }}>
-                  https://clients.evalright.us/login.php
-                </a>
-              </p>
+                  <p style={{ fontSize: "13px", fontWeight: 700, color: "#555555", margin: "0 0 8px 0" }}>Your Account Login Information!</p>
+                  <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 6px 0" }}>Your User Name is: Farooq</p>
+                  <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 6px 0" }}>Your Password is: Farooq@2026</p>
+                  <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 16px 0" }}>
+                    Login here:{" "}
+                    <a href="https://clients.evalright.us/login.php" style={{ color: "#2563EB" }}>
+                      https://clients.evalright.us/login.php
+                    </a>
+                  </p>
 
-              <p style={{ fontSize: "13px", color: "rgb(199, 0, 57)", margin: "0 0 16px 0", lineHeight: 1.6 }}>
-                To reach our Customer Fulfillment Team directly please use the chat feature located in the bottom right corner of the portal.
-              </p>
+                  <p style={{ fontSize: "13px", color: "rgb(199, 0, 57)", margin: "0 0 16px 0", lineHeight: 1.6 }}>
+                    To reach our Customer Fulfillment Team directly please use the chat feature located in the bottom right corner of the portal.
+                  </p>
 
-              <p style={{ fontSize: "13px", fontWeight: 700, color: "#555555", margin: "0 0 8px 0" }}>Add EvalRight to Your Safe Senders List</p>
-              <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 16px 0", lineHeight: 1.6 }}>
-                Please add our domain, @evalright.us to your Safe Senders list so that you receive our email messages.
-              </p>
+                  <p style={{ fontSize: "13px", fontWeight: 700, color: "#555555", margin: "0 0 8px 0" }}>Add EvalRight to Your Safe Senders List</p>
+                  <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 16px 0", lineHeight: 1.6 }}>
+                    Please add our domain, @evalright.us to your Safe Senders list so that you receive our email messages.
+                  </p>
 
-              <p style={{ fontSize: "13px", fontWeight: 700, color: "#555555", margin: "0 0 8px 0" }}>
-                Obligations Under the Fair Credit Reporting Act (FCRA) and Verifying Criminal Database Records
-              </p>
-              <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 16px 0", lineHeight: 1.6 }}>
-                By using our system, you agree to abide by the Fair Credit Reporting Act (FCRA){" "}
-                <span style={{ color: "rgb(199, 0, 57)" }}>compliance guidelines</span> that include obtaining written consent from the applicant/employee before the background check is ordered, following FCRA required steps pertaining to adverse action and not using the information obtained in violation of any state or federal employment laws or regulations. You also agree to provide the applicant/employee with a copy of the FCRA Summary of Rights before ordering the background check. You also authorize us to verify any criminal records obtained from a database search (aka unverified criminal records) by ordering the criminal record on file from the originating court, at full price, including court costs, because no controls exist to ensure the accuracy of criminal database records.
-              </p>
+                  <p style={{ fontSize: "13px", fontWeight: 700, color: "#555555", margin: "0 0 8px 0" }}>
+                    Obligations Under the Fair Credit Reporting Act (FCRA) and Verifying Criminal Database Records
+                  </p>
+                  <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 16px 0", lineHeight: 1.6 }}>
+                    By using our system, you agree to abide by the Fair Credit Reporting Act (FCRA){" "}
+                    <span style={{ color: "rgb(199, 0, 57)" }}>compliance guidelines</span> that include obtaining written consent from the applicant/employee before the background check is ordered, following FCRA required steps pertaining to adverse action and not using the information obtained in violation of any state or federal employment laws or regulations. You also agree to provide the applicant/employee with a copy of the FCRA Summary of Rights before ordering the background check. You also authorize us to verify any criminal records obtained from a database search (aka unverified criminal records) by ordering the criminal record on file from the originating court, at full price, including court costs, because no controls exist to ensure the accuracy of criminal database records.
+                  </p>
 
-              <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 16px 0", lineHeight: 1.6 }}>
-                Thank you, again, for your business.
-              </p>
+                  <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 16px 0", lineHeight: 1.6 }}>
+                    Thank you, again, for your business.
+                  </p>
 
-              <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 12px 0", lineHeight: 1.6 }}>
-                Please note: unless you pay by credit card at the beginning of the month, payment is due within 30 days after you receive your invoice. If your account goes beyond 30 days past due, we may temporarily suspend access to the account until payment is received in full. If we choose to exercise this option, you will be required to guarantee your account with a credit card before resuming access.
-              </p>
-              <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 12px 0", lineHeight: 1.6 }}>
-                Also, before submitting an order, you will see a confirmation message that shows your final price. If you have any questions at this stage, do not submit the order and call your customer service agent for assistance. By submitting the order, you acknowledge that all sales are final and no refunds will be issued.
-              </p>
-              <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 12px 0", lineHeight: 1.6 }}>
-                Finally, a quick note about accuracy. We follow every available Best Practice to maximize the delivery of accurate information, but unfortunately we cannot guarantee 100% accuracy. No screening company could ever make such a guarantee. Some elements of the screening process are handled by other people, like court clerks, court researchers, education institutions, former employers and drug testing laboratories, to name a few. Reliance on third-parties for information creates an element of risk, however slight, for all companies that rely on background checks. We will do everything possible to maximize accuracy and to rapidly resolve any questions or issues that may arise pertaining to accuracy.
-              </p>
-              <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 12px 0", lineHeight: 1.6 }}>
-                If you ever have any questions, please contact us.
-              </p>
-              <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 20px 0", lineHeight: 1.6 }}>
-                If you have any questions after 6 pm EST, please email us at info@evalright.us and we will respond ASAP.
-              </p>
+                  <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 12px 0", lineHeight: 1.6 }}>
+                    Please note: unless you pay by credit card at the beginning of the month, payment is due within 30 days after you receive your invoice. If your account goes beyond 30 days past due, we may temporarily suspend access to the account until payment is received in full. If we choose to exercise this option, you will be required to guarantee your account with a credit card before resuming access.
+                  </p>
+                  <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 12px 0", lineHeight: 1.6 }}>
+                    Also, before submitting an order, you will see a confirmation message that shows your final price. If you have any questions at this stage, do not submit the order and call your customer service agent for assistance. By submitting the order, you acknowledge that all sales are final and no refunds will be issued.
+                  </p>
+                  <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 12px 0", lineHeight: 1.6 }}>
+                    Finally, a quick note about accuracy. We follow every available Best Practice to maximize the delivery of accurate information, but unfortunately we cannot guarantee 100% accuracy. No screening company could ever make such a guarantee. Some elements of the screening process are handled by other people, like court clerks, court researchers, education institutions, former employers and drug testing laboratories, to name a few. Reliance on third-parties for information creates an element of risk, however slight, for all companies that rely on background checks. We will do everything possible to maximize accuracy and to rapidly resolve any questions or issues that may arise pertaining to accuracy.
+                  </p>
+                  <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 12px 0", lineHeight: 1.6 }}>
+                    If you ever have any questions, please contact us.
+                  </p>
+                  <p style={{ fontSize: "13px", color: "#555555", margin: "0 0 20px 0", lineHeight: 1.6 }}>
+                    If you have any questions after 6 pm EST, please email us at info@evalright.us and we will respond ASAP.
+                  </p>
+                </>
+              )}
 
               <hr style={{ border: "none", borderTop: "1px solid #E5E7EB", margin: "0 0 12px 0" }} />
               <p style={{ fontSize: "13px", fontWeight: 600, color: "#555555", margin: "0 0 4px 0" }}>EvalRight</p>

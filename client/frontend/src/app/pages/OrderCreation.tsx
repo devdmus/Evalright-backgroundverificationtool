@@ -1,7 +1,8 @@
-﻿import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { RotateCcw, ArrowRight, Search, Save, ChevronLeft, ChevronRight, ChevronDown, X, Edit, Mail } from "lucide-react";
 import { Footer } from "../components/Footer";
 import { getPageTheme } from "../theme/pageTheme";
+import { ORDERS } from "../data/mockData";
 
 interface OrderCreationProps {
   isInvitation?: boolean;
@@ -254,6 +255,20 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
   const [afterOrderAction, setAfterOrderAction] = useState("view-results");
   const [invitationTemplate, setInvitationTemplate] = useState("Select Template");
 
+  const [availableTemplates, setAvailableTemplates] = useState<string[]>(["Select Template", "Standard Invitation Template"]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("evalright_templates");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setAvailableTemplates(["Select Template", ...parsed.map((p: any) => p.name)]);
+        }
+      } catch (e) {}
+    }
+  }, []);
+
   // Form states
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
@@ -393,6 +408,93 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
       triggerToast("Please fill in all required fields (marked with *).", true);
       return;
     }
+
+    // Format the email using the template
+    let templateContent = "";
+    const savedTemplates = localStorage.getItem("evalright_templates");
+    if (savedTemplates) {
+      try {
+        const templates = JSON.parse(savedTemplates);
+        const matched = templates.find((t: any) => t.name === invitationTemplate);
+        if (matched) {
+          templateContent = matched.content;
+        }
+      } catch (e) {}
+    }
+
+    if (!templateContent) {
+      templateContent = `
+        <p>Hello [applicant_first_name],</p>
+        <p style="margin-top: 16px;">Below you will find a link to authorize and initiate a background check, which is required as a condition of employment.</p>
+        <p style="margin-top: 16px;">Please save this email and keep it handy as it contains instructions for entering information to process the background check.</p>
+        <p style="margin-top: 16px;">
+          <b>First, please click this link to read and print the <span style="color: rgb(199, 0, 57);">Fair Credit Reporting Act Summary of Rights</span>.</b>
+        </p>
+        <p style="margin-top: 24px;">
+          [INVITATION_URL]
+        </p>
+      `;
+    }
+
+    const fullName = `${firstName} ${middleNameDisabled ? "" : middleName + " "}${lastName}`.trim();
+    let formattedBody = templateContent
+      .replaceAll("[applicant_first_name]", firstName)
+      .replaceAll("[applicant_last_name]", lastName)
+      .replaceAll("[applicant_name]", fullName)
+      .replaceAll("[company_name]", "EvalRight Client Corp")
+      .replaceAll("[FCRA_URL]", "https://www.evalright.com/fcra")
+      .replaceAll("[company_info]", "EvalRight Client Corp, 100 Main St, Chicago, IL");
+
+    const inviteId = "INV-" + Math.floor(100000 + Math.random() * 900000);
+    const inviteUrl = `#invite-form?id=${inviteId}`;
+    const linkHtml = `<div style="text-align: center; margin: 30px 0;">
+      <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
+    </div>`;
+
+    if (formattedBody.includes("[INVITATION_URL]")) {
+      formattedBody = formattedBody.replaceAll("[INVITATION_URL]", linkHtml);
+    } else {
+      formattedBody += `<p style="margin-top: 24px;"><b>Please click the button below to fill out your background check authorization form:</b></p>${linkHtml}`;
+    }
+
+    const newEmail = {
+      id: Math.floor(4000000 + Math.random() * 1000000),
+      subject: `Background Check Invitation - ${fullName}`,
+      recipient: applicantEmail,
+      dateSent: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      lastUpdate: "N/A",
+      displayDateSent: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      body: formattedBody
+    };
+
+    const existingEmailsStr = localStorage.getItem("evalright_emails");
+    let existingEmails = [];
+    if (existingEmailsStr) {
+      try {
+        existingEmails = JSON.parse(existingEmailsStr);
+      } catch (e) {}
+    }
+    localStorage.setItem("evalright_emails", JSON.stringify([newEmail, ...existingEmails]));
+
+    const newInvite = {
+      inviteId: inviteId,
+      name: fullName,
+      email: applicantEmail,
+      dateCreated: new Date().toISOString().substring(0, 10),
+      status: "Active",
+      emailActivity: "Sent",
+      selectedProducts: Array.from(selected),
+    };
+
+    const existingInvitesStr = localStorage.getItem("evalright_invitations");
+    let existingInvites = [];
+    if (existingInvitesStr) {
+      try {
+        existingInvites = JSON.parse(existingInvitesStr);
+      } catch (e) {}
+    }
+    localStorage.setItem("evalright_invitations", JSON.stringify([newInvite, ...existingInvites]));
+
     setStep(4);
   }
 
@@ -1275,7 +1377,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   <FloatingSelect
                     label="Invitation Email Template"
                     value={invitationTemplate}
-                    options={["Select Template", "Standard Invitation Template", "Custom Template"]}
+                    options={availableTemplates}
                     onChange={setInvitationTemplate}
                     required
                   />
@@ -2222,6 +2324,55 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 type="button"
                 onClick={() => {
                   setShowSubmitModal(false);
+
+                  const fullName = `${firstName} ${middleNameDisabled ? "" : middleName + " "}${lastName}`.trim();
+                  const searchId = "" + Math.floor(8000000 + Math.random() * 1000000);
+                  const reportId = "RP-" + Math.floor(20000 + Math.random() * 10000);
+                  
+                  const productNames = Array.from(selected).map(id => {
+                    const knownNames: Record<string, string> = {
+                      cdlis: "CDLIS",
+                      "county-criminal": "County Criminal Search",
+                      "driving-history": "Driving History",
+                      "education-verification": "Education Verification",
+                      "employment-verification": "Employment Verification",
+                      "labcorp-10-panel": "LabCorp - 10 Panel",
+                    };
+                    return knownNames[id] || id;
+                  });
+
+                  const verificationType = productNames.join(", ") || "Background Check";
+
+                  const newOrder = {
+                    searchId,
+                    reportId,
+                    firstName,
+                    lastName,
+                    applicantName: fullName,
+                    verificationType,
+                    status: "PENDING" as const,
+                    orderedBy: "Farooq Shaik",
+                    orderDate: new Date().toISOString().substring(0, 10),
+                    county: "Cook",
+                    state: jobState !== "Select State" ? jobState : "IL",
+                    ssn: ssn ? ssn.replace(/.(?=.{4})/g, '*') : "***-**-XXXX",
+                    dob: dob || "N/A",
+                    applicantEmail: applicantEmail,
+                    criminalRecordsFound: "None",
+                    reference: reference || "",
+                  };
+
+                  const existingOrdersStr = localStorage.getItem("evalright_orders");
+                  let existingOrders = [];
+                  if (existingOrdersStr) {
+                    try {
+                      existingOrders = JSON.parse(existingOrdersStr);
+                    } catch (e) {}
+                  } else {
+                    existingOrders = [...ORDERS];
+                  }
+                  localStorage.setItem("evalright_orders", JSON.stringify([newOrder, ...existingOrders]));
+
                   setStep(4);
                 }}
                 style={{

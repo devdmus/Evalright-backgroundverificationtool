@@ -37,10 +37,11 @@ export type PageKey =
   | "setup-random-drug-checks"
   | "invoices"
   | "support-center"
+  | "activity-report"
+  | "invite-form"
   | "forms-documents"
   | "email-activity"
-  | "announcements"
-  | "activity-report";
+  | "announcements";
 
 interface SidebarProps {
   currentPage: PageKey;

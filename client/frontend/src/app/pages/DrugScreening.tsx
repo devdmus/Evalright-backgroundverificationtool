@@ -63,7 +63,7 @@ export function DrugScreening({ isDarkMode = false }: { isDarkMode?: boolean }) 
   };
 
   const processedScreens = useMemo(() => {
-    let result = [...rawData] as Record<string, string>[];
+    let result = [...rawData] as unknown as Record<string, string>[];
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
