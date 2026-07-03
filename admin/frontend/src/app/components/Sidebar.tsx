@@ -20,8 +20,6 @@ export type PageKey =
   | "client-summary"
   | "set-pricing"
   | "client-orders"
-  | "reports-orders"
-  | "reports-clients"
   | "accounts-receivable"
   | "reports-activity"
   | "reports-client-group-activity"
@@ -37,7 +35,8 @@ export type PageKey =
   | "reports-geographic-criminal"
   | "reports-income-history"
   | "reports-package-order-trend"
-  | "reports-alacarte-frequency"
+  | "reports-a-la-carte-frequency"
+  | "reports-monthly-revenue"
   | "invoices"
   | "account-settings"
   | "client-groups"
@@ -102,7 +101,8 @@ const mainNavGroups: NavGroup[] = [
       { label: "Geographic Criminal Report", page: "reports-geographic-criminal" },
       { label: "Income History", page: "reports-income-history" },
       { label: "Package Order Trend", page: "reports-package-order-trend" },
-      { label: "A La Carte Order Frequency", page: "reports-alacarte-frequency" },
+      { label: "A La Carte Order Frequency", page: "reports-a-la-carte-frequency" },
+      { label: "Monthly Revenue Report", page: "reports-monthly-revenue" },
     ],
   },
 ];
@@ -137,8 +137,6 @@ const clientsPages = new Set<PageKey>([
   "client-management", "add-new-client", "client-invoices", "mass-mail", "client-summary",
 ]);
 const reportsPages = new Set<PageKey>([
-  "reports-orders",
-  "reports-clients",
   "accounts-receivable",
   "reports-activity",
   "reports-client-group-activity",
@@ -154,7 +152,8 @@ const reportsPages = new Set<PageKey>([
   "reports-geographic-criminal",
   "reports-income-history",
   "reports-package-order-trend",
-  "reports-alacarte-frequency",
+  "reports-a-la-carte-frequency",
+  "reports-monthly-revenue",
 ]);
 const accountSettingsPages = new Set<PageKey>([
   "account-settings",
