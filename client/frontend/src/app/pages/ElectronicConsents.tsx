@@ -8,7 +8,7 @@ interface ConsentRecord {
   applicantName: string;
   emailAddress: string;
   dob: string;
-  ssn: string;
+  adhr: string;
   dateSigned: string;
   formType: string;
 }
@@ -79,9 +79,9 @@ export function ElectronicConsents({ isDarkMode = false }: { isDarkMode?: boolea
     } else if (sortField === "dob") {
       valA = a.dob;
       valB = b.dob;
-    } else if (sortField === "ssn") {
-      valA = a.ssn;
-      valB = b.ssn;
+    } else if (sortField === "adhr") {
+      valA = a.adhr;
+      valB = b.adhr;
     } else if (sortField === "dateSigned") {
       valA = a.dateSigned;
       valB = b.dateSigned;
@@ -193,8 +193,8 @@ export function ElectronicConsents({ isDarkMode = false }: { isDarkMode?: boolea
                   <th onClick={() => handleSort("dob")} style={s.th}>
                     DOB <SortIcon active={sortField === "dob"} direction={sortDirection} colors={s.sortColors(sortField === "dob", sortDirection)} />
                   </th>
-                  <th onClick={() => handleSort("ssn")} style={s.th}>
-                    SSN <SortIcon active={sortField === "ssn"} direction={sortDirection} colors={s.sortColors(sortField === "ssn", sortDirection)} />
+                  <th onClick={() => handleSort("adhr")} style={s.th}>
+                    ADHR <SortIcon active={sortField === "adhr"} direction={sortDirection} colors={s.sortColors(sortField === "adhr", sortDirection)} />
                   </th>
                   <th onClick={() => handleSort("dateSigned")} style={s.th}>
                     Date Signed <SortIcon active={sortField === "dateSigned"} direction={sortDirection} colors={s.sortColors(sortField === "dateSigned", sortDirection)} />
@@ -217,7 +217,7 @@ export function ElectronicConsents({ isDarkMode = false }: { isDarkMode?: boolea
                       <td style={{ ...s.td, color: s.t.text }}>{c.applicantName}</td>
                       <td style={s.td}>{c.emailAddress}</td>
                       <td style={s.td}>{c.dob}</td>
-                      <td style={s.td}>{c.ssn}</td>
+                      <td style={s.td}>{c.adhr}</td>
                       <td style={s.td}>{c.dateSigned}</td>
                       <td style={{ ...s.td, color: s.t.text }}>{c.formType}</td>
                       <td style={s.td}>

@@ -19,6 +19,7 @@ import { DailyUsageReport } from "./pages/DailyUsageReport";
 import { InactiveClientReport } from "./pages/InactiveClientReport";
 import { JurisdictionReport } from "./pages/JurisdictionReport";
 import { OrderLossReport } from "./pages/OrderLossReport";
+import { CLIENT_LIST, ClientRecord } from "./data/mockData";
 
 const USER_NAME = "Raghu Adaveni";
 
@@ -68,6 +69,26 @@ export default function App() {
   const [selectedClientId, setSelectedClientId] = useState<string | undefined>();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [clients, setClients] = useState<ClientRecord[]>([]);
+
+  async function fetchClients() {
+    try {
+      const response = await fetch("http://localhost:5001/api/clients");
+      const dbClients = await response.json();
+      if (Array.isArray(dbClients)) {
+        setClients([...dbClients, ...CLIENT_LIST]);
+      } else {
+        setClients(CLIENT_LIST);
+      }
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+      setClients(CLIENT_LIST);
+    }
+  }
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
 
   useEffect(() => {
     const pageLabel = PAGE_TITLES[currentPage] ?? currentPage;
@@ -90,17 +111,18 @@ export default function App() {
   function renderPage() {
     switch (currentPage) {
       case "home":
-        return <HomePage isDarkMode={isDarkMode} onNavigate={setCurrentPage} onViewClient={handleViewClient} />;
+        return <HomePage isDarkMode={isDarkMode} onNavigate={setCurrentPage} onViewClient={handleViewClient} clients={clients} />;
       case "client-management":
-        return <ClientManagement isDarkMode={isDarkMode} onViewClient={handleViewClient} />;
+        return <ClientManagement isDarkMode={isDarkMode} onViewClient={handleViewClient} clients={clients} />;
       case "add-new-client":
-        return <AddNewClient isDarkMode={isDarkMode} />;
+        return <AddNewClient isDarkMode={isDarkMode} onClientAdded={fetchClients} />;
       case "client-summary":
         return (
           <ClientSummary
             isDarkMode={isDarkMode}
             clientId={selectedClientId}
             onNavigate={(page) => setCurrentPage(page as PageKey)}
+            clients={clients}
           />
         );
       case "set-pricing":

@@ -58,7 +58,7 @@ export function ReportsOrders({ isDarkMode = false }: { isDarkMode?: boolean }) 
   const [searchType, setSearchType] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [ssn, setSsn] = useState("");
+  const [adhr, setAdhr] = useState("");
   const [dob, setDob] = useState("");
   const [county, setCounty] = useState("");
   const [state, setState] = useState("");
@@ -85,12 +85,12 @@ export function ReportsOrders({ isDarkMode = false }: { isDarkMode?: boolean }) 
     const matchType = !searchType || o.verificationType === searchType;
     const matchFirst = !firstName || o.firstName.toLowerCase().includes(firstName.toLowerCase());
     const matchLast = !lastName || o.lastName.toLowerCase().includes(lastName.toLowerCase());
-    const matchSsn = !ssn || (o.ssn || "").includes(ssn);
+    const matchAdhr = !adhr || (o.adhr || o.ssn || "").includes(adhr);
     const matchCounty = !county || (o.county || "").toLowerCase().includes(county.toLowerCase());
     const matchState = !state || o.state === state;
     const matchEmail = !applicantEmail || (o.applicantEmail || "").toLowerCase().includes(applicantEmail.toLowerCase());
     const matchBy = !orderedBy || o.orderedBy === orderedBy;
-    return matchId && matchReportId && matchStatus && matchType && matchFirst && matchLast && matchSsn && matchCounty && matchState && matchEmail && matchBy;
+    return matchId && matchReportId && matchStatus && matchType && matchFirst && matchLast && matchAdhr && matchCounty && matchState && matchEmail && matchBy;
   });
 
   const totalResults = filtered.length;
@@ -105,7 +105,7 @@ export function ReportsOrders({ isDarkMode = false }: { isDarkMode?: boolean }) 
 
   function handleReset() {
     setSearchId(""); setReportId(""); setStatus(""); setSearchType("");
-    setFirstName(""); setLastName(""); setSsn(""); setDob("");
+    setFirstName(""); setLastName(""); setAdhr(""); setDob("");
     setCounty(""); setState(""); setOrderReference(""); setOrderDateFrom("");
     setOrderDateTo(""); setSortOrder("Status"); setSearchesPerPage(20);
     setAge(""); setApplicantEmail(""); setCriminalRecords(""); setOrderedBy("");
@@ -185,8 +185,8 @@ export function ReportsOrders({ isDarkMode = false }: { isDarkMode?: boolean }) 
           {/* Row 2 */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)" }}>
             <div style={cellStyle}>
-              <label style={labelStyle}>SSN</label>
-              <input style={inputStyle} value={ssn} onChange={(e) => setSsn(e.target.value)} placeholder="" />
+              <label style={labelStyle}>ADHR</label>
+              <input style={inputStyle} value={adhr} onChange={(e) => setAdhr(e.target.value)} placeholder="" />
             </div>
             <div style={cellStyle}>
               <label style={labelStyle}>DOB</label>

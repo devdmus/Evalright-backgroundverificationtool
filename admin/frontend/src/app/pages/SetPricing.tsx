@@ -52,7 +52,7 @@ export const SEARCH_PRICING_LIST: SearchPricingItem[] = [
 
   { name: "(AF) Quest - 5 Panel" },
 
-  { name: "SSN Trace/Address History" },
+  { name: "ADHR Trace/Address History" },
 
   { name: "County Criminal" },
 

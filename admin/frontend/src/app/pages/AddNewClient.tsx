@@ -4,11 +4,15 @@ import { Footer } from "../components/Footer";
 
 interface AddNewClientProps {
   isDarkMode?: boolean;
+  onClientAdded?: () => void;
 }
 
-export function AddNewClient({ isDarkMode = false }: AddNewClientProps) {
+export function AddNewClient({ isDarkMode = false, onClientAdded }: AddNewClientProps) {
   const [showNote, setShowNote] = useState(true);
   const [sendAccountMessage, setSendAccountMessage] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
   const [form, setForm] = useState({
     companyName: "",
     address1: "",
@@ -43,12 +47,90 @@ export function AddNewClient({ isDarkMode = false }: AddNewClientProps) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  async function handleSubmit() {
+    // Validate required fields
+    if (!form.companyName.trim() || !form.email.trim() || !form.username.trim() || !form.password.trim() || !form.firstName.trim()) {
+      setMessage({ type: "error", text: "Please fill in all required fields (Company Name, Email, Username, Password, and First Name)." });
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch("http://localhost:5001/api/clients", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...form,
+          sendAccountMessage,
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to create client.");
+      }
+
+      setMessage({ type: "success", text: "Client added successfully!" });
+      if (onClientAdded) {
+        onClientAdded();
+      }
+      // Reset form fields
+      setForm({
+        companyName: "",
+        address1: "",
+        address2: "",
+        city: "",
+        state: "",
+        postcode: "",
+        phoneNumber: "",
+        firstName: "",
+        lastName: "",
+        email: "",
+        username: "",
+        password: "",
+        dontApplyLateFees: false,
+        dontSendOverdueEmails: false,
+        dontApplyTax: false,
+        clientGroup: "New Sign-Ups EvalRight",
+        status: "Active",
+        creditBalance: "",
+        adminNotes: "",
+      });
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ type: "error", text: err.message || "An error occurred while adding client." });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, background: contentBg }}>
       <div style={{ flex: 1, padding: "20px 24px", overflowY: "auto" }}>
         <h1 style={{ fontSize: "20px", fontWeight: 600, color: accentColor, margin: "0 0 16px 0" }}>
           Add New Client
         </h1>
+
+        {message && (
+          <div
+            style={{
+              background: message.type === "success" ? (isDarkMode ? "rgba(76,175,80,0.15)" : "#E8F5E9") : (isDarkMode ? "rgba(244,67,54,0.15)" : "#FFEBEE"),
+              border: `1px solid ${message.type === "success" ? (isDarkMode ? "#2E7D32" : "#A5D6A7") : (isDarkMode ? "#C62828" : "#EF9A9A")}`,
+              borderRadius: "4px",
+              padding: "12px 16px",
+              marginBottom: "16px",
+              color: message.type === "success" ? (isDarkMode ? "#81C784" : "#2E7D32") : (isDarkMode ? "#E57373" : "#C62828"),
+              fontSize: "13px",
+              lineHeight: 1.5,
+            }}
+          >
+            {message.text}
+          </div>
+        )}
 
         {showNote && (
           <div
@@ -193,6 +275,8 @@ export function AddNewClient({ isDarkMode = false }: AddNewClientProps) {
 
             <div style={{ display: "flex", justifyContent: "center" }}>
               <button
+                onClick={handleSubmit}
+                disabled={loading}
                 style={{
                   height: "40px",
                   padding: "0 36px",
@@ -202,10 +286,11 @@ export function AddNewClient({ isDarkMode = false }: AddNewClientProps) {
                   borderRadius: "4px",
                   fontSize: "14px",
                   fontWeight: 600,
-                  cursor: "pointer",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  opacity: loading ? 0.7 : 1,
                 }}
               >
-                Add Client
+                {loading ? "Adding..." : "Add Client"}
               </button>
             </div>
           </div>

@@ -51,7 +51,7 @@ const MASS_MAIL_SEARCH_TYPES = [
   "All Searches",
   "(AF) LabCorp - 10 Panel",
   "Nationwide Criminal Database Search",
-  "SSN Verification (CBSV)",
+  "ADHR Verification (UIDAI)",
   "County Criminal Search",
   "Drug Screening 4 Panel (LabCorp)",
   "Drug Screening 5 Panel with Nicotine",

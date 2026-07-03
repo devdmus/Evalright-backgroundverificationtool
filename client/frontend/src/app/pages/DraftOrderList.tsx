@@ -21,19 +21,19 @@ const MOCK_DRAFTS: DraftRecord[] = [
   {
     id: "draft-2",
     applicantName: "N/A (invitation draft)",
-    searchesOrdered: "SSN Trace/Address History",
+    searchesOrdered: "ADHR Trace/Address History",
     dateCreated: "06/15/2026 01:15 AM",
   },
   {
     id: "draft-3",
     applicantName: "N/A (invitation draft)",
-    searchesOrdered: "SSN Trace/Address History",
+    searchesOrdered: "ADHR Trace/Address History",
     dateCreated: "06/15/2026 01:14 AM",
   },
   {
     id: "draft-4",
     applicantName: "N/A (invitation draft)",
-    searchesOrdered: "SSN Trace/Address History",
+    searchesOrdered: "ADHR Trace/Address History",
     dateCreated: "06/15/2026 01:13 AM",
   },
 ];

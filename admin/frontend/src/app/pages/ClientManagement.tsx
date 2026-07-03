@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Search, Filter } from "lucide-react";
 import { Footer } from "../components/Footer";
 import { Pagination } from "../components/Pagination";
-import { CLIENT_LIST } from "../data/mockData";
+import { CLIENT_LIST, ClientRecord } from "../data/mockData";
 
 interface ClientManagementProps {
   isDarkMode?: boolean;
   onViewClient?: (clientId: string) => void;
+  clients?: ClientRecord[];
 }
 
 function SortIcon() {
@@ -38,7 +39,7 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-export function ClientManagement({ isDarkMode = false, onViewClient }: ClientManagementProps) {
+export function ClientManagement({ isDarkMode = false, onViewClient, clients }: ClientManagementProps) {
   const [perPage, setPerPage] = useState(10);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -58,7 +59,7 @@ export function ClientManagement({ isDarkMode = false, onViewClient }: ClientMan
   const inputBg = isDarkMode ? "#2A2D34" : "#FFFFFF";
   const theadBg = isDarkMode ? "#2A2D34" : "#F9FAFB";
 
-  const filtered = CLIENT_LIST.filter((c) => {
+  const filtered = (clients || CLIENT_LIST).filter((c) => {
     if (search.trim()) {
       const q = search.toLowerCase();
       if (

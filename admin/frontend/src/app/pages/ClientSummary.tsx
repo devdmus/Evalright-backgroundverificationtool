@@ -61,20 +61,16 @@ const QUICK_ACTIONS = [
 
 
 interface ClientSummaryProps {
-
   isDarkMode?: boolean;
-
   clientId?: string;
-
   initialTab?: string;
-
   onNavigate?: (page: string) => void;
-
+  clients?: ClientRecord[];
 }
 
 
 
-export function ClientSummary({ isDarkMode = false, clientId, initialTab = "Summary", onNavigate }: ClientSummaryProps) {
+export function ClientSummary({ isDarkMode = false, clientId, initialTab = "Summary", onNavigate, clients }: ClientSummaryProps) {
 
   const [activeTab, setActiveTab] = useState(initialTab);
 
@@ -87,8 +83,7 @@ export function ClientSummary({ isDarkMode = false, clientId, initialTab = "Summ
 
 
   const client: ClientRecord =
-
-    CLIENT_LIST.find((c) => c.id === selectedClientId) ?? DEMO_CLIENT;
+    (clients || CLIENT_LIST).find((c) => c.id === selectedClientId) ?? DEMO_CLIENT;
 
 
 
