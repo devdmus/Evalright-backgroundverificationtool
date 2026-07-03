@@ -9,6 +9,7 @@ interface OrderCreationProps {
   showInvitationBanner?: boolean;
   isDarkMode?: boolean;
   onNavigate?: (page: any) => void;
+  currentUser?: any;
 }
 
 interface AlaCarteSearchItem {
@@ -142,11 +143,11 @@ const COL2_CATEGORIES: AlaCarteCategory[] = [
     ]
   },
   {
-    title: "SSN Trace",
+    title: "ADHR Trace",
     items: [
-      { id: "ssn-trace-address", name: "SSN Trace/Address History", hasTooltip: true },
-      { id: "ssn-validation", name: "SSN Validation", hasTooltip: true },
-      { id: "ssn-verification-cbsv", name: "SSN Verification (CBSV)", hasTooltip: true },
+      { id: "adhr-trace-address", name: "ADHR Trace/Address History", hasTooltip: true },
+      { id: "adhr-validation", name: "ADHR Validation", hasTooltip: true },
+      { id: "adhr-verification-cbsv", name: "ADHR Verification (UIDAI)", hasTooltip: true },
     ]
   }
 ];
@@ -172,9 +173,9 @@ const TOOLTIP_MESSAGES: Record<string, string> = {
   "education-verification": "Verification of education credentials that confirm degree received, course of study, and dates of attendance.",
   "employment-verification": "Verifies an individual's work history, such as company names and locations, dates, positions or titles held along with compensation (if requested and provided by the source), directly with former employers or their authorized agents.",
   "professional-license": "This search provides information from licensing agencies in various states across the United States. The search includes the type",
-  "ssn-trace-address": "The SSN Trace creates a compilation from the credit bureaus of addresses and alias names associated with the SSN. Based on this information and your specific package, we will use this address history to determine which jurisdictions to search for court records.",
-  "ssn-validation": "This service identifies if a Social Security Number (SSN) is valid using information from the Social Security Administration (SSA) and checks the SSA Death Index. Note: the SSN Validation check DOES NOT confirm that the SSN belongs to your candidate.",
-  "ssn-verification-cbsv": "This service can verify if the SSN holder's name, date of birth, and SSN match SSA's records by obtaining the information directly with the Social Security Administration (SSA)",
+  "adhr-trace-address": "The ADHR Trace creates a compilation from database agencies of addresses and alias names associated with the Aadhaar. Based on this information and your specific package, we will use this address history to determine which jurisdictions to search for court records.",
+  "adhr-validation": "This service identifies if an Aadhaar Number (ADHR) is valid using information from the Unique Identification Authority of India (UIDAI). Note: the ADHR Validation check DOES NOT confirm that the Aadhaar belongs to your candidate.",
+  "adhr-verification-cbsv": "This service can verify if the Aadhaar holder's name, date of birth, and Aadhaar match UIDAI's records by obtaining the information directly with the Unique Identification Authority of India (UIDAI)",
 };
 
 const STATES_LIST = [
@@ -225,24 +226,24 @@ const allSearchItems = [
 ];
 const itemMap = new Map(allSearchItems.map((item) => [item.id, item]));
 
-function maskSSN(val: string) {
+function maskAdhr(val: string) {
   if (!val) return "";
-  if (val.includes("X") || val.includes("x")) return val;
+  if (val.includes("X") || val.includes("x") || val.includes("*")) return val;
   const clean = val.replace(/\D/g, "");
   if (clean.length >= 4) {
-    return `XXX-XX-${clean.slice(-4)}`;
+    return `XXXX-XXXX-${clean.slice(-4)}`;
   }
   return val;
 }
 
 function getSearchDisplayName(itemId: string, name: string) {
-  if (itemId === "ssn-trace-address") {
-    return "SSN Trace/Address History (SSN Trace)";
+  if (itemId === "adhr-trace-address") {
+    return "ADHR Trace/Address History (ADHR Trace)";
   }
   return name;
 }
 
-export function OrderCreation({ isInvitation = false, showInvitationBanner = false, isDarkMode = false, onNavigate }: OrderCreationProps) {
+export function OrderCreation({ isInvitation = false, showInvitationBanner = false, isDarkMode = false, onNavigate, currentUser }: OrderCreationProps) {
   const t = getPageTheme(isDarkMode);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bannerVisible, setBannerVisible] = useState(true);
@@ -279,7 +280,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
   const [showMinorModal, setShowMinorModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [minorAgreementChecked, setMinorAgreementChecked] = useState(true);
-  const [ssn, setSsn] = useState("");
+  const [adhr, setAdhr] = useState("");
   const [streetAddress, setStreetAddress] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [reference, setReference] = useState("");
@@ -287,6 +288,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
   const [applicantEmail, setApplicantEmail] = useState("");
   const [emailReport, setEmailReport] = useState(false);
   const [rushOrder, setRushOrder] = useState(false);
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
 
   // Toast notification state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -330,7 +332,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
     setLastName("");
     setGeneration("None");
     setDob("");
-    setSsn("");
+    setAdhr("");
     setStreetAddress("");
     setZipCode("");
     setReference("");
@@ -378,7 +380,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
       !isMiddleNameValid ||
       !lastName.trim() ||
       !dob.trim() ||
-      !ssn.trim() ||
+      !adhr.trim() ||
       !streetAddress.trim() ||
       !zipCode.trim() ||
       jobState === "Select State" ||
@@ -556,7 +558,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                       setLastName("");
                       setGeneration("None");
                       setDob("");
-                      setSsn("");
+                      setAdhr("");
                       setStreetAddress("");
                       setZipCode("");
                       setReference("");
@@ -597,7 +599,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                         setLastName("");
                         setGeneration("None");
                         setDob("");
-                        setSsn("");
+                        setAdhr("");
                         setStreetAddress("");
                         setZipCode("");
                         setReference("");
@@ -1207,7 +1209,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               {/* Row 2 */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "16px" }}>
                 <FloatingDatePicker label="Date of Birth" value={dob} onChange={setDob} required />
-                <FloatingInput label="Social Security Number" value={ssn} onChange={setSsn} required placeholder="XXX-XX-XXXX" />
+                <FloatingInput label="Aadhaar Number (ADHR)" value={adhr} onChange={setAdhr} required placeholder="XXXX-XXXX-XXXX" />
                 <FloatingInput label="Street Address" value={streetAddress} onChange={setStreetAddress} required />
                 <FloatingInput label="Zip Code" value={zipCode} onChange={setZipCode} required />
               </div>
@@ -1557,10 +1559,10 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   
                   <div>
                     <div style={{ fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                      Applicant's SSN:
+                      Applicant's Aadhaar:
                     </div>
                     <div style={{ fontSize: "15px", color: "#1F2937", marginTop: "6px", fontWeight: 500 }}>
-                      {maskSSN(ssn)}
+                      {maskAdhr(adhr)}
                     </div>
                   </div>
                   
@@ -1611,7 +1613,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     {Array.from(selected).map((itemId) => {
                       const item = itemMap.get(itemId);
                       const productName = item ? item.name : itemId;
-                      const editLabel = itemId === "ssn-trace-address" ? "Show SSN Report" : "Show Report";
+                      const editLabel = itemId === "adhr-trace-address" ? "Show ADHR Report" : "Show Report";
                       
                       return (
                         <tr key={itemId} style={{ borderBottom: "1px solid #E5E7EB" }}>
@@ -2322,8 +2324,14 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setShowSubmitModal(false);
+                disabled={isSubmittingOrder}
+                onClick={async () => {
+                  if (!currentUser) {
+                    triggerToast("You must be logged in to submit an order.", true);
+                    return;
+                  }
+
+                  setIsSubmittingOrder(true);
 
                   const fullName = `${firstName} ${middleNameDisabled ? "" : middleName + " "}${lastName}`.trim();
                   const searchId = "" + Math.floor(8000000 + Math.random() * 1000000);
@@ -2351,43 +2359,84 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     applicantName: fullName,
                     verificationType,
                     status: "PENDING" as const,
-                    orderedBy: "Farooq Shaik",
+                    orderedBy: currentUser.firstName && currentUser.lastName
+                      ? `${currentUser.firstName} ${currentUser.lastName}`.trim()
+                      : currentUser.username,
                     orderDate: new Date().toISOString().substring(0, 10),
                     county: "Cook",
                     state: jobState !== "Select State" ? jobState : "IL",
-                    ssn: ssn ? ssn.replace(/.(?=.{4})/g, '*') : "***-**-XXXX",
+                    adhr: adhr ? adhr.replace(/.(?=.{4})/g, '*') : "********XXXX",
                     dob: dob || "N/A",
                     applicantEmail: applicantEmail,
                     criminalRecordsFound: "None",
                     reference: reference || "",
                   };
 
-                  const existingOrdersStr = localStorage.getItem("evalright_orders");
-                  let existingOrders = [];
-                  if (existingOrdersStr) {
-                    try {
-                      existingOrders = JSON.parse(existingOrdersStr);
-                    } catch (e) {}
-                  } else {
-                    existingOrders = [...ORDERS];
-                  }
-                  localStorage.setItem("evalright_orders", JSON.stringify([newOrder, ...existingOrders]));
+                  try {
+                    const response = await fetch("http://localhost:5000/api/orders", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        "x-user-id": currentUser.id
+                      },
+                      body: JSON.stringify({
+                        applicantDetails: {
+                          firstName,
+                          middleName: middleNameDisabled ? undefined : middleName,
+                          lastName,
+                          email: applicantEmail,
+                          dob,
+                          adhr,
+                          street1: streetAddress,
+                          zipCode,
+                          state: jobState !== "Select State" ? jobState : "IL"
+                        },
+                        branchId: currentUser.branch_id,
+                        serviceIds: Array.from(selected),
+                        priority: rushOrder ? 'rush' : 'standard',
+                        notes: reference || '',
+                        idempotencyKey: 'idem-' + searchId
+                      })
+                    });
 
-                  setStep(4);
+                    const data = await response.json();
+                    if (!response.ok || !data.success) {
+                      throw new Error(data.error || "Failed to save order to database.");
+                    }
+
+                    const existingOrdersStr = localStorage.getItem("evalright_orders");
+                    let existingOrders = [];
+                    if (existingOrdersStr) {
+                      try {
+                        existingOrders = JSON.parse(existingOrdersStr);
+                      } catch (e) {}
+                    } else {
+                      existingOrders = [...ORDERS];
+                    }
+                    localStorage.setItem("evalright_orders", JSON.stringify([newOrder, ...existingOrders]));
+
+                    setShowSubmitModal(false);
+                    setStep(4);
+                  } catch (err: any) {
+                    console.error("Error saving order:", err);
+                    triggerToast(err.message || "Failed to submit order. Please try again.", true);
+                  } finally {
+                    setIsSubmittingOrder(false);
+                  }
                 }}
                 style={{
                   height: "40px",
                   padding: "0 32px",
-                  background: "#C70039",
+                  background: isSubmittingOrder ? "#9CA3AF" : "#C70039",
                   color: "#FFFFFF",
                   border: "none",
                   borderRadius: "4px",
                   fontSize: "14px",
                   fontWeight: 500,
-                  cursor: "pointer",
+                  cursor: isSubmittingOrder ? "not-allowed" : "pointer",
                 }}
               >
-                Submit Order
+                {isSubmittingOrder ? "Submitting..." : "Submit Order"}
               </button>
             </div>
 

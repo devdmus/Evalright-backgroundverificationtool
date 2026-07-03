@@ -43,7 +43,7 @@ const MOCK_ORDERS: OrderItem[] = [
     client: "ZScale LLC",
     firstName: "Ganeshram",
     lastName: "Madaswamy",
-    searchType: "SSN Verification (CBSV)",
+    searchType: "ADHR Verification (UIDAI)",
     status: "Pending",
     badgeColor: "yellow",
     ssn: "123-45-6789",
@@ -73,7 +73,7 @@ const MOCK_ORDERS: OrderItem[] = [
     client: "ZScale LLC",
     firstName: "Uday Kiran Reddy",
     lastName: "Bommu",
-    searchType: "SSN Verification (CBSV)",
+    searchType: "ADHR Verification (UIDAI)",
     status: "Closed",
     badgeColor: "red",
     ssn: "987-65-4321",
@@ -136,7 +136,7 @@ const MOCK_ORDERS: OrderItem[] = [
     client: "VIGILIQ LLC",
     firstName: "Bhanu",
     lastName: "S",
-    searchType: "SSN Verification (CBSV)",
+    searchType: "ADHR Verification (UIDAI)",
     status: "Closed",
     badgeColor: "green",
     ssn: "333-33-3333",
@@ -216,7 +216,7 @@ const SEARCH_TYPE_OPTIONS = [
   { value: "All", label: "All Searches" },
   { value: "(AF) LabCorp - 10 Panel", label: "(AF) LabCorp - 10 Panel" },
   { value: "Nationwide Criminal Database Search", label: "Nationwide Criminal Database Search" },
-  { value: "SSN Verification (CBSV)", label: "SSN Verification (CBSV)" },
+  { value: "ADHR Verification (UIDAI)", label: "ADHR Verification (UIDAI)" },
   { value: "County Criminal Search", label: "County Criminal Search" },
   { value: "Drug Screening 4 Panel (LabCorp)", label: "Drug Screening 4 Panel (LabCorp)" },
   { value: "Drug Screening 5 Panel with Nicotine", label: "Drug Screening 5 Panel with Nicotine" },
@@ -938,7 +938,7 @@ export function ClientOrdersPage({ isDarkMode = false }: ClientOrdersPageProps) 
             <InputField label="Last Name" value={lastName} onChange={setLastName} />
           </div>
           <div>
-            <InputField label="SSN" value={ssn} onChange={setSsn} />
+            <InputField label="ADHR" value={ssn} onChange={setSsn} />
           </div>
           <div>
             <InputField label="DOB" value={dob} onChange={setDob} />
@@ -1262,9 +1262,9 @@ export function ClientOrdersPage({ isDarkMode = false }: ClientOrdersPageProps) 
                             DOB: <span style={{ fontWeight: 600, color: textPrimary }}>{formatDobString(order.dob)}</span>
                           </div>
 
-                          {/* SSN */}
+                          {/* ADHR */}
                           <div style={{ fontSize: "13.5px", color: textLabel }}>
-                            SSN: <span style={{ fontWeight: 600, color: textPrimary }}>{order.ssn}</span>
+                            ADHR: <span style={{ fontWeight: 600, color: textPrimary }}>{order.ssn}</span>
                           </div>
 
                           {/* Location */}
@@ -1582,7 +1582,7 @@ export function ClientOrdersPage({ isDarkMode = false }: ClientOrdersPageProps) 
                     <>
                       <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
                         <td style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", borderRight: "1px solid #E5E7EB" }}>9634922</td>
-                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", borderRight: "1px solid #E5E7EB" }}>SSN Verification (CBSV)</td>
+                        <td style={{ padding: "8px 12px", fontSize: "13px", color: "#111827", borderRight: "1px solid #E5E7EB" }}>ADHR Verification (UIDAI)</td>
                         <td style={{ padding: "8px 12px", fontSize: "13px", color: "#385623", fontWeight: "bold" }}>COMPLETE</td>
                       </tr>
                       <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
@@ -1609,8 +1609,8 @@ export function ClientOrdersPage({ isDarkMode = false }: ClientOrdersPageProps) 
               </table>
             </div>
 
-            {/* SSN Validation Section */}
-            {(activeOrder.reportId === "1849270" || activeOrder.searchType.toLowerCase().includes("ssn")) && (
+            {/* ADHR Validation Section */}
+            {(activeOrder.reportId === "1849270" || activeOrder.searchType.toLowerCase().includes("ssn") || activeOrder.searchType.toLowerCase().includes("adhr")) && (
               <div>
                 <div
                   style={{
@@ -1625,7 +1625,7 @@ export function ClientOrdersPage({ isDarkMode = false }: ClientOrdersPageProps) 
                     borderTopRightRadius: "4px",
                   }}
                 >
-                  <span>SSN Validation</span>
+                  <span>ADHR Validation</span>
                   <span>Search ID. {activeOrder.reportId === "1849270" ? "9634922" : activeOrder.id}</span>
                 </div>
                 <div style={{ border: "1px solid #E5E7EB", borderTop: "none", borderBottomLeftRadius: "4px", borderBottomRightRadius: "4px" }}>

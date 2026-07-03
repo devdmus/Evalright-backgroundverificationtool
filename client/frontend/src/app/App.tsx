@@ -29,10 +29,8 @@ import { ActivityReportPage } from "./pages/ActivityReportPage";
 import { AnalyticsDashboard } from "./pages/AnalyticsDashboard";
 import { HRSoftwareIntegrations } from "./pages/HRSoftwareIntegrations";
 import { DisputesList } from "./pages/DisputesList";
-import { LoginPage } from "./pages/LoginPage";
+import { LoginPage, UserDetails } from "./pages/LoginPage";
 // import { ChatWidget } from "./components/ChatWidget";
-
-const USER_NAME = "Farooq Shaik";
 
 const PAGE_TITLES: Record<PageKey, string> = {
   home: "Home",
@@ -68,19 +66,22 @@ const PAGE_TITLES: Record<PageKey, string> = {
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserDetails | null>(null);
   const [showLogoutBanner, setShowLogoutBanner] = useState(false);
   const [currentPage, setCurrentPage] = useState<PageKey>("home");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = (user: UserDetails) => {
     setShowLogoutBanner(false);
+    setCurrentUser(user);
     setIsAuthenticated(true);
     setCurrentPage("home");
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setCurrentUser(null);
     setShowLogoutBanner(true);
     setCurrentPage("home");
   };
@@ -104,7 +105,7 @@ export default function App() {
       case "home":
         return <HomePage isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
       case "order":
-        return <OrderCreation isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
+        return <OrderCreation isDarkMode={isDarkMode} onNavigate={setCurrentPage} currentUser={currentUser} />;
       case "order-invitation":
         return (
           <OrderCreation
@@ -112,6 +113,7 @@ export default function App() {
             showInvitationBanner
             isDarkMode={isDarkMode}
             onNavigate={setCurrentPage}
+            currentUser={currentUser}
           />
         );
       case "order-list":
@@ -187,7 +189,7 @@ export default function App() {
     >
       {/* Fixed top header */}
       <Header
-        userName={USER_NAME}
+        userName={currentUser ? `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim() || currentUser.username : "Farooq Shaik"}
         onMenuToggle={() => setSidebarOpen((o) => !o)}
         sidebarOpen={sidebarOpen}
         onBellClick={() => setCurrentPage("announcements")}

@@ -307,13 +307,13 @@ export function HomePage({ isDarkMode = false, onNavigate }: HomePageProps) {
 
     let selectedProducts: string[] = [];
     if (pkg === "Basic Screening") {
-      selectedProducts = ["ssn-trace", "county-criminal"];
+      selectedProducts = ["adhr-trace", "county-criminal"];
     } else if (pkg === "Standard") {
-      selectedProducts = ["ssn-trace", "county-criminal", "global-watchlist", "driving-history"];
+      selectedProducts = ["adhr-trace", "county-criminal", "global-watchlist", "driving-history"];
     } else if (pkg.toLowerCase().includes("federal")) {
-      selectedProducts = ["ssn-trace", "county-criminal", "federal-criminal"];
+      selectedProducts = ["adhr-trace", "county-criminal", "federal-criminal"];
     } else {
-      selectedProducts = ["ssn-trace", "county-criminal", "global-watchlist"];
+      selectedProducts = ["adhr-trace", "county-criminal", "global-watchlist"];
     }
 
     let templateContent = "";

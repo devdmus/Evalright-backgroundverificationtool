@@ -25,18 +25,21 @@ const AGING_ITEMS = [
   { label: "90+ Days", value: "₹1,572.98", color: "#9C27B0" },
 ];
 
+import { ClientRecord } from "../data/mockData";
+
 interface HomePageProps {
   isDarkMode?: boolean;
   onNavigate?: (page: any) => void;
   onViewClient?: (clientId: string) => void;
+  clients?: ClientRecord[];
 }
 
-function getClientIdByName(name: string): string {
-  const match = CLIENT_LIST.find((c) => c.companyName === name);
+function getClientIdByName(name: string, clients?: ClientRecord[]): string {
+  const match = (clients || CLIENT_LIST).find((c) => c.companyName === name);
   return match?.id ?? DEMO_CLIENT.id;
 }
 
-export function HomePage({ isDarkMode = false, onNavigate, onViewClient }: HomePageProps) {
+export function HomePage({ isDarkMode = false, onNavigate, onViewClient, clients }: HomePageProps) {
   const [widgetsLocked, setWidgetsLocked] = useState(true);
   const [myNotes, setMyNotes] = useState("");
 
@@ -426,7 +429,7 @@ export function HomePage({ isDarkMode = false, onNavigate, onViewClient }: HomeP
                           color: isDarkMode ? "#DF2A57" : "#C70039",
                           cursor: "pointer",
                         }}
-                        onClick={() => onViewClient?.(getClientIdByName(client.name))}
+                        onClick={() => onViewClient?.(getClientIdByName(client.name, clients))}
                       >
                         {client.name}
                       </td>
@@ -544,7 +547,7 @@ export function HomePage({ isDarkMode = false, onNavigate, onViewClient }: HomeP
                           color: isDarkMode ? "#DF2A57" : "#C70039",
                           cursor: "pointer",
                         }}
-                        onClick={() => onViewClient?.(getClientIdByName(client.name))}
+                        onClick={() => onViewClient?.(getClientIdByName(client.name, clients))}
                       >
                         {client.name}
                       </td>

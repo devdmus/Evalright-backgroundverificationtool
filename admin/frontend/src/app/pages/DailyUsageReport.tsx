@@ -25,7 +25,7 @@ const MOCK_DAILY_USAGE: Record<string, DailyUsageRow[]> = {
     {
       id: "du2",
       clientName: "4i Americas LLC",
-      activityType: "SSN Trace/Address History",
+      activityType: "ADHR Trace/Address History",
       volume: 5,
       time: "06/23/2026 10:30 AM",
       amount: 40.00,

@@ -4,9 +4,19 @@ import { Eye, LogIn } from "lucide-react";
 const LOGO_SRC = "/evalright-logo.jpg";
 const CARD_WIDTH = "430px";
 
+export interface UserDetails {
+  id: string;
+  company_id: string;
+  branch_id: string | null;
+  username: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+}
+
 interface LoginPageProps {
   showLogoutBanner?: boolean;
-  onLogin: () => void;
+  onLogin: (user: UserDetails) => void;
 }
 
 function LoginField({
@@ -121,10 +131,40 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onLogin();
+    if (!username.trim() || !password.trim()) {
+      setError("Please enter both username and password.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed.");
+      }
+
+      onLogin(data.user);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "An error occurred during login.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -184,6 +224,22 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
             </div>
           )}
 
+          {error && (
+            <div
+              style={{
+                background: "#FCE8E6",
+                color: "#C5221F",
+                borderBottom: "1px solid #FAD2CF",
+                padding: "12px 16px",
+                fontSize: "13px",
+                fontWeight: 500,
+                textAlign: "center",
+              }}
+            >
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} style={{ padding: "28px 32px 32px" }}>
             <h1
               style={{
@@ -237,9 +293,9 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
               </button>
             </div>
 
-            <button type="submit" style={loginButtonStyle}>
-              Log In
-              <LogIn size={17} strokeWidth={2.25} />
+            <button type="submit" disabled={loading} style={{ ...loginButtonStyle, opacity: loading ? 0.7 : 1, cursor: loading ? "not-allowed" : "pointer" }}>
+              {loading ? "Logging in..." : "Log In"}
+              {!loading && <LogIn size={17} strokeWidth={2.25} />}
             </button>
           </form>
         </div>

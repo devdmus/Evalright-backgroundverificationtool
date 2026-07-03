@@ -11,7 +11,7 @@ interface Filters {
   searchType: string;
   firstName: string;
   lastName: string;
-  ssn: string;
+  adhr: string;
   dob: string;
   county: string;
   state: string;
@@ -28,7 +28,7 @@ interface Filters {
 
 const EMPTY_FILTERS: Filters = {
   searchId: "", reportId: "", status: "", searchType: "",
-  firstName: "", lastName: "", ssn: "", dob: "",
+  firstName: "", lastName: "", adhr: "", dob: "",
   county: "", state: "", orderReference: "",
   orderDateFrom: "", orderDateTo: "",
   sortOrder: "Status", perPage: "20",
@@ -591,7 +591,7 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
           {/* Row 2 */}
           <InputField label="First Name" value={filters.firstName} onChange={(val) => set("firstName", val)} isDarkMode={isDarkMode} />
           <InputField label="Last Name" value={filters.lastName} onChange={(val) => set("lastName", val)} isDarkMode={isDarkMode} />
-          <InputField label="SSN" value={filters.ssn} onChange={(val) => set("ssn", val)} isDarkMode={isDarkMode} />
+          <InputField label="ADHR" value={filters.adhr} onChange={(val) => set("adhr", val)} isDarkMode={isDarkMode} />
           <InputField label="DOB" value={filters.dob} onChange={(val) => set("dob", val)} isDarkMode={isDarkMode} />
 
           {/* Row 3 */}
@@ -824,7 +824,7 @@ export function AllOrderDetails({ isDarkMode = false }: { isDarkMode?: boolean }
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "10px", background: isDarkMode ? t.tableHeadBg : t.contentBg, padding: "10px", marginBottom: "16px", color: t.heading }}>
                           <div><strong style={{ fontWeight: 600 }}>Order Date:</strong> {o.orderDate}</div>
                           <div><strong style={{ fontWeight: 600 }}>DOB:</strong> {o.dob || "05/17/1996"}</div>
-                          <div><strong style={{ fontWeight: 600 }}>SSN:</strong> {o.ssn || "111-11-1111"}</div>
+                          <div><strong style={{ fontWeight: 600 }}>ADHR:</strong> {o.adhr || o.ssn || "XXXX-XXXX-1234"}</div>
                           <div><strong style={{ fontWeight: 600 }}>Location:</strong> {o.county ? `${o.county}, ` : ""}{o.state || "El Paso, TX 79999"}</div>
                         </div>
 

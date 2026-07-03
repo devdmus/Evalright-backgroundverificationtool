@@ -283,8 +283,8 @@ export function ApplicantManager({ isDarkMode = false, onNavigate }: { isDarkMod
                           <span>{details.dob}</span>
                         </div>
                         <div>
-                          <strong style={{ display: "block", color: isDarkMode ? "#9CA3AF" : "#666666" }}>SSN (Masked):</strong>
-                          <span>{details.ssn ? details.ssn.replace(/.(?=.{4})/g, '*') : "***-**-XXXX"}</span>
+                          <strong style={{ display: "block", color: isDarkMode ? "#9CA3AF" : "#666666" }}>ADHR (Masked):</strong>
+                          <span>{details.adhr || details.ssn ? (details.adhr || details.ssn).replace(/.(?=.{4})/g, '*') : "XXXX-XXXX-XXXX"}</span>
                         </div>
                       </div>
 

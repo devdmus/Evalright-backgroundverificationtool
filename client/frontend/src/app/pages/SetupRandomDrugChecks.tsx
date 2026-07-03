@@ -14,7 +14,7 @@ import { Footer } from "../components/Footer";
 interface Employee {
   name: string;
   birthdate: string;
-  ssn: string;
+  adhr: string;
   address: string;
   zipCode: string;
   email: string;
@@ -27,7 +27,7 @@ const EMPLOYEE_COLUMNS: {
 }[] = [
   { label: "Name", field: "name", sortable: true },
   { label: "Birthdate", field: "birthdate", sortable: true },
-  { label: "SSN", field: "ssn", sortable: false },
+  { label: "ADHR", field: "adhr", sortable: false },
   { label: "Address", field: "address", sortable: true },
   { label: "Zip Code", field: "zipCode", sortable: true },
   { label: "Email", field: "email", sortable: true },
@@ -182,7 +182,7 @@ export function SetupRandomDrugChecks({ isDarkMode = false }: { isDarkMode?: boo
             }}
           >
             Following format is expected: First Name, Middle Name, Last Name, Generation, Birthdate
-            (YYYY-MM-DD), SSN, Address, Address 2, Zip Code, Email.
+            (YYYY-MM-DD), ADHR, Address, Address 2, Zip Code, Email.
           </p>
 
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>

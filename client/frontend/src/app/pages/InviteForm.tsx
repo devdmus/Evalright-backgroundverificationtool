@@ -24,7 +24,7 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
     email: "",
     phone: "",
     dob: "",
-    ssn: "",
+    adhr: "",
     street: "",
     city: "",
     state: "",
@@ -92,14 +92,14 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
     setErrorMsg(null);
 
     // Validate Required Common Fields
-    if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() || !formData.dob.trim() || !formData.ssn.trim() || !formData.street.trim() || !formData.city.trim() || !formData.state.trim() || !formData.zip.trim()) {
+    if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() || !formData.dob.trim() || !formData.adhr.trim() || !formData.street.trim() || !formData.city.trim() || !formData.state.trim() || !formData.zip.trim()) {
       setErrorMsg("Please complete all general personal information fields.");
       return;
     }
 
-    // Validate SSN and DOB simple format
-    if (formData.ssn.replace(/\D/g, "").length < 9) {
-      setErrorMsg("Please enter a valid 9-digit Social Security Number.");
+    // Validate Aadhaar and DOB simple format
+    if (formData.adhr.replace(/\D/g, "").length < 12) {
+      setErrorMsg("Please enter a valid 12-digit Aadhaar Number.");
       return;
     }
 
@@ -207,7 +207,7 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
         orderDate: new Date().toISOString().substring(0, 10),
         county: formData.city,
         state: formData.state,
-        ssn: formData.ssn.replace(/.(?=.{4})/g, '*'),
+        adhr: formData.adhr.replace(/.(?=.{4})/g, '*'),
         dob: formData.dob,
         applicantEmail: formData.email,
         criminalRecordsFound: "Pending Court Records",
@@ -358,8 +358,8 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
                 <input style={formInput} placeholder="e.g. 05/18/1992" value={formData.dob} onChange={(e) => handleChange("dob", e.target.value)} required />
               </div>
               <div>
-                <label style={formLabel}>Social Security Number (SSN) *</label>
-                <input style={formInput} type="password" placeholder="9 digits, e.g. 123456789" maxLength={9} value={formData.ssn} onChange={(e) => handleChange("ssn", e.target.value.replace(/\D/g, ""))} required />
+                <label style={formLabel}>Aadhaar Number (ADHR) *</label>
+                <input style={formInput} type="password" placeholder="12 digits, e.g. 123456789012" maxLength={12} value={formData.adhr} onChange={(e) => handleChange("adhr", e.target.value.replace(/\D/g, ""))} required />
               </div>
             </div>
 
@@ -543,7 +543,7 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
                 The employer requesting this form ("the Company") may obtain information about you from a third party consumer reporting agency for employment purposes. Thus, you may be the subject of a "consumer report" and/or an "investigative consumer report" which may include information about your character, general reputation, personal characteristics, and/or mode of living.
               </p>
               <p style={{ margin: "0 0 10px 0" }}>
-                These reports may contain information regarding your credit history, criminal history, social security number verification, motor vehicle records ("driving records"), verification of your education or employment history, or other background checks.
+                These reports may contain information regarding your credit history, criminal history, Aadhaar number verification, motor vehicle records ("driving records"), verification of your education or employment history, or other background checks.
               </p>
               <p style={{ margin: "0 0 10px 0" }}>
                 You have the right, upon written request made within a reasonable time, to request whether a consumer report has been run and to request the nature and scope of any investigative consumer report. The Consumer Financial Protection Bureau's "A Summary of Your Rights Under the Fair Credit Reporting Act" is provided along with this document.

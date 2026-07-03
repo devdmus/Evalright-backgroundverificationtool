@@ -106,7 +106,7 @@ export function ClientProfileTab({ isDarkMode = false }: ClientProfileTabProps) 
         </div>
       </div>
 
-      <SectionHeader bg={sectionBg}>SSN TRACE RESULT CONFIGURATION</SectionHeader>
+      <SectionHeader bg={sectionBg}>ADHR TRACE RESULT CONFIGURATION</SectionHeader>
       <div style={{ padding: "20px" }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", marginBottom: "16px", alignItems: "center" }}>
           <Radio label="View Exact Match" checked={profile.ssnMatchType === "exact"} onChange={() => update("ssnMatchType", "exact")} textColor={textColor} />
@@ -131,7 +131,7 @@ export function ClientProfileTab({ isDarkMode = false }: ClientProfileTabProps) 
               <option>3 Years</option>
             </Select>
           </Field>
-          <Checkbox label="Hide SSN Addresses" checked={profile.hideSsnAddresses} onChange={(v) => update("hideSsnAddresses", v)} textColor={textColor} />
+          <Checkbox label="Hide ADHR Addresses" checked={profile.hideSsnAddresses} onChange={(v) => update("hideSsnAddresses", v)} textColor={textColor} />
         </div>
       </div>
 

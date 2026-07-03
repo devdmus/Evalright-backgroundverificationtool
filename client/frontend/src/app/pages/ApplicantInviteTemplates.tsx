@@ -83,7 +83,7 @@ const defaultHtmlContent = `
     The background check will be conducted by our third party screening partner. Please provide all requested information for fields highlighted in <b>RED</b> and make sure to double-check your data entry to ensure correct spelling and correct numerical sequences. Failure to do this will delay your background check.
   </p>
   <p style="margin-top: 24px; color: #555555;">
-    <b>&gt;&gt;&gt; Please review your name and ensure it appears exactly as it does on your Social Security card or driver's license. If the name does not match please reach out to the employer.</b>
+    <b>&gt;&gt;&gt; Please review your name and ensure it appears exactly as it does on your Aadhaar card or driver's license. If the name does not match please reach out to the employer.</b>
   </p>
   <p style="margin-top: 24px;">
     <b style="color: #666666;">&gt;&gt;&gt; ALSO, WHEN ENTERING INFORMATION, PROVIDE AS MUCH DETAIL AS POSSIBLE. FAILURE TO PROVIDE ALL REQUESTED INFORMATION WILL DELAY COMPLETION OF YOUR BACKGROUND CHECK.</b>

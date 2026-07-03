@@ -9,11 +9,11 @@ function getAmountVal(verificationType: string): number {
   switch (verificationType) {
     case "I-9 Verifications (E-Verify)": return 29.00;
     case "Military Service Verification": return 35.00;
-    case "SSN Trace/Address History": return 15.00;
+    case "ADHR Trace/Address History": return 15.00;
     case "Federal Search": return 45.00;
     case "Global Watch List": return 20.00;
     case "Reference Verification": return 30.00;
-    case "SSN Trace": return 12.00;
+    case "ADHR Trace": return 12.00;
     case "Employment Verification": return 40.00;
     case "Criminal Search": return 45.00;
     case "Education Verification": return 40.00;
