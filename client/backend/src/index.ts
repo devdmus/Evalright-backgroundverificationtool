@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import crypto from 'crypto';
 import { pool } from './config/db';
 import orderRouter from './Order';
+import invitationRouter from './Invitation';
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(orderRouter);
+app.use(invitationRouter);
 
 // API Health Check
 app.get('/api/health', async (req, res) => {

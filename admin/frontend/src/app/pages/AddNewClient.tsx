@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { Footer } from "../components/Footer";
+import { INDIA_STATES } from "../data/mockData";
 
 interface AddNewClientProps {
   isDarkMode?: boolean;
@@ -195,7 +196,12 @@ export function AddNewClient({ isDarkMode = false, onClientAdded }: AddNewClient
               <FieldInput label="Address 1" value={form.address1} onChange={(v) => update("address1", v)} borderColor={borderColor} inputBg={inputBg} textColor={textColor} mutedColor={mutedColor} />
               <FieldInput label="Address 2 (Optional)" value={form.address2} onChange={(v) => update("address2", v)} borderColor={borderColor} inputBg={inputBg} textColor={textColor} mutedColor={mutedColor} />
               <FieldInput label="City" value={form.city} onChange={(v) => update("city", v)} borderColor={borderColor} inputBg={inputBg} textColor={textColor} mutedColor={mutedColor} />
-              <FieldInput label="State/Region" value={form.state} onChange={(v) => update("state", v)} borderColor={borderColor} inputBg={inputBg} textColor={textColor} mutedColor={mutedColor} />
+              <FieldSelect label="State/Region" value={form.state} onChange={(v) => update("state", v)} borderColor={borderColor} inputBg={inputBg} textColor={textColor} mutedColor={mutedColor}>
+                <option value="">Select State</option>
+                {INDIA_STATES.map((st) => (
+                  <option key={st} value={st}>{st}</option>
+                ))}
+              </FieldSelect>
               <FieldInput label="Postcode" value={form.postcode} onChange={(v) => update("postcode", v)} borderColor={borderColor} inputBg={inputBg} textColor={textColor} mutedColor={mutedColor} />
               <FieldInput label="Phone Number" value={form.phoneNumber} onChange={(v) => update("phoneNumber", v)} borderColor={borderColor} inputBg={inputBg} textColor={textColor} mutedColor={mutedColor} />
             </div>

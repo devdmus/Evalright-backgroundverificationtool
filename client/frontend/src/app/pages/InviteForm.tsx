@@ -58,15 +58,17 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
     setInviteId(id);
 
     if (id) {
-      const saved = localStorage.getItem("evalright_invitations");
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          const matched = parsed.find((p: any) => p.inviteId === id);
-          if (matched) {
+      setLoading(true);
+      fetch(`http://localhost:5000/api/invitations/${id}`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Not found in database");
+          return res.json();
+        })
+        .then((data) => {
+          if (data && data.invitation) {
+            const matched = data.invitation;
             setInviteData(matched);
-            // Pre-populate name & email
-            const nameParts = matched.name.split(" ");
+            const nameParts = (matched.name || "").split(" ");
             setFormData((prev) => ({
               ...prev,
               firstName: nameParts[0] || "",
@@ -75,12 +77,36 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
               email: matched.email || "",
             }));
           }
-        } catch (e) {
-          console.error(e);
-        }
-      }
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.warn("DB invitation load failed, checking local storage fallback:", err);
+          // Fallback to local storage
+          const saved = localStorage.getItem("evalright_invitations");
+          if (saved) {
+            try {
+              const parsed = JSON.parse(saved);
+              const matched = parsed.find((p: any) => p.inviteId === id);
+              if (matched) {
+                setInviteData(matched);
+                const nameParts = (matched.name || "").split(" ");
+                setFormData((prev) => ({
+                  ...prev,
+                  firstName: nameParts[0] || "",
+                  middleName: nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : "",
+                  lastName: nameParts.length > 1 ? nameParts[nameParts.length - 1] : "",
+                  email: matched.email || "",
+                }));
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          }
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const handleChange = (field: string, value: any) => {
@@ -157,68 +183,88 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
 
     setSubmitting(true);
 
-    setTimeout(() => {
-      // 1. Update Invitation Status in localStorage
-      const savedInvitesStr = localStorage.getItem("evalright_invitations");
-      if (savedInvitesStr) {
-        try {
-          const invites = JSON.parse(savedInvitesStr);
-          const idx = invites.findIndex((i: any) => i.inviteId === inviteId);
-          if (idx !== -1) {
-            invites[idx].status = "Complete";
-            invites[idx].emailActivity = "Replied";
-            localStorage.setItem("evalright_invitations", JSON.stringify(invites));
-          }
-        } catch (e) {}
-      }
+    fetch(`http://localhost:5000/api/invitations/${inviteId}/submit`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((data) => {
+            throw new Error(data.error || "Failed to save details to the database.");
+          });
+        }
+        return res.json();
+      })
+      .then((data) => {
+        // 1. Update Invitation Status in localStorage
+        const savedInvitesStr = localStorage.getItem("evalright_invitations");
+        if (savedInvitesStr) {
+          try {
+            const invites = JSON.parse(savedInvitesStr);
+            const idx = invites.findIndex((i: any) => i.inviteId === inviteId);
+            if (idx !== -1) {
+              invites[idx].status = "Complete";
+              invites[idx].emailActivity = "Replied";
+              localStorage.setItem("evalright_invitations", JSON.stringify(invites));
+            }
+          } catch (e) {}
+        }
 
-      // 2. Create the final order in localStorage evalright_orders
-      const savedOrdersStr = localStorage.getItem("evalright_orders");
-      let existingOrders = [];
-      if (savedOrdersStr) {
-        try {
-          existingOrders = JSON.parse(savedOrdersStr);
-        } catch (e) {}
-      }
+        // 2. Create the final order in localStorage evalright_orders
+        const savedOrdersStr = localStorage.getItem("evalright_orders");
+        let existingOrders = [];
+        if (savedOrdersStr) {
+          try {
+            existingOrders = JSON.parse(savedOrdersStr);
+          } catch (e) {}
+        }
 
-      // Map selected products to friendly verification type string
-      const productNames = products.map((id: string) => {
-        const known: Record<string, string> = {
-          cdlis: "CDLIS",
-          "county-criminal": "County Criminal Search",
-          "driving-history": "Driving History",
-          "education-verification": "Education Verification",
-          "employment-verification": "Employment Verification",
-          "labcorp-10-panel": "LabCorp - 10 Panel Drug Screen",
+        // Map selected products to friendly verification type string
+        const productNames = products.map((id: string) => {
+          const known: Record<string, string> = {
+            cdlis: "CDLIS",
+            "county-criminal": "County Criminal Search",
+            "driving-history": "Driving History",
+            "education-verification": "Education Verification",
+            "employment-verification": "Employment Verification",
+            "labcorp-10-panel": "LabCorp - 10 Panel Drug Screen",
+          };
+          return known[id] || id;
+        });
+        const verificationType = productNames.join(", ") || "Background Check";
+
+        const newOrder = {
+          searchId: "" + Math.floor(8000000 + Math.random() * 1000000),
+          reportId: "RP-" + Math.floor(20000 + Math.random() * 10000),
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          applicantName: `${formData.firstName} ${formData.lastName}`,
+          verificationType,
+          status: "IN PROGRESS" as const,
+          orderedBy: "Applicant (Online Portal)",
+          orderDate: new Date().toISOString().substring(0, 10),
+          county: formData.city,
+          state: formData.state,
+          adhr: formData.adhr.replace(/.(?=.{4})/g, '*'),
+          dob: formData.dob,
+          applicantEmail: formData.email,
+          criminalRecordsFound: "Pending Court Records",
+          details: formData,
         };
-        return known[id] || id;
+
+        localStorage.setItem("evalright_orders", JSON.stringify([newOrder, ...existingOrders]));
+
+        setSubmitting(false);
+        setSubmitted(true);
+      })
+      .catch((err) => {
+        console.error("Database submission failed:", err);
+        setErrorMsg(err.message || "An error occurred while saving your details to the database.");
+        setSubmitting(false);
       });
-      const verificationType = productNames.join(", ") || "Background Check";
-
-      const newOrder = {
-        searchId: "" + Math.floor(8000000 + Math.random() * 1000000),
-        reportId: "RP-" + Math.floor(20000 + Math.random() * 10000),
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        applicantName: `${formData.firstName} ${formData.lastName}`,
-        verificationType,
-        status: "IN PROGRESS" as const,
-        orderedBy: "Applicant (Online Portal)",
-        orderDate: new Date().toISOString().substring(0, 10),
-        county: formData.city,
-        state: formData.state,
-        adhr: formData.adhr.replace(/.(?=.{4})/g, '*'),
-        dob: formData.dob,
-        applicantEmail: formData.email,
-        criminalRecordsFound: "Pending Court Records",
-        details: formData,
-      };
-
-      localStorage.setItem("evalright_orders", JSON.stringify([newOrder, ...existingOrders]));
-
-      setSubmitting(false);
-      setSubmitted(true);
-    }, 1500);
   };
 
   if (loading) {
@@ -284,6 +330,8 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
     );
   }
 
+
+
   const products = inviteData.selectedProducts || [];
   const hasDriving = products.some((p: string) => p.includes("driving") || p.includes("cdlis"));
   const hasDrug = products.some((p: string) => p.includes("panel") || p.includes("drug"));
@@ -321,6 +369,8 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
         {/* Form Body */}
         <form onSubmit={handleSubmit} style={{ background: "#FFFFFF", borderRadius: "0 0 8px 8px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)", padding: "30px" }}>
           
+
+
           {errorMsg && (
             <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: "4px", padding: "12px 16px", color: "#B91C1C", fontSize: "14px", fontWeight: 500, marginBottom: "24px" }}>
               ⚠️ {errorMsg}
@@ -384,6 +434,21 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
                 <input style={formInput} maxLength={6} value={formData.zip} onChange={(e) => handleChange("zip", e.target.value.replace(/\D/g, ""))} required />
               </div>
             </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginTop: "16px" }}>
+              <div>
+                <DocumentUploadField 
+                  label="Upload Aadhaar Card *" 
+                  onChange={(file) => console.log("Uploaded Aadhaar Card:", file)}
+                />
+              </div>
+              <div>
+                <DocumentUploadField 
+                  label="Upload PAN Card" 
+                  onChange={(file) => console.log("Uploaded PAN Card:", file)}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Section 2: Dynamic Requirements based on Order Selections */}
@@ -413,6 +478,10 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
                       </select>
                     </div>
                   </div>
+                  <DocumentUploadField 
+                    label="Upload Driver's License Document" 
+                    onChange={(file) => console.log("Uploaded License:", file)}
+                  />
                 </div>
               )}
 
@@ -440,6 +509,10 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
                       I hereby authorize EvalRight and its partner drug screening laboratories to collect a specimen for testing, analyze it for controlled substances, and report the findings back to the requesting employer. *
                     </span>
                   </label>
+                  <DocumentUploadField 
+                    label="Upload Drug Test Consent / Prescription Document" 
+                    onChange={(file) => console.log("Uploaded Drug Test:", file)}
+                  />
                 </div>
               )}
 
@@ -479,6 +552,10 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
                       <input style={formInput} placeholder="e.g. 05/2014" value={formData.gradDate} onChange={(e) => handleChange("gradDate", e.target.value)} />
                     </div>
                   </div>
+                  <DocumentUploadField 
+                    label="Upload Degree Certificate / Transcript" 
+                    onChange={(file) => console.log("Uploaded Education:", file)}
+                  />
                 </div>
               )}
 
@@ -515,6 +592,10 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
                       <input style={formInput} placeholder="e.g. 555-0199" value={formData.supervisorPhone} onChange={(e) => handleChange("supervisorPhone", e.target.value)} />
                     </div>
                   </div>
+                  <DocumentUploadField 
+                    label="Upload Experience Letter / Paystub" 
+                    onChange={(file) => console.log("Uploaded Employment:", file)}
+                  />
                 </div>
               )}
             </div>
@@ -582,21 +663,21 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
           <div style={{ display: "flex", justifyContent: "flex-end", borderTop: "1px solid #F3F4F6", paddingTop: "24px" }}>
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete'))}
               style={{
-                background: submitting ? "#E5E7EB" : "rgb(199, 0, 57)",
-                color: submitting ? "#9CA3AF" : "#FFFFFF",
+                background: (submitting || (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete'))) ? "#E5E7EB" : "rgb(199, 0, 57)",
+                color: (submitting || (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete'))) ? "#9CA3AF" : "#FFFFFF",
                 border: "none",
                 borderRadius: "4px",
                 padding: "12px 36px",
                 fontSize: "15px",
                 fontWeight: 600,
-                cursor: submitting ? "not-allowed" : "pointer",
+                cursor: (submitting || (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete'))) ? "not-allowed" : "pointer",
                 transition: "all 0.15s ease",
-                boxShadow: "0 2px 8px rgba(199, 0, 57, 0.15)"
+                boxShadow: (submitting || (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete'))) ? "none" : "0 2px 8px rgba(199, 0, 57, 0.15)"
               }}
             >
-              {submitting ? "Submitting Authorization..." : "Submit Authorization"}
+              {submitting ? "Submitting Authorization..." : (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete')) ? "Submission Completed" : "Submit Authorization"}
             </button>
           </div>
 
@@ -604,6 +685,67 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
       </div>
 
       <Footer isDarkMode={isDarkMode} />
+    </div>
+  );
+}
+
+
+interface DocumentUploadFieldProps {
+  label: string;
+  onChange: (file: File | null) => void;
+  disabled?: boolean;
+}
+
+function DocumentUploadField({ label, onChange, disabled = false }: DocumentUploadFieldProps) {
+  const [fileName, setFileName] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setFileName(file.name);
+      onChange(file);
+    } else {
+      setFileName(null);
+      onChange(null);
+    }
+  };
+
+  return (
+    <div style={{ marginTop: "16px", textAlign: "left" }}>
+      <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#4B5563", marginBottom: "6px" }}>
+        {label}
+      </label>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <label
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "38px",
+            padding: "0 16px",
+            background: disabled ? "#E5E7EB" : "rgb(199, 0, 57)",
+            color: disabled ? "#9CA3AF" : "#FFFFFF",
+            borderRadius: "4px",
+            fontSize: "13px",
+            fontWeight: 600,
+            cursor: disabled ? "not-allowed" : "pointer",
+            border: "none",
+            boxShadow: disabled ? "none" : "0 2px 4px rgba(199,0,57,0.15)",
+            transition: "all 0.15s ease",
+          }}
+        >
+          Choose File
+          <input
+            type="file"
+            onChange={handleFileChange}
+            disabled={disabled}
+            style={{ display: "none" }}
+          />
+        </label>
+        <span style={{ fontSize: "13px", color: fileName ? "#1F2937" : "#9CA3AF", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "250px" }}>
+          {fileName || "No file selected"}
+        </span>
+      </div>
     </div>
   );
 }

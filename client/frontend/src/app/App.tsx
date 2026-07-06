@@ -72,6 +72,23 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
+  useEffect(() => {
+    function handleHashRoute() {
+      const hash = window.location.hash;
+      if (hash.startsWith("#invite-form")) {
+        const parts = hash.split("?id=");
+        if (parts.length > 1) {
+          const inviteId = parts[1];
+          localStorage.setItem("evalright_active_invite_id", inviteId);
+          setCurrentPage("invite-form");
+        }
+      }
+    }
+    handleHashRoute();
+    window.addEventListener("hashchange", handleHashRoute);
+    return () => window.removeEventListener("hashchange", handleHashRoute);
+  }, []);
+
   const handleLogin = (user: UserDetails) => {
     setShowLogoutBanner(false);
     setCurrentUser(user);
@@ -95,6 +112,10 @@ export default function App() {
     const pageLabel = PAGE_TITLES[currentPage] ?? currentPage;
     document.title = `EvalRight - ${pageLabel}`;
   }, [currentPage, isAuthenticated]);
+
+  if (currentPage === "invite-form") {
+    return <InviteForm isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
+  }
 
   if (!isAuthenticated) {
     return <LoginPage showLogoutBanner={showLogoutBanner} onLogin={handleLogin} />;
@@ -171,10 +192,6 @@ export default function App() {
       default:
         return <PlaceholderPage title={PAGE_TITLES[currentPage] ?? currentPage} isDarkMode={isDarkMode} />;
     }
-  }
-
-  if (currentPage === "invite-form") {
-    return <InviteForm isDarkMode={isDarkMode} onNavigate={setCurrentPage} />;
   }
 
   return (
