@@ -330,6 +330,8 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
     );
   }
 
+
+
   const products = inviteData.selectedProducts || [];
   const hasDriving = products.some((p: string) => p.includes("driving") || p.includes("cdlis"));
   const hasDrug = products.some((p: string) => p.includes("panel") || p.includes("drug"));
@@ -367,6 +369,8 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
         {/* Form Body */}
         <form onSubmit={handleSubmit} style={{ background: "#FFFFFF", borderRadius: "0 0 8px 8px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)", padding: "30px" }}>
           
+
+
           {errorMsg && (
             <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: "4px", padding: "12px 16px", color: "#B91C1C", fontSize: "14px", fontWeight: 500, marginBottom: "24px" }}>
               ⚠️ {errorMsg}
@@ -430,6 +434,21 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
                 <input style={formInput} maxLength={6} value={formData.zip} onChange={(e) => handleChange("zip", e.target.value.replace(/\D/g, ""))} required />
               </div>
             </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginTop: "16px" }}>
+              <div>
+                <DocumentUploadField 
+                  label="Upload Aadhaar Card *" 
+                  onChange={(file) => console.log("Uploaded Aadhaar Card:", file)}
+                />
+              </div>
+              <div>
+                <DocumentUploadField 
+                  label="Upload PAN Card" 
+                  onChange={(file) => console.log("Uploaded PAN Card:", file)}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Section 2: Dynamic Requirements based on Order Selections */}
@@ -459,6 +478,10 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
                       </select>
                     </div>
                   </div>
+                  <DocumentUploadField 
+                    label="Upload Driver's License Document" 
+                    onChange={(file) => console.log("Uploaded License:", file)}
+                  />
                 </div>
               )}
 
@@ -486,6 +509,10 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
                       I hereby authorize EvalRight and its partner drug screening laboratories to collect a specimen for testing, analyze it for controlled substances, and report the findings back to the requesting employer. *
                     </span>
                   </label>
+                  <DocumentUploadField 
+                    label="Upload Drug Test Consent / Prescription Document" 
+                    onChange={(file) => console.log("Uploaded Drug Test:", file)}
+                  />
                 </div>
               )}
 
@@ -525,6 +552,10 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
                       <input style={formInput} placeholder="e.g. 05/2014" value={formData.gradDate} onChange={(e) => handleChange("gradDate", e.target.value)} />
                     </div>
                   </div>
+                  <DocumentUploadField 
+                    label="Upload Degree Certificate / Transcript" 
+                    onChange={(file) => console.log("Uploaded Education:", file)}
+                  />
                 </div>
               )}
 
@@ -561,6 +592,10 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
                       <input style={formInput} placeholder="e.g. 555-0199" value={formData.supervisorPhone} onChange={(e) => handleChange("supervisorPhone", e.target.value)} />
                     </div>
                   </div>
+                  <DocumentUploadField 
+                    label="Upload Experience Letter / Paystub" 
+                    onChange={(file) => console.log("Uploaded Employment:", file)}
+                  />
                 </div>
               )}
             </div>
@@ -628,21 +663,21 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
           <div style={{ display: "flex", justifyContent: "flex-end", borderTop: "1px solid #F3F4F6", paddingTop: "24px" }}>
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete'))}
               style={{
-                background: submitting ? "#E5E7EB" : "rgb(199, 0, 57)",
-                color: submitting ? "#9CA3AF" : "#FFFFFF",
+                background: (submitting || (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete'))) ? "#E5E7EB" : "rgb(199, 0, 57)",
+                color: (submitting || (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete'))) ? "#9CA3AF" : "#FFFFFF",
                 border: "none",
                 borderRadius: "4px",
                 padding: "12px 36px",
                 fontSize: "15px",
                 fontWeight: 600,
-                cursor: submitting ? "not-allowed" : "pointer",
+                cursor: (submitting || (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete'))) ? "not-allowed" : "pointer",
                 transition: "all 0.15s ease",
-                boxShadow: "0 2px 8px rgba(199, 0, 57, 0.15)"
+                boxShadow: (submitting || (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete'))) ? "none" : "0 2px 8px rgba(199, 0, 57, 0.15)"
               }}
             >
-              {submitting ? "Submitting Authorization..." : "Submit Authorization"}
+              {submitting ? "Submitting Authorization..." : (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete')) ? "Submission Completed" : "Submit Authorization"}
             </button>
           </div>
 
@@ -650,6 +685,67 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
       </div>
 
       <Footer isDarkMode={isDarkMode} />
+    </div>
+  );
+}
+
+
+interface DocumentUploadFieldProps {
+  label: string;
+  onChange: (file: File | null) => void;
+  disabled?: boolean;
+}
+
+function DocumentUploadField({ label, onChange, disabled = false }: DocumentUploadFieldProps) {
+  const [fileName, setFileName] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setFileName(file.name);
+      onChange(file);
+    } else {
+      setFileName(null);
+      onChange(null);
+    }
+  };
+
+  return (
+    <div style={{ marginTop: "16px", textAlign: "left" }}>
+      <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#4B5563", marginBottom: "6px" }}>
+        {label}
+      </label>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <label
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "38px",
+            padding: "0 16px",
+            background: disabled ? "#E5E7EB" : "rgb(199, 0, 57)",
+            color: disabled ? "#9CA3AF" : "#FFFFFF",
+            borderRadius: "4px",
+            fontSize: "13px",
+            fontWeight: 600,
+            cursor: disabled ? "not-allowed" : "pointer",
+            border: "none",
+            boxShadow: disabled ? "none" : "0 2px 4px rgba(199,0,57,0.15)",
+            transition: "all 0.15s ease",
+          }}
+        >
+          Choose File
+          <input
+            type="file"
+            onChange={handleFileChange}
+            disabled={disabled}
+            style={{ display: "none" }}
+          />
+        </label>
+        <span style={{ fontSize: "13px", color: fileName ? "#1F2937" : "#9CA3AF", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "250px" }}>
+          {fileName || "No file selected"}
+        </span>
+      </div>
     </div>
   );
 }

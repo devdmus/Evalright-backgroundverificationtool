@@ -390,12 +390,8 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
       return;
     }
     
-    if (isMinor(dob)) {
-      setMinorAgreementChecked(true);
-      setShowMinorModal(true);
-    } else {
-      setStep(3);
-    }
+    setMinorAgreementChecked(true);
+    setShowMinorModal(true);
   }
 
   async function handleSendInvitation() {
@@ -2129,7 +2125,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               }}
             >
               <span style={{ fontSize: "16px", fontWeight: "600" }}>
-                Minor Applicant Authorization
+                {isMinor(dob) ? "Minor Applicant Authorization" : "Applicant Authorization"}
               </span>
               <button
                 type="button"
@@ -2151,7 +2147,9 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             {/* Modal Content */}
             <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "20px" }}>
               <p style={{ margin: 0, fontSize: "14px", color: "#4B5563", lineHeight: "1.6" }}>
-                Employer certifies that it has obtained and maintains a signed authorization from the parent or legal guardian of the minor applicant/employee, permitting the procurement of a background check for employment purposes.
+                {isMinor(dob)
+                  ? "Employer certifies that it has obtained and maintains a signed authorization from the parent or legal guardian of the minor applicant/employee, permitting the procurement of a background check for employment purposes."
+                  : "Employer certifies that it has obtained and maintains a signed authorization from the applicant/employee, permitting the procurement of a background check for employment purposes."}
               </p>
               
               <div>
@@ -2172,7 +2170,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   }}
                 >
                   <li>Proper disclosure was provided in accordance with the Fair Credit Reporting Act (FCRA).</li>
-                  <li>Written parental/guardian consent has been obtained prior to initiating the background check.</li>
+                  <li>
+                    {isMinor(dob)
+                      ? "Written parental/guardian consent has been obtained prior to initiating the background check."
+                      : "Written consent has been obtained prior to initiating the background check."}
+                  </li>
                   <li>Any information obtained will be used solely for lawful employment purposes and handled in compliance with applicable federal and state laws.</li>
                 </ul>
               </div>
@@ -2440,6 +2442,39 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                       existingOrders = [...ORDERS];
                     }
                     localStorage.setItem("evalright_orders", JSON.stringify([newOrder, ...existingOrders]));
+
+                    // Log candidate email notification in localStorage (evalright_emails)
+                    const inviteUrl = data.inviteUrl || `http://localhost:5173/#invite-form?id=${data.inviteToken}`;
+                    const linkHtml = `<div style="text-align: center; margin: 30px 0;">
+                      <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
+                    </div>`;
+
+                    const mailSubject = `Background Check Process Initiated - ${fullName}`;
+                    const mailBody = `
+                      <p>Hello ${firstName},</p>
+                      <p style="margin-top: 16px;">We wanted to inform you that a background check order has been submitted for you by EvalRight Client Corp.</p>
+                      <p style="margin-top: 16px;"><b>Verification Services:</b> ${verificationType}</p>
+                      <p style="margin-top: 16px;"><b>Order Date:</b> ${new Date().toLocaleDateString()}</p>
+                      <p style="margin-top: 16px;"><b>Please click the button below to view details:</b></p>
+                      ${linkHtml}
+                    `;
+                    const newEmail = {
+                      id: Math.floor(4000000 + Math.random() * 1000000),
+                      subject: mailSubject,
+                      recipient: applicantEmail,
+                      dateSent: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                      lastUpdate: "N/A",
+                      displayDateSent: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                      body: mailBody
+                    };
+                    const existingEmailsStr = localStorage.getItem("evalright_emails");
+                    let existingEmails = [];
+                    if (existingEmailsStr) {
+                      try {
+                        existingEmails = JSON.parse(existingEmailsStr);
+                      } catch (e) {}
+                    }
+                    localStorage.setItem("evalright_emails", JSON.stringify([newEmail, ...existingEmails]));
 
                     setShowSubmitModal(false);
                     setStep(4);

@@ -253,10 +253,6 @@ router.get('/api/invitations/:token', async (req: any, res: any) => {
       return res.status(410).json({ error: 'Invitation has expired' });
     }
 
-    if (invitation.status === 'completed' || invitation.status === 'Complete') {
-      return res.status(409).json({ error: 'Invitation has already been completed' });
-    }
-
     res.json({
       success: true,
       invitation: {
@@ -265,7 +261,8 @@ router.get('/api/invitations/:token', async (req: any, res: any) => {
         email: invitation.email,
         selectedProducts: invitation.selected_services,
         branchId: invitation.branch_id,
-        companyId: invitation.company_id
+        companyId: invitation.company_id,
+        status: invitation.status
       }
     });
 
