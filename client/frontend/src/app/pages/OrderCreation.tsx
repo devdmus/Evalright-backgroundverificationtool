@@ -398,7 +398,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
     }
   }
 
-  function handleSendInvitation() {
+  async function handleSendInvitation() {
     const isMiddleNameValid = middleNameDisabled || middleName.trim() !== "";
     if (
       invitationTemplate === "Select Template" ||
@@ -447,57 +447,83 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
       .replaceAll("[FCRA_URL]", "https://www.evalright.com/fcra")
       .replaceAll("[company_info]", "EvalRight Client Corp, 100 Main St, Chicago, IL");
 
-    const inviteId = "INV-" + Math.floor(100000 + Math.random() * 900000);
-    const inviteUrl = `#invite-form?id=${inviteId}`;
-    const linkHtml = `<div style="text-align: center; margin: 30px 0;">
-      <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
-    </div>`;
+    try {
+      const response = await fetch("http://localhost:5000/api/invitations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": currentUser.id
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email: applicantEmail,
+          branchId: currentUser.branch_id,
+          selectedProducts: Array.from(selected),
+          orderedBy: currentUser.id
+        })
+      });
 
-    if (formattedBody.includes("[INVITATION_URL]")) {
-      formattedBody = formattedBody.replaceAll("[INVITATION_URL]", linkHtml);
-    } else {
-      formattedBody += `<p style="margin-top: 24px;"><b>Please click the button below to fill out your background check authorization form:</b></p>${linkHtml}`;
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to create invitation in the database.");
+      }
+
+      const inviteId = data.inviteToken || "INV-" + Math.floor(100000 + Math.random() * 900000);
+      const inviteUrl = `#invite-form?id=${inviteId}`;
+      const linkHtml = `<div style="text-align: center; margin: 30px 0;">
+        <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
+      </div>`;
+
+      if (formattedBody.includes("[INVITATION_URL]")) {
+        formattedBody = formattedBody.replaceAll("[INVITATION_URL]", linkHtml);
+      } else {
+        formattedBody += `<p style="margin-top: 24px;"><b>Please click the button below to fill out your background check authorization form:</b></p>${linkHtml}`;
+      }
+
+      const newEmail = {
+        id: Math.floor(4000000 + Math.random() * 1000000),
+        subject: `Background Check Invitation - ${fullName}`,
+        recipient: applicantEmail,
+        dateSent: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        lastUpdate: "N/A",
+        displayDateSent: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        body: formattedBody
+      };
+
+      const existingEmailsStr = localStorage.getItem("evalright_emails");
+      let existingEmails = [];
+      if (existingEmailsStr) {
+        try {
+          existingEmails = JSON.parse(existingEmailsStr);
+        } catch (e) {}
+      }
+      localStorage.setItem("evalright_emails", JSON.stringify([newEmail, ...existingEmails]));
+
+      const newInvite = {
+        inviteId: inviteId,
+        name: fullName,
+        email: applicantEmail,
+        dateCreated: new Date().toISOString().substring(0, 10),
+        status: "Active",
+        emailActivity: "Sent",
+        selectedProducts: Array.from(selected),
+      };
+
+      const existingInvitesStr = localStorage.getItem("evalright_invitations");
+      let existingInvites = [];
+      if (existingInvitesStr) {
+        try {
+          existingInvites = JSON.parse(existingInvitesStr);
+        } catch (e) {}
+      }
+      localStorage.setItem("evalright_invitations", JSON.stringify([newInvite, ...existingInvites]));
+
+      setStep(4);
+    } catch (err: any) {
+      console.error(err);
+      triggerToast(err.message || "An error occurred while creating candidate invitation.", true);
     }
-
-    const newEmail = {
-      id: Math.floor(4000000 + Math.random() * 1000000),
-      subject: `Background Check Invitation - ${fullName}`,
-      recipient: applicantEmail,
-      dateSent: new Date().toISOString().replace('T', ' ').substring(0, 19),
-      lastUpdate: "N/A",
-      displayDateSent: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      body: formattedBody
-    };
-
-    const existingEmailsStr = localStorage.getItem("evalright_emails");
-    let existingEmails = [];
-    if (existingEmailsStr) {
-      try {
-        existingEmails = JSON.parse(existingEmailsStr);
-      } catch (e) {}
-    }
-    localStorage.setItem("evalright_emails", JSON.stringify([newEmail, ...existingEmails]));
-
-    const newInvite = {
-      inviteId: inviteId,
-      name: fullName,
-      email: applicantEmail,
-      dateCreated: new Date().toISOString().substring(0, 10),
-      status: "Active",
-      emailActivity: "Sent",
-      selectedProducts: Array.from(selected),
-    };
-
-    const existingInvitesStr = localStorage.getItem("evalright_invitations");
-    let existingInvites = [];
-    if (existingInvitesStr) {
-      try {
-        existingInvites = JSON.parse(existingInvitesStr);
-      } catch (e) {}
-    }
-    localStorage.setItem("evalright_invitations", JSON.stringify([newInvite, ...existingInvites]));
-
-    setStep(4);
   }
 
   function handleSaveOrder() {

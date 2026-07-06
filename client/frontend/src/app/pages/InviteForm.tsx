@@ -58,15 +58,17 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
     setInviteId(id);
 
     if (id) {
-      const saved = localStorage.getItem("evalright_invitations");
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          const matched = parsed.find((p: any) => p.inviteId === id);
-          if (matched) {
+      setLoading(true);
+      fetch(`http://localhost:5000/api/invitations/${id}`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Not found in database");
+          return res.json();
+        })
+        .then((data) => {
+          if (data && data.invitation) {
+            const matched = data.invitation;
             setInviteData(matched);
-            // Pre-populate name & email
-            const nameParts = matched.name.split(" ");
+            const nameParts = (matched.name || "").split(" ");
             setFormData((prev) => ({
               ...prev,
               firstName: nameParts[0] || "",
@@ -75,12 +77,36 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
               email: matched.email || "",
             }));
           }
-        } catch (e) {
-          console.error(e);
-        }
-      }
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.warn("DB invitation load failed, checking local storage fallback:", err);
+          // Fallback to local storage
+          const saved = localStorage.getItem("evalright_invitations");
+          if (saved) {
+            try {
+              const parsed = JSON.parse(saved);
+              const matched = parsed.find((p: any) => p.inviteId === id);
+              if (matched) {
+                setInviteData(matched);
+                const nameParts = (matched.name || "").split(" ");
+                setFormData((prev) => ({
+                  ...prev,
+                  firstName: nameParts[0] || "",
+                  middleName: nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : "",
+                  lastName: nameParts.length > 1 ? nameParts[nameParts.length - 1] : "",
+                  email: matched.email || "",
+                }));
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          }
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const handleChange = (field: string, value: any) => {
@@ -157,68 +183,88 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
 
     setSubmitting(true);
 
-    setTimeout(() => {
-      // 1. Update Invitation Status in localStorage
-      const savedInvitesStr = localStorage.getItem("evalright_invitations");
-      if (savedInvitesStr) {
-        try {
-          const invites = JSON.parse(savedInvitesStr);
-          const idx = invites.findIndex((i: any) => i.inviteId === inviteId);
-          if (idx !== -1) {
-            invites[idx].status = "Complete";
-            invites[idx].emailActivity = "Replied";
-            localStorage.setItem("evalright_invitations", JSON.stringify(invites));
-          }
-        } catch (e) {}
-      }
+    fetch(`http://localhost:5000/api/invitations/${inviteId}/submit`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((data) => {
+            throw new Error(data.error || "Failed to save details to the database.");
+          });
+        }
+        return res.json();
+      })
+      .then((data) => {
+        // 1. Update Invitation Status in localStorage
+        const savedInvitesStr = localStorage.getItem("evalright_invitations");
+        if (savedInvitesStr) {
+          try {
+            const invites = JSON.parse(savedInvitesStr);
+            const idx = invites.findIndex((i: any) => i.inviteId === inviteId);
+            if (idx !== -1) {
+              invites[idx].status = "Complete";
+              invites[idx].emailActivity = "Replied";
+              localStorage.setItem("evalright_invitations", JSON.stringify(invites));
+            }
+          } catch (e) {}
+        }
 
-      // 2. Create the final order in localStorage evalright_orders
-      const savedOrdersStr = localStorage.getItem("evalright_orders");
-      let existingOrders = [];
-      if (savedOrdersStr) {
-        try {
-          existingOrders = JSON.parse(savedOrdersStr);
-        } catch (e) {}
-      }
+        // 2. Create the final order in localStorage evalright_orders
+        const savedOrdersStr = localStorage.getItem("evalright_orders");
+        let existingOrders = [];
+        if (savedOrdersStr) {
+          try {
+            existingOrders = JSON.parse(savedOrdersStr);
+          } catch (e) {}
+        }
 
-      // Map selected products to friendly verification type string
-      const productNames = products.map((id: string) => {
-        const known: Record<string, string> = {
-          cdlis: "CDLIS",
-          "county-criminal": "County Criminal Search",
-          "driving-history": "Driving History",
-          "education-verification": "Education Verification",
-          "employment-verification": "Employment Verification",
-          "labcorp-10-panel": "LabCorp - 10 Panel Drug Screen",
+        // Map selected products to friendly verification type string
+        const productNames = products.map((id: string) => {
+          const known: Record<string, string> = {
+            cdlis: "CDLIS",
+            "county-criminal": "County Criminal Search",
+            "driving-history": "Driving History",
+            "education-verification": "Education Verification",
+            "employment-verification": "Employment Verification",
+            "labcorp-10-panel": "LabCorp - 10 Panel Drug Screen",
+          };
+          return known[id] || id;
+        });
+        const verificationType = productNames.join(", ") || "Background Check";
+
+        const newOrder = {
+          searchId: "" + Math.floor(8000000 + Math.random() * 1000000),
+          reportId: "RP-" + Math.floor(20000 + Math.random() * 10000),
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          applicantName: `${formData.firstName} ${formData.lastName}`,
+          verificationType,
+          status: "IN PROGRESS" as const,
+          orderedBy: "Applicant (Online Portal)",
+          orderDate: new Date().toISOString().substring(0, 10),
+          county: formData.city,
+          state: formData.state,
+          adhr: formData.adhr.replace(/.(?=.{4})/g, '*'),
+          dob: formData.dob,
+          applicantEmail: formData.email,
+          criminalRecordsFound: "Pending Court Records",
+          details: formData,
         };
-        return known[id] || id;
+
+        localStorage.setItem("evalright_orders", JSON.stringify([newOrder, ...existingOrders]));
+
+        setSubmitting(false);
+        setSubmitted(true);
+      })
+      .catch((err) => {
+        console.error("Database submission failed:", err);
+        setErrorMsg(err.message || "An error occurred while saving your details to the database.");
+        setSubmitting(false);
       });
-      const verificationType = productNames.join(", ") || "Background Check";
-
-      const newOrder = {
-        searchId: "" + Math.floor(8000000 + Math.random() * 1000000),
-        reportId: "RP-" + Math.floor(20000 + Math.random() * 10000),
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        applicantName: `${formData.firstName} ${formData.lastName}`,
-        verificationType,
-        status: "IN PROGRESS" as const,
-        orderedBy: "Applicant (Online Portal)",
-        orderDate: new Date().toISOString().substring(0, 10),
-        county: formData.city,
-        state: formData.state,
-        adhr: formData.adhr.replace(/.(?=.{4})/g, '*'),
-        dob: formData.dob,
-        applicantEmail: formData.email,
-        criminalRecordsFound: "Pending Court Records",
-        details: formData,
-      };
-
-      localStorage.setItem("evalright_orders", JSON.stringify([newOrder, ...existingOrders]));
-
-      setSubmitting(false);
-      setSubmitted(true);
-    }, 1500);
   };
 
   if (loading) {
