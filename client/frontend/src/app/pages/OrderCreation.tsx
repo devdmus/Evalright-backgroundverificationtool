@@ -409,13 +409,24 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
 
     // Format the email using the template
     let templateContent = "";
+    let templateName = "";
+    let templateSubject = "";
+    let templateFromName = "";
+    let templateReplyTo = "";
+    let templateCopyTo = "";
+
     const savedTemplates = localStorage.getItem("evalright_templates");
     if (savedTemplates) {
       try {
         const templates = JSON.parse(savedTemplates);
         const matched = templates.find((t: any) => t.name === invitationTemplate);
         if (matched) {
+          templateName = matched.name;
+          templateSubject = matched.subject;
           templateContent = matched.content;
+          templateFromName = matched.fromName;
+          templateReplyTo = matched.replyTo;
+          templateCopyTo = matched.copyTo;
         }
       } catch (e) {}
     }
@@ -456,7 +467,13 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
           email: applicantEmail,
           branchId: currentUser.branch_id,
           selectedProducts: Array.from(selected),
-          orderedBy: currentUser.id
+          orderedBy: currentUser.id,
+          emailTemplateName: templateName,
+          emailSubject: templateSubject || `Background Check Invitation - ${fullName}`,
+          emailContent: templateContent,
+          replyTo: templateReplyTo,
+          fromName: templateFromName,
+          copyTo: templateCopyTo
         })
       });
 
