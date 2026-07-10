@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { X } from "lucide-react";
 import { Footer } from "../components/Footer";
+import { INDIA_STATES } from "../data/mockData";
 
 interface AddNewClientProps {
   isDarkMode?: boolean;
@@ -8,7 +8,6 @@ interface AddNewClientProps {
 }
 
 export function AddNewClient({ isDarkMode = false, onClientAdded }: AddNewClientProps) {
-  const [showNote, setShowNote] = useState(true);
   const [sendAccountMessage, setSendAccountMessage] = useState(true);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -132,40 +131,6 @@ export function AddNewClient({ isDarkMode = false, onClientAdded }: AddNewClient
           </div>
         )}
 
-        {showNote && (
-          <div
-            style={{
-              background: isDarkMode ? "rgba(255,193,7,0.15)" : "#FFF8E1",
-              border: `1px solid ${isDarkMode ? "#5C4A00" : "#FFE082"}`,
-              borderRadius: "4px",
-              padding: "12px 16px",
-              marginBottom: "16px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              gap: "12px",
-            }}
-          >
-            <p style={{ margin: 0, fontSize: "13px", color: isDarkMode ? "#FCD34D" : "#5D4037", lineHeight: 1.5 }}>
-              <strong>NOTE:</strong> Clients should always register themselves to accept ToS and such...
-            </p>
-            <button
-              onClick={() => setShowNote(false)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: mutedColor,
-                padding: "2px",
-                flexShrink: 0,
-                display: "flex",
-              }}
-            >
-              <X size={16} />
-            </button>
-          </div>
-        )}
-
         <div
           style={{
             background: cardBg,
@@ -195,7 +160,12 @@ export function AddNewClient({ isDarkMode = false, onClientAdded }: AddNewClient
               <FieldInput label="Address 1" value={form.address1} onChange={(v) => update("address1", v)} borderColor={borderColor} inputBg={inputBg} textColor={textColor} mutedColor={mutedColor} />
               <FieldInput label="Address 2 (Optional)" value={form.address2} onChange={(v) => update("address2", v)} borderColor={borderColor} inputBg={inputBg} textColor={textColor} mutedColor={mutedColor} />
               <FieldInput label="City" value={form.city} onChange={(v) => update("city", v)} borderColor={borderColor} inputBg={inputBg} textColor={textColor} mutedColor={mutedColor} />
-              <FieldInput label="State/Region" value={form.state} onChange={(v) => update("state", v)} borderColor={borderColor} inputBg={inputBg} textColor={textColor} mutedColor={mutedColor} />
+              <FieldSelect label="State/Region" value={form.state} onChange={(v) => update("state", v)} borderColor={borderColor} inputBg={inputBg} textColor={textColor} mutedColor={mutedColor}>
+                <option value="">Select State</option>
+                {INDIA_STATES.map((st) => (
+                  <option key={st} value={st}>{st}</option>
+                ))}
+              </FieldSelect>
               <FieldInput label="Postcode" value={form.postcode} onChange={(v) => update("postcode", v)} borderColor={borderColor} inputBg={inputBg} textColor={textColor} mutedColor={mutedColor} />
               <FieldInput label="Phone Number" value={form.phoneNumber} onChange={(v) => update("phoneNumber", v)} borderColor={borderColor} inputBg={inputBg} textColor={textColor} mutedColor={mutedColor} />
             </div>

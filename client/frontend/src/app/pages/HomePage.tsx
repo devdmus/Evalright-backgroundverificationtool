@@ -199,9 +199,10 @@ function FloatingField({ label, required, value, onChange, type = "text", isSele
 interface HomePageProps {
   isDarkMode?: boolean;
   onNavigate?: (page: any) => void;
+  currentUser?: any;
 }
 
-export function HomePage({ isDarkMode = false, onNavigate }: HomePageProps) {
+export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePageProps) {
   const [pkg, setPkg] = useState("");
   const [template, setTemplate] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -299,7 +300,7 @@ export function HomePage({ isDarkMode = false, onNavigate }: HomePageProps) {
     },
   ], [counts]);
 
-  const handleSendInvitation = () => {
+  const handleSendInvitation = async () => {
     if (!pkg || !template || !firstName.trim() || !lastName.trim() || !emailAddr.trim()) {
       alert("Please fill in all required fields (marked with *).");
       return;
@@ -317,13 +318,24 @@ export function HomePage({ isDarkMode = false, onNavigate }: HomePageProps) {
     }
 
     let templateContent = "";
+    let templateName = "";
+    let templateSubject = "";
+    let templateFromName = "";
+    let templateReplyTo = "";
+    let templateCopyTo = "";
+
     const savedTemplates = localStorage.getItem("evalright_templates");
     if (savedTemplates) {
       try {
         const templates = JSON.parse(savedTemplates);
         const matched = templates.find((t: any) => t.name === template);
         if (matched) {
+          templateName = matched.name;
+          templateSubject = matched.subject;
           templateContent = matched.content;
+          templateFromName = matched.fromName;
+          templateReplyTo = matched.replyTo;
+          templateCopyTo = matched.copyTo;
         }
       } catch (e) {}
     }
@@ -351,66 +363,98 @@ export function HomePage({ isDarkMode = false, onNavigate }: HomePageProps) {
       .replaceAll("[FCRA_URL]", "https://www.evalright.com/fcra")
       .replaceAll("[company_info]", "EvalRight Client Corp, 100 Main St, Chicago, IL");
 
-    const inviteId = "INV-" + Math.floor(100000 + Math.random() * 900000);
-    const inviteUrl = `#invite-form?id=${inviteId}`;
-    const linkHtml = `<div style="text-align: center; margin: 30px 0;">
-      <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
-    </div>`;
+    try {
+      const response = await fetch("http://localhost:5000/api/invitations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": currentUser?.id || "fallback-id"
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email: emailAddr,
+          branchId: currentUser?.branch_id || null,
+          selectedProducts: selectedProducts,
+          orderedBy: currentUser?.id || "fallback-id",
+          emailTemplateName: templateName,
+          emailSubject: templateSubject || `Background Check Invitation - ${fullName}`,
+          emailContent: templateContent,
+          replyTo: templateReplyTo,
+          fromName: templateFromName,
+          copyTo: templateCopyTo
+        })
+      });
 
-    if (formattedBody.includes("[INVITATION_URL]")) {
-      formattedBody = formattedBody.replaceAll("[INVITATION_URL]", linkHtml);
-    } else {
-      formattedBody += `<p style="margin-top: 24px;"><b>Please click the button below to fill out your background check authorization form:</b></p>${linkHtml}`;
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to create invitation in the database.");
+      }
+
+      const inviteId = data.inviteToken || "INV-" + Math.floor(100000 + Math.random() * 900000);
+      const inviteUrl = `#invite-form?id=${inviteId}`;
+      const linkHtml = `<div style="text-align: center; margin: 30px 0;">
+        <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
+      </div>`;
+
+      if (formattedBody.includes("[INVITATION_URL]")) {
+        formattedBody = formattedBody.replaceAll("[INVITATION_URL]", linkHtml);
+      } else {
+        formattedBody += `<p style="margin-top: 24px;"><b>Please click the button below to fill out your background check authorization form:</b></p>${linkHtml}`;
+      }
+
+      const newEmail = {
+        id: Math.floor(4000000 + Math.random() * 1000000),
+        subject: templateSubject || `Background Check Invitation - ${fullName}`,
+        recipient: emailAddr,
+        dateSent: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        displayDateSent: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        lastUpdate: "N/A",
+        body: formattedBody
+      };
+
+      const existingEmailsStr = localStorage.getItem("evalright_emails");
+      let existingEmails = [];
+      if (existingEmailsStr) {
+        try {
+          existingEmails = JSON.parse(existingEmailsStr);
+        } catch (e) {}
+      }
+      localStorage.setItem("evalright_emails", JSON.stringify([newEmail, ...existingEmails]));
+
+      const newInvite = {
+        inviteId: inviteId,
+        name: fullName,
+        email: emailAddr,
+        dateCreated: new Date().toISOString().substring(0, 10),
+        status: "Active",
+        emailActivity: "Sent",
+        selectedProducts,
+      };
+
+      const existingInvitesStr = localStorage.getItem("evalright_invitations");
+      let existingInvites = [];
+      if (existingInvitesStr) {
+        try {
+          existingInvites = JSON.parse(existingInvitesStr);
+        } catch (e) {}
+      }
+      localStorage.setItem("evalright_invitations", JSON.stringify([newInvite, ...existingInvites]));
+
+      alert(`Invitation sent successfully to ${fullName}!`);
+      
+      setPkg("");
+      setTemplate("");
+      setFirstName("");
+      setLastName("");
+      setMiddleName("");
+      setEmailAddr("");
+      setReference("");
+      setUpdateTrigger(prev => prev + 1);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "An error occurred while sending invitation");
     }
-
-    const newEmail = {
-      id: Math.floor(4000000 + Math.random() * 1000000),
-      subject: `Background Check Invitation - ${fullName}`,
-      recipient: emailAddr,
-      dateSent: new Date().toISOString().replace('T', ' ').substring(0, 19),
-      displayDateSent: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      lastUpdate: "N/A",
-      body: formattedBody
-    };
-
-    const existingEmailsStr = localStorage.getItem("evalright_emails");
-    let existingEmails = [];
-    if (existingEmailsStr) {
-      try {
-        existingEmails = JSON.parse(existingEmailsStr);
-      } catch (e) {}
-    }
-    localStorage.setItem("evalright_emails", JSON.stringify([newEmail, ...existingEmails]));
-
-    const newInvite = {
-      inviteId: inviteId,
-      name: fullName,
-      email: emailAddr,
-      dateCreated: new Date().toISOString().substring(0, 10),
-      status: "Active",
-      emailActivity: "Sent",
-      selectedProducts,
-    };
-
-    const existingInvitesStr = localStorage.getItem("evalright_invitations");
-    let existingInvites = [];
-    if (existingInvitesStr) {
-      try {
-        existingInvites = JSON.parse(existingInvitesStr);
-      } catch (e) {}
-    }
-    localStorage.setItem("evalright_invitations", JSON.stringify([newInvite, ...existingInvites]));
-
-    alert(`Invitation sent successfully to ${fullName}!`);
-    
-    setPkg("");
-    setTemplate("");
-    setFirstName("");
-    setLastName("");
-    setMiddleName("");
-    setEmailAddr("");
-    setReference("");
-    setUpdateTrigger(prev => prev + 1);
   };
 
   return (

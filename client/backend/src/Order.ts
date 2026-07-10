@@ -365,14 +365,78 @@ router.post('/api/orders', async (req: any, res: any) => {
       [logId, orderedBy || null, companyId, orderId]
     );
 
+    // 9b. Create Email Log for candidate notification
+    const emailLogId = crypto.randomUUID();
+    const emailSubject = `Background Check Process Initiated - ${applicantDetails.firstName} ${applicantDetails.lastName}`;
+    await clientConnection.query(
+      `INSERT INTO email_logs (id, recipient, subject, provider, status, sent_at)
+       VALUES ($1, $2, $3, 'Power Automate', 'sent', NOW())`,
+      [emailLogId, applicantDetails.email, emailSubject]
+    );
+
+    // 9c. Create corresponding completed invitation entry to generate inviteToken and inviteUrl
+    const inviteToken = 'INV-' + Math.floor(100000 + Math.random() * 900000);
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    const invitationId = crypto.randomUUID();
+    
+    await clientConnection.query(
+      `INSERT INTO invitations (id, company_id, email, status, invite_token, expires_at, created_by, first_name, last_name, selected_services, branch_id, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())`,
+      [
+        invitationId,
+        companyId,
+        applicantDetails.email,
+        'completed',
+        inviteToken,
+        expiresAt,
+        orderedBy || null,
+        applicantDetails.firstName,
+        applicantDetails.lastName,
+        JSON.stringify(serviceIds || []),
+        resolvedBranchId
+      ]
+    );
+
     await clientConnection.query('COMMIT');
+
+    // 10. Trigger Power Automate flow asynchronously for Candidate Notification
+    const webhookUrl = process.env.POWER_AUTOMATE_WEBHOOK_URL;
+    const inviteUrl = `http://localhost:5173/#invite-form?id=${inviteToken}`;
+    console.log(`✉️ Sending candidate order confirmation webhook via Power Automate. Candidate: ${applicantDetails.email}, URL: ${inviteUrl}`);
+    
+    if (webhookUrl && webhookUrl.trim() !== '') {
+      fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidateEmail: applicantDetails.email,
+          candidateName: `${applicantDetails.firstName} ${applicantDetails.lastName}`,
+          inviteUrl: inviteUrl,
+          selectedProducts: serviceIds || [],
+          companyName: 'EvalRight Client Corp'
+        })
+      }).then(response => {
+        if (!response.ok) {
+          console.error('❌ Power Automate Webhook (Order) returned error status:', response.status);
+        } else {
+          console.log('✅ Power Automate Webhook (Order) successfully triggered.');
+        }
+      }).catch(err => {
+        console.error('❌ Error hitting Power Automate Webhook (Order):', err.message);
+      });
+    } else {
+      console.warn('⚠️ [WARNING] POWER_AUTOMATE_WEBHOOK_URL is not configured in backend .env. Skipping email trigger.');
+    }
 
     res.status(201).json({
       success: true,
       message: 'Order created successfully',
       orderId,
       orderNumber,
-      status: 'pending'
+      status: 'pending',
+      inviteToken,
+      inviteUrl
     });
 
   } catch (err: any) {
