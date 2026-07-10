@@ -106,7 +106,13 @@ router.post('/api/invitations', async (req: any, res: any) => {
     email,
     branchId,
     selectedProducts,
-    orderedBy // UUID of authenticated client user
+    orderedBy, // UUID of authenticated client user
+    emailTemplateName,
+    emailSubject,
+    emailContent,
+    replyTo,
+    fromName,
+    copyTo
   } = req.body;
 
   if (!firstName || !lastName || !email || !selectedProducts || !Array.isArray(selectedProducts)) {
@@ -167,13 +173,15 @@ router.post('/api/invitations', async (req: any, res: any) => {
         ]
       );
 
+      // Resolve subject
+      const resolvedSubject = emailSubject || `Background Check Invitation - ${firstName} ${lastName}`;
+
       // 2. Insert into email_logs
       const emailLogId = crypto.randomUUID();
-      const subject = `Background Check Invitation - ${firstName} ${lastName}`;
       await dbClient.query(
         `INSERT INTO email_logs (id, recipient, subject, provider, status, sent_at)
          VALUES ($1, $2, $3, 'Power Automate', 'sent', NOW())`,
-        [emailLogId, email, subject]
+        [emailLogId, email, resolvedSubject]
       );
 
       await dbClient.query('COMMIT');
@@ -181,6 +189,38 @@ router.post('/api/invitations', async (req: any, res: any) => {
       // 3. Trigger Power Automate flow asynchronously
       const webhookUrl = process.env.POWER_AUTOMATE_WEBHOOK_URL;
       const inviteUrl = `http://localhost:5173/#invite-form?id=${inviteToken}`;
+
+      let emailBody = '';
+      if (emailContent && emailContent.trim() !== '') {
+        const fullName = `${firstName} ${lastName}`.trim();
+        let formattedBody = emailContent
+          .replaceAll("[applicant_first_name]", firstName)
+          .replaceAll("[applicant_last_name]", lastName)
+          .replaceAll("[applicant_name]", fullName)
+          .replaceAll("[company_name]", "EvalRight Client Corp")
+          .replaceAll("[FCRA_URL]", "https://www.evalright.com/fcra")
+          .replaceAll("[company_info]", "EvalRight Client Corp, 100 Main St, Chicago, IL");
+
+        const linkHtml = `<div style="text-align: center; margin: 30px 0;">
+          <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
+        </div>`;
+
+        if (formattedBody.includes("[INVITATION_URL]")) {
+          emailBody = formattedBody.replaceAll("[INVITATION_URL]", linkHtml);
+        } else {
+          emailBody = formattedBody + `<p style="margin-top: 24px;"><b>Please click the button below to fill out your background check authorization form:</b></p>${linkHtml}`;
+        }
+      } else {
+        // Fallback default body
+        emailBody = `
+          <p>Hello ${firstName},</p>
+          <p style="margin-top: 16px;">Below you will find a link to authorize and initiate a background check, which is required as a condition of employment.</p>
+          <p style="margin-top: 16px;">Please save this email and keep it handy as it contains instructions for entering information to process the background check.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
+          </div>
+        `;
+      }
       
       console.log(`✉️ Sending candidate invitation webhook via Power Automate. Token: ${inviteToken}`);
       
@@ -193,7 +233,12 @@ router.post('/api/invitations', async (req: any, res: any) => {
             candidateName: `${firstName} ${lastName}`,
             inviteUrl: inviteUrl,
             selectedProducts: selectedProducts,
-            companyName: 'EvalRight Client Corp'
+            companyName: 'EvalRight Client Corp',
+            emailSubject: resolvedSubject,
+            emailBody: emailBody,
+            fromName: fromName || 'EvalRight Support',
+            replyTo: replyTo || 'support@evalright.us',
+            copyTo: copyTo || ''
           })
         }).then(response => {
           if (!response.ok) {

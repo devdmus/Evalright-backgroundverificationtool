@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { X } from "lucide-react";
 import { Footer } from "../components/Footer";
 import { INDIA_STATES } from "../data/mockData";
 
@@ -9,7 +8,6 @@ interface AddNewClientProps {
 }
 
 export function AddNewClient({ isDarkMode = false, onClientAdded }: AddNewClientProps) {
-  const [showNote, setShowNote] = useState(true);
   const [sendAccountMessage, setSendAccountMessage] = useState(true);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -130,40 +128,6 @@ export function AddNewClient({ isDarkMode = false, onClientAdded }: AddNewClient
             }}
           >
             {message.text}
-          </div>
-        )}
-
-        {showNote && (
-          <div
-            style={{
-              background: isDarkMode ? "rgba(255,193,7,0.15)" : "#FFF8E1",
-              border: `1px solid ${isDarkMode ? "#5C4A00" : "#FFE082"}`,
-              borderRadius: "4px",
-              padding: "12px 16px",
-              marginBottom: "16px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              gap: "12px",
-            }}
-          >
-            <p style={{ margin: 0, fontSize: "13px", color: isDarkMode ? "#FCD34D" : "#5D4037", lineHeight: 1.5 }}>
-              <strong>NOTE:</strong> Clients should always register themselves to accept ToS and such...
-            </p>
-            <button
-              onClick={() => setShowNote(false)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: mutedColor,
-                padding: "2px",
-                flexShrink: 0,
-                display: "flex",
-              }}
-            >
-              <X size={16} />
-            </button>
           </div>
         )}
 
