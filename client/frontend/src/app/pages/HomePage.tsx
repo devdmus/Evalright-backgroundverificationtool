@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Mail, Plus, ArrowRight, Eye } from "lucide-react";
 import { Footer } from "../components/Footer";
+import { ORDERS } from "../data/mockData";
 
 // ── Static data ──────────────────────────────────────────────────────────────
 
@@ -205,6 +206,16 @@ interface HomePageProps {
 export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePageProps) {
   const [pkg, setPkg] = useState("");
   const [template, setTemplate] = useState("");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isToastError, setIsToastError] = useState(false);
+
+  function triggerToast(msg: string, isError = false) {
+    setToastMessage(msg);
+    setIsToastError(isError);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  }
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [middleName, setMiddleName] = useState("");
@@ -302,7 +313,7 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
 
   const handleSendInvitation = async () => {
     if (!pkg || !template || !firstName.trim() || !lastName.trim() || !emailAddr.trim()) {
-      alert("Please fill in all required fields (marked with *).");
+      triggerToast("Please fill in all required fields (marked with *).", true);
       return;
     }
 
@@ -441,7 +452,54 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
       }
       localStorage.setItem("evalright_invitations", JSON.stringify([newInvite, ...existingInvites]));
 
-      alert(`Invitation sent successfully to ${fullName}!`);
+      // Also save a pending order in localStorage (evalright_orders)
+      const existingOrdersStr = localStorage.getItem("evalright_orders");
+      let existingOrders = [];
+      if (existingOrdersStr) {
+        try {
+          existingOrders = JSON.parse(existingOrdersStr);
+        } catch (e) {}
+      } else {
+        existingOrders = [...ORDERS];
+      }
+
+      const productNames = selectedProducts.map((id: string) => {
+        const knownNames: Record<string, string> = {
+          cdlis: "CDLIS",
+          "county-criminal": "County Criminal Search",
+          "driving-history": "Driving History",
+          "education-verification": "Education Verification",
+          "employment-verification": "Employment Verification",
+          "labcorp-10-panel": "LabCorp - 10 Panel",
+        };
+        return knownNames[id] || id;
+      });
+      const verificationType = productNames.join(", ") || "Background Check";
+
+      const pendingOrder = {
+        searchId: "" + Math.floor(8000000 + Math.random() * 1000000),
+        reportId: "RP-" + Math.floor(20000 + Math.random() * 10000),
+        firstName,
+        lastName,
+        applicantName: fullName,
+        verificationType,
+        status: "PENDING" as const,
+        orderedBy: currentUser?.firstName && currentUser?.lastName
+          ? `${currentUser.firstName} ${currentUser.lastName}`.trim()
+          : (currentUser?.username || "Admin User"),
+        orderDate: new Date().toISOString().substring(0, 10),
+        county: "Pending",
+        state: "Pending",
+        adhr: "Pending",
+        dob: "Pending",
+        applicantEmail: emailAddr,
+        criminalRecordsFound: "Pending",
+        reference: reference || "",
+        inviteId: inviteId,
+      };
+      localStorage.setItem("evalright_orders", JSON.stringify([pendingOrder, ...existingOrders]));
+
+      triggerToast(`Invitation sent successfully to ${fullName}!`);
       
       setPkg("");
       setTemplate("");
@@ -453,7 +511,7 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
       setUpdateTrigger(prev => prev + 1);
     } catch (err: any) {
       console.error(err);
-      alert(err.message || "An error occurred while sending invitation");
+      triggerToast(err.message || "An error occurred while sending invitation", true);
     }
   };
 
@@ -860,6 +918,27 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
           </div>
         </div>
       </div>
+
+      {toastMessage && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "24px",
+            right: "24px",
+            background: isToastError ? "#EF4444" : "#10B981",
+            color: "#FFFFFF",
+            padding: "12px 24px",
+            borderRadius: "4px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            zIndex: 9999,
+            fontSize: "14px",
+            fontWeight: 500,
+            transition: "all 0.3s ease",
+          }}
+        >
+          {toastMessage}
+        </div>
+      )}
 
       <Footer isDarkMode={isDarkMode} />
     </div>

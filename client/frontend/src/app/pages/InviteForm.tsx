@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, CheckCircle, Shield, FileText, Landmark, User, Award, Briefcase, Car } from "lucide-react";
 import { Footer } from "../components/Footer";
 import { getPageTheme } from "../theme/pageTheme";
+import { ORDERS } from "../data/mockData";
 
 interface InviteFormProps {
   isDarkMode?: boolean;
@@ -213,13 +214,15 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
           } catch (e) {}
         }
 
-        // 2. Create the final order in localStorage evalright_orders
+        // 2. Create/Update the final order in localStorage evalright_orders
         const savedOrdersStr = localStorage.getItem("evalright_orders");
         let existingOrders = [];
         if (savedOrdersStr) {
           try {
             existingOrders = JSON.parse(savedOrdersStr);
           } catch (e) {}
+        } else {
+          existingOrders = [...ORDERS];
         }
 
         // Map selected products to friendly verification type string
@@ -236,26 +239,48 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
         });
         const verificationType = productNames.join(", ") || "Background Check";
 
-        const newOrder = {
-          searchId: "" + Math.floor(8000000 + Math.random() * 1000000),
-          reportId: "RP-" + Math.floor(20000 + Math.random() * 10000),
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          applicantName: `${formData.firstName} ${formData.lastName}`,
-          verificationType,
-          status: "IN PROGRESS" as const,
-          orderedBy: "Applicant (Online Portal)",
-          orderDate: new Date().toISOString().substring(0, 10),
-          county: formData.city,
-          state: formData.state,
-          adhr: formData.adhr.replace(/.(?=.{4})/g, '*'),
-          dob: formData.dob,
-          applicantEmail: formData.email,
-          criminalRecordsFound: "Pending Court Records",
-          details: formData,
-        };
+        const idx = existingOrders.findIndex((o: any) => o.inviteId === inviteId || (o.applicantEmail === formData.email && o.status === "PENDING"));
 
-        localStorage.setItem("evalright_orders", JSON.stringify([newOrder, ...existingOrders]));
+        if (idx !== -1) {
+          // Update the existing pending order
+          existingOrders[idx] = {
+            ...existingOrders[idx],
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            applicantName: `${formData.firstName} ${formData.lastName}`,
+            verificationType,
+            status: "IN PROGRESS" as const,
+            county: formData.city,
+            state: formData.state,
+            adhr: formData.adhr.replace(/.(?=.{4})/g, '*'),
+            dob: formData.dob,
+            criminalRecordsFound: "Pending Court Records",
+            details: formData,
+          };
+        } else {
+          // Create new order as fallback
+          const newOrder = {
+            searchId: "" + Math.floor(8000000 + Math.random() * 1000000),
+            reportId: "RP-" + Math.floor(20000 + Math.random() * 10000),
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            applicantName: `${formData.firstName} ${formData.lastName}`,
+            verificationType,
+            status: "IN PROGRESS" as const,
+            orderedBy: "Applicant (Online Portal)",
+            orderDate: new Date().toISOString().substring(0, 10),
+            county: formData.city,
+            state: formData.state,
+            adhr: formData.adhr.replace(/.(?=.{4})/g, '*'),
+            dob: formData.dob,
+            applicantEmail: formData.email,
+            criminalRecordsFound: "Pending Court Records",
+            details: formData,
+          };
+          existingOrders = [newOrder, ...existingOrders];
+        }
+
+        localStorage.setItem("evalright_orders", JSON.stringify(existingOrders));
 
         setSubmitting(false);
         setSubmitted(true);
