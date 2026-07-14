@@ -242,10 +242,53 @@ function DateRangePicker({ value, onChange, onLoad, isDarkMode = false }: DateRa
             >
               <ChevronLeft size={16} />
             </button>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontWeight: 600, fontSize: "16px" }}>
-              <span>{monthNames[viewMonth]}</span>
-              <ChevronDown size={14} style={{ marginTop: "2px" }} />
-              <span>{viewYear}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px", fontWeight: 600, fontSize: "16px" }}>
+              <select
+                value={viewMonth}
+                onChange={(e) => setViewMonth(parseInt(e.target.value))}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#FFFFFF",
+                  fontWeight: 600,
+                  fontSize: "16px",
+                  cursor: "pointer",
+                  outline: "none",
+                  paddingRight: "2px",
+                  appearance: "none",
+                }}
+              >
+                {monthNames.map((name, idx) => (
+                  <option key={name} value={idx} style={{ color: "#333" }}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={14} style={{ flexShrink: 0 }} />
+
+              <select
+                value={viewYear}
+                onChange={(e) => setViewYear(parseInt(e.target.value))}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#FFFFFF",
+                  fontWeight: 600,
+                  fontSize: "16px",
+                  cursor: "pointer",
+                  outline: "none",
+                  paddingRight: "2px",
+                  marginLeft: "4px",
+                  appearance: "none",
+                }}
+              >
+                {Array.from({ length: 21 }, (_, i) => 2020 + i).map((yr) => (
+                  <option key={yr} value={yr} style={{ color: "#333" }}>
+                    {yr}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={14} style={{ flexShrink: 0 }} />
             </div>
             <button
               onClick={handleNextMonth}
