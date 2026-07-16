@@ -383,6 +383,255 @@ const CRIMINAL_RECORDS_OPTIONS = [
   { value: "No", label: "No" },
 ];
 
+const getCellStyle = (isDarkMode: boolean): React.CSSProperties => ({
+  background: isDarkMode ? "#252830" : "#FFFFFF",
+  border: isDarkMode ? "1px solid #333333" : "1px solid #E2E8F0",
+  borderRadius: "4px",
+  padding: "8px 12px",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  height: "58px",
+  boxSizing: "border-box",
+  position: "relative",
+});
+
+const getCellLabelStyle = (isDarkMode: boolean): React.CSSProperties => ({
+  fontSize: "12px",
+  color: isDarkMode ? "#8391a2" : "#8A8A8A",
+  fontWeight: 400,
+  lineHeight: "1.2",
+  marginBottom: "3px",
+  textAlign: "left",
+});
+
+const getInputElementStyle = (isDarkMode: boolean): React.CSSProperties => ({
+  border: "none",
+  outline: "none",
+  background: "transparent",
+  width: "100%",
+  fontSize: "14px",
+  color: isDarkMode ? "#E5E7EB" : "#374151",
+  padding: "0",
+  margin: "0",
+  fontFamily: "inherit",
+});
+
+interface InputFieldProps {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  isDarkMode?: boolean;
+}
+
+function InputField({ label, value, onChange, isDarkMode = false }: InputFieldProps) {
+  return (
+    <div style={getCellStyle(isDarkMode)}>
+      <label style={getCellLabelStyle(isDarkMode)}>{label}</label>
+      <input
+        type="text"
+        style={getInputElementStyle(isDarkMode)}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
+  );
+}
+
+interface DateInputFieldProps {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  isDarkMode?: boolean;
+}
+
+function DateInputField({ label, value, onChange, isDarkMode = false }: DateInputFieldProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [type, setType] = useState("text");
+
+  return (
+    <div
+      style={{ ...getCellStyle(isDarkMode), cursor: "pointer" }}
+      onClick={() => {
+        if (inputRef.current) {
+          setType("date");
+          inputRef.current.focus();
+          if (typeof inputRef.current.showPicker === "function") {
+            try {
+              inputRef.current.showPicker();
+            } catch (e) {
+              console.log(e);
+            }
+          }
+        }
+      }}
+    >
+      <label style={getCellLabelStyle(isDarkMode)}>{label}</label>
+      <input
+        ref={inputRef}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onFocus={() => setType("date")}
+        onBlur={(e) => {
+          if (!e.target.value) {
+            setType("text");
+          }
+        }}
+        style={getInputElementStyle(isDarkMode)}
+      />
+    </div>
+  );
+}
+
+interface DropdownItemProps {
+  label: string;
+  isSelected: boolean;
+  onClick: () => void;
+  isDarkMode?: boolean;
+}
+
+function DropdownItem({ label, isSelected, onClick, isDarkMode = false }: DropdownItemProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const hoverOrSelectedBg = isDarkMode ? "#4A4A4A" : "#7b7b7b";
+  const defaultBg = isDarkMode ? "#252830" : "#FFFFFF";
+
+  return (
+    <div
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        padding: "8px 12px",
+        fontSize: "14px",
+        fontFamily: "'Wix Madefor Display', sans-serif",
+        color: isHovered || isSelected ? "#FFFFFF" : (isDarkMode ? "#E5E7EB" : "#4B5563"),
+        background: isHovered || isSelected ? hoverOrSelectedBg : defaultBg,
+        cursor: "pointer",
+        transition: "background 0.1s ease, color 0.1s ease",
+      }}
+    >
+      {label}
+    </div>
+  );
+}
+
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface CustomDropdownProps {
+  label: string;
+  value: string;
+  options: Option[];
+  onChange: (value: string) => void;
+  align?: "left" | "right" | "center";
+  isDarkMode?: boolean;
+}
+
+function CustomDropdown({ label, value, options, onChange, align = "left", isDarkMode = false }: CustomDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const selectedOption = options.find((opt) => opt.value === value) || options[0];
+
+  let positionStyle: React.CSSProperties = {};
+  if (align === "right") {
+    positionStyle = {
+      right: "-1px",
+      left: "auto",
+    };
+  } else if (align === "center") {
+    positionStyle = {
+      left: "50%",
+      transform: "translateX(-50%)",
+    };
+  } else {
+    positionStyle = {
+      left: "-1px",
+    };
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      onClick={() => setIsOpen(!isOpen)}
+      style={{ ...getCellStyle(isDarkMode), cursor: "pointer" }}
+    >
+      <label style={getCellLabelStyle(isDarkMode)}>{label}</label>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", userSelect: "none" }}>
+        <span
+          style={{
+            fontSize: "14px",
+            color: isDarkMode ? "#E5E7EB" : "#374151",
+            fontWeight: 400,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {selectedOption ? selectedOption.label : value}
+        </span>
+        <ChevronDown size={14} style={{ color: isDarkMode ? "#8391a2" : "#6B7280", marginLeft: "4px", flexShrink: 0 }} />
+      </div>
+
+      {isOpen && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 2px)",
+            ...positionStyle,
+            minWidth: "100%",
+            width: "max-content",
+            maxWidth: "450px",
+            background: isDarkMode ? "#252830" : "#FFFFFF",
+            border: isDarkMode ? "1px solid #333333" : "1px solid #cbd5e1",
+            borderRadius: "4px",
+            boxSizing: "border-box",
+            zIndex: 1000,
+            maxHeight: "240px",
+            overflowX: "hidden",
+            overflowY: "auto",
+            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          {options.map((opt) => {
+            const isSelected = opt.value === value;
+            return (
+              <DropdownItem
+                key={opt.value}
+                label={opt.label}
+                isSelected={isSelected}
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                isDarkMode={isDarkMode}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface ClientOrdersPageProps {
   isDarkMode?: boolean;
 }
@@ -620,259 +869,7 @@ export function ClientOrdersPage({ isDarkMode = false }: ClientOrdersPageProps) 
   const textLabel = isDarkMode ? "#8391a2" : "#8A8A8A";
   const cardShadow = "0 1px 3px rgba(0,0,0,0.05)";
 
-  // Replicated cell style from AllOrderDetails (with borders matching screenshot)
-  const CELL_STYLE: React.CSSProperties = {
-    background: isDarkMode ? "#252830" : "#FFFFFF",
-    border: isDarkMode ? "1px solid #333333" : "1px solid #E2E8F0",
-    borderRadius: "4px",
-    padding: "8px 12px",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    height: "58px",
-    boxSizing: "border-box",
-    position: "relative",
-  };
-
-  const CELL_LABEL_STYLE: React.CSSProperties = {
-    fontSize: "12px",
-    color: isDarkMode ? "#8391a2" : "#8A8A8A",
-    fontWeight: 400,
-    lineHeight: "1.2",
-    marginBottom: "3px",
-    textAlign: "left",
-  };
-
-  const INPUT_ELEMENT_STYLE: React.CSSProperties = {
-    border: "none",
-    outline: "none",
-    background: "transparent",
-    width: "100%",
-    fontSize: "14px",
-    color: isDarkMode ? "#E5E7EB" : "#374151",
-    padding: "0",
-    margin: "0",
-    fontFamily: "inherit",
-  };
-
-  // Reusable custom InputField (no placeholder text, matches screenshot blank inputs)
-  function InputField({
-    label,
-    value,
-    onChange,
-  }: {
-    label: string;
-    value: string;
-    onChange: (val: string) => void;
-  }) {
-    return (
-      <div style={CELL_STYLE}>
-        <label style={CELL_LABEL_STYLE}>{label}</label>
-        <input
-          type="text"
-          style={INPUT_ELEMENT_STYLE}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      </div>
-    );
-  }
-
-  // Custom Date input field matching completely empty/blank look when value is empty
-  function DateInputField({
-    label,
-    value,
-    onChange,
-  }: {
-    label: string;
-    value: string;
-    onChange: (val: string) => void;
-  }) {
-    const inputRef = useRef<HTMLInputElement>(null);
-    const [type, setType] = useState("text");
-
-    return (
-      <div
-        style={{ ...CELL_STYLE, cursor: "pointer" }}
-        onClick={() => {
-          if (inputRef.current) {
-            setType("date");
-            inputRef.current.focus();
-            if (typeof inputRef.current.showPicker === "function") {
-              try {
-                inputRef.current.showPicker();
-              } catch (e) {
-                console.log(e);
-              }
-            }
-          }
-        }}
-      >
-        <label style={CELL_LABEL_STYLE}>{label}</label>
-        <input
-          ref={inputRef}
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setType("date")}
-          onBlur={(e) => {
-            if (!e.target.value) {
-              setType("text");
-            }
-          }}
-          style={INPUT_ELEMENT_STYLE}
-        />
-      </div>
-    );
-  }
-
-  // Custom Dropdown item component
-  interface DropdownItemProps {
-    label: string;
-    isSelected: boolean;
-    onClick: () => void;
-  }
-
-  function DropdownItem({ label, isSelected, onClick }: DropdownItemProps) {
-    const [isHovered, setIsHovered] = useState(false);
-    const hoverOrSelectedBg = isDarkMode ? "#4A4A4A" : "#7b7b7b";
-    const defaultBg = isDarkMode ? "#252830" : "#FFFFFF";
-
-    return (
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick();
-        }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        style={{
-          padding: "8px 12px",
-          fontSize: "14px",
-          fontFamily: "'Wix Madefor Display', sans-serif",
-          color: isHovered || isSelected ? "#FFFFFF" : (isDarkMode ? "#E5E7EB" : "#4B5563"),
-          background: isHovered || isSelected ? hoverOrSelectedBg : defaultBg,
-          cursor: "pointer",
-          transition: "background 0.1s ease, color 0.1s ease",
-        }}
-      >
-        {label}
-      </div>
-    );
-  }
-
-  // Custom Dropdown replicating AllOrderDetails dropdown UI
-  interface Option {
-    value: string;
-    label: string;
-  }
-
-  interface CustomDropdownProps {
-    label: string;
-    value: string;
-    options: Option[];
-    onChange: (value: string) => void;
-    align?: "left" | "right" | "center";
-  }
-
-  function CustomDropdown({ label, value, options, onChange, align = "left" }: CustomDropdownProps) {
-    const [isOpen, setIsOpen] = useState(false);
-    const containerRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-      function handleClickOutside(event: MouseEvent) {
-        if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-          setIsOpen(false);
-        }
-      }
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, []);
-
-    const selectedOption = options.find((opt) => opt.value === value) || options[0];
-
-    // Align dropdown popup
-    let positionStyle: React.CSSProperties = {};
-    if (align === "right") {
-      positionStyle = {
-        right: "-1px",
-        left: "auto",
-      };
-    } else if (align === "center") {
-      positionStyle = {
-        left: "50%",
-        transform: "translateX(-50%)",
-      };
-    } else {
-      positionStyle = {
-        left: "-1px",
-      };
-    }
-
-    return (
-      <div
-        ref={containerRef}
-        onClick={() => setIsOpen(!isOpen)}
-        style={{ ...CELL_STYLE, cursor: "pointer" }}
-      >
-        <label style={CELL_LABEL_STYLE}>{label}</label>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", userSelect: "none" }}>
-          <span
-            style={{
-              fontSize: "14px",
-              color: isDarkMode ? "#E5E7EB" : "#374151",
-              fontWeight: 400,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {selectedOption ? selectedOption.label : value}
-          </span>
-          <ChevronDown size={14} style={{ color: isDarkMode ? "#8391a2" : "#6B7280", marginLeft: "4px", flexShrink: 0 }} />
-        </div>
-
-        {isOpen && (
-          <div
-            style={{
-              position: "absolute",
-              top: "calc(100% + 2px)",
-              ...positionStyle,
-              minWidth: "100%",
-              width: "max-content",
-              maxWidth: "450px",
-              background: isDarkMode ? "#252830" : "#FFFFFF",
-              border: isDarkMode ? "1px solid #333333" : "1px solid #cbd5e1",
-              borderRadius: "4px",
-              boxSizing: "border-box",
-              zIndex: 1000,
-              maxHeight: "240px",
-              overflowX: "hidden",
-              overflowY: "auto",
-              boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            {options.map((opt) => {
-              const isSelected = opt.value === value;
-              return (
-                <DropdownItem
-                  key={opt.value}
-                  label={opt.label}
-                  isSelected={isSelected}
-                  onClick={() => {
-                    onChange(opt.value);
-                    setIsOpen(false);
-                  }}
-                />
-              );
-            })}
-          </div>
-        )}
-      </div>
-    );
-  }
+  // Custom components have been hoisted outside the component body to maintain focus state
 
   return (
     <div
@@ -915,59 +912,59 @@ export function ClientOrdersPage({ isDarkMode = false }: ClientOrdersPageProps) 
         >
           {/* Row 1 */}
           <div style={{ gridColumn: "span 2" }}>
-            <CustomDropdown label="Client" value={client} options={CLIENT_OPTIONS} onChange={setClient} />
+            <CustomDropdown label="Client" value={client} options={CLIENT_OPTIONS} onChange={setClient} isDarkMode={isDarkMode} />
           </div>
           <div>
-            <InputField label="Search ID" value={searchId} onChange={setSearchId} />
+            <InputField label="Search ID" value={searchId} onChange={setSearchId} isDarkMode={isDarkMode} />
           </div>
           <div>
-            <InputField label="Report ID" value={reportId} onChange={setReportId} />
+            <InputField label="Report ID" value={reportId} onChange={setReportId} isDarkMode={isDarkMode} />
           </div>
           <div>
-            <CustomDropdown label="Status" value={status} options={STATUS_OPTIONS} onChange={setStatus} align="right" />
+            <CustomDropdown label="Status" value={status} options={STATUS_OPTIONS} onChange={setStatus} align="right" isDarkMode={isDarkMode} />
           </div>
           <div>
-            <CustomDropdown label="Search Type / Name" value={searchType} options={SEARCH_TYPE_OPTIONS} onChange={setSearchType} align="right" />
+            <CustomDropdown label="Search Type / Name" value={searchType} options={SEARCH_TYPE_OPTIONS} onChange={setSearchType} align="right" isDarkMode={isDarkMode} />
           </div>
 
           {/* Row 2 */}
           <div>
-            <InputField label="First Name" value={firstName} onChange={setFirstName} />
+            <InputField label="First Name" value={firstName} onChange={setFirstName} isDarkMode={isDarkMode} />
           </div>
           <div>
-            <InputField label="Last Name" value={lastName} onChange={setLastName} />
+            <InputField label="Last Name" value={lastName} onChange={setLastName} isDarkMode={isDarkMode} />
           </div>
           <div>
-            <InputField label="ADHR" value={ssn} onChange={setSsn} />
+            <InputField label="ADHR" value={ssn} onChange={setSsn} isDarkMode={isDarkMode} />
           </div>
           <div>
-            <InputField label="DOB" value={dob} onChange={setDob} />
+            <InputField label="DOB" value={dob} onChange={setDob} isDarkMode={isDarkMode} />
           </div>
           <div>
-            <InputField label="County" value={county} onChange={setCounty} />
+            <InputField label="County" value={county} onChange={setCounty} isDarkMode={isDarkMode} />
           </div>
           <div>
-            <InputField label="State" value={stateName} onChange={setStateName} />
+            <InputField label="State" value={stateName} onChange={setStateName} isDarkMode={isDarkMode} />
           </div>
 
           {/* Row 3 */}
           <div>
-            <DateInputField label="Order Date From" value={orderDateFrom} onChange={setOrderDateFrom} />
+            <DateInputField label="Order Date From" value={orderDateFrom} onChange={setOrderDateFrom} isDarkMode={isDarkMode} />
           </div>
           <div>
-            <DateInputField label="Order Date To" value={orderDateTo} onChange={setOrderDateTo} />
+            <DateInputField label="Order Date To" value={orderDateTo} onChange={setOrderDateTo} isDarkMode={isDarkMode} />
           </div>
           <div>
-            <CustomDropdown label="Sort Order" value={sortOrder} options={SORT_ORDER_OPTIONS} onChange={setSortOrder} align="left" />
+            <CustomDropdown label="Sort Order" value={sortOrder} options={SORT_ORDER_OPTIONS} onChange={setSortOrder} align="left" isDarkMode={isDarkMode} />
           </div>
           <div>
-            <CustomDropdown label="Searches per page" value={searchesPerPage} options={PER_PAGE_OPTIONS} onChange={setSearchesPerPage} align="center" />
+            <CustomDropdown label="Searches per page" value={searchesPerPage} options={PER_PAGE_OPTIONS} onChange={setSearchesPerPage} align="center" isDarkMode={isDarkMode} />
           </div>
           <div>
-            <CustomDropdown label="Age" value={age} options={AGE_OPTIONS} onChange={setAge} align="right" />
+            <CustomDropdown label="Age" value={age} options={AGE_OPTIONS} onChange={setAge} align="right" isDarkMode={isDarkMode} />
           </div>
           <div>
-            <CustomDropdown label="Criminal Records Found" value={criminalRecords} options={CRIMINAL_RECORDS_OPTIONS} onChange={setCriminalRecords} align="right" />
+            <CustomDropdown label="Criminal Records Found" value={criminalRecords} options={CRIMINAL_RECORDS_OPTIONS} onChange={setCriminalRecords} align="right" isDarkMode={isDarkMode} />
           </div>
         </div>
 

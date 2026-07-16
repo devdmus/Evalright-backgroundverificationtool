@@ -26,156 +26,117 @@ interface AlaCarteCategory {
 
 const COL1_CATEGORIES: AlaCarteCategory[] = [
   {
-    title: "CDLIS",
-    items: [
-      { id: "cdlis", name: "CDLIS", hasTooltip: true },
-    ]
-  },
-  {
-    title: "Civil",
+    title: "Identity & Database Verifications",
     hasExpand: true,
     items: [
-      { id: "bankruptcies-liens-judgments", name: "Bankruptcies, Liens, Judgments", hasTooltip: true },
-      { id: "county-civil", name: "County Civil" },
-      { id: "ffiec", name: "FFIEC" },
-      { id: "nationwide-federal-civil", name: "Nationwide Federal Civil", hasTooltip: true },
+      { id: "personal-details", name: "Personal Details", hasTooltip: true },
+      { id: "ssn-check", name: "SSN Check", hasTooltip: true },
+      { id: "id-verification-aadhar", name: "ID Verification (Aadhar)", hasTooltip: true },
+      { id: "id-verification-pan", name: "ID Verification (PAN)", hasTooltip: true },
+      { id: "id-verification-dl", name: "ID Verification (DL)", hasTooltip: true },
+      { id: "id-verification-voterid", name: "ID Verification (Voter ID)", hasTooltip: true },
+      { id: "id-verification-passport", name: "ID Verification (Passport)", hasTooltip: true },
+      { id: "uan-verification", name: "UAN Verification", hasTooltip: true },
+      { id: "indian-database-check", name: "Indian Database Check", hasTooltip: true },
+      { id: "global-database-check", name: "Global Database Check", hasTooltip: true },
+      { id: "ofac-check", name: "OFAC Check", hasTooltip: true },
     ]
   },
   {
-    title: "Criminal Search",
+    title: "Criminal & Registry Searches",
     hasExpand: true,
     items: [
-      { id: "az-adult-protective", name: "AZ Adult Protective Services", hasTooltip: true },
-      { id: "canada-criminal-national", name: "Canada Criminal Search (National Level)", hasTooltip: true },
-      { id: "canada-criminal-province", name: "Canada Criminal Search (Province Level)", hasTooltip: true },
-      { id: "county-criminal", name: "County Criminal", hasTooltip: true },
+      { id: "criminal-record-check", name: "Criminal Record Check", hasTooltip: true },
+      { id: "police-verification-check", name: "Police Verification Check", hasTooltip: true },
+      { id: "nationwide-criminal-check", name: "Nationwide Criminal Check", hasTooltip: true },
+      { id: "national-sex-offender-registry-check", name: "National Sex Offender Registry Check", hasTooltip: true },
     ]
   },
   {
-    title: "Driving History",
-    items: [
-      { id: "canadian-driving-history", name: "Canadian Driving History" },
-      { id: "driving-history", name: "Driving History", hasTooltip: true },
-      { id: "fmcsa-verification", name: "FMCSA Verification (PSP Driver History)", hasTooltip: true },
-    ]
-  },
-  {
-    title: "Drug Test",
+    title: "Financial & Tax Checks",
     hasExpand: true,
     items: [
-      { id: "labcorp-10-panel", name: "(AF) LabCorp - 10 Panel", hasTooltip: true },
-      { id: "labcorp-10-panel-6am-oxy", name: "(AF) LabCorp - 10 Panel 6AM/ OXY", hasTooltip: true },
-      { id: "labcorp-10-panel-alcohol", name: "(AF) LabCorp - 10 Panel ALCOHOL", hasTooltip: true },
-      { id: "labcorp-10-panel-oxy", name: "(AF) LabCorp - 10 Panel OXY", hasTooltip: true },
-    ]
-  },
-  {
-    title: "Education Verification",
-    items: [
-      { id: "education-verification", name: "Education Verification", hasTooltip: true },
-      { id: "international-education", name: "International Education Verification" },
-    ]
-  },
-  {
-    title: "Employment Verification",
-    items: [
-      { id: "employment-verification", name: "Employment Verification", hasTooltip: true },
-      { id: "international-employment", name: "International Employment Verification" },
-      { id: "military-service", name: "Military Service Verification" },
+      { id: "credit-check", name: "Credit Check", hasTooltip: true },
+      { id: "26as-check", name: "26AS Check", hasTooltip: true },
+      { id: "form-16-check", name: "Form 16 Check", hasTooltip: true },
+      { id: "itr-check", name: "ITR Check", hasTooltip: true },
     ]
   }
 ];
 
 const COL2_CATEGORIES: AlaCarteCategory[] = [
   {
-    title: "Financial",
-    items: [
-      { id: "hud-ldp", name: "HUD Limited Denial of Participation List (LDP)" },
-      { id: "pep", name: "PEP" },
-    ]
-  },
-  {
-    title: "Generic, No Special Forms Required",
+    title: "Professional & Education Verifications",
     hasExpand: true,
     items: [
-      { id: "colorado-caps", name: "Colorado CAPS" },
-      { id: "death-records-index", name: "Death Records Index" },
-      { id: "international-gov-id", name: "International Government ID Verification" },
-      { id: "ny-medicaid-inspector", name: "NY Office of the Medicaid Inspector General" },
+      { id: "employment-verification", name: "Employment Verification", hasTooltip: true },
+      { id: "education-verification", name: "Education Verification", hasTooltip: true },
+      { id: "reference-check", name: "Reference Check", hasTooltip: true },
+      { id: "freelancing-check", name: "Freelancing Check", hasTooltip: true },
+      { id: "directorship-check", name: "Directorship Check", hasTooltip: true },
+      { id: "cv-check", name: "Cv Check", hasTooltip: true },
+      { id: "gap-analysis", name: "Gap Analysis", hasTooltip: true },
     ]
   },
   {
-    title: "Occupational Services",
+    title: "Address Verifications",
     hasExpand: true,
     items: [
-      { id: "es-audiogram", name: "ES - Audiogram", hasTooltip: true },
-      { id: "es-chest-xray-1-2", name: "ES - Chest X-Ray (1 or 2 Views)", hasTooltip: true },
-      { id: "es-chest-xray-2", name: "ES - Chest X-Ray (2 Views)", hasTooltip: true },
-      { id: "es-dot-physical", name: "ES - DOT Physical", hasTooltip: true },
+      { id: "address-verification", name: "Address Verification", hasTooltip: true },
+      { id: "supplier-address", name: "Supplier Address", hasTooltip: true },
     ]
   },
   {
-    title: "OIG",
+    title: "Health & Other Checks",
+    hasExpand: true,
     items: [
-      { id: "oig-exclusions", name: "Office of Inspector General (OIG) - Exclusions List" },
-    ]
-  },
-  {
-    title: "Professional License Verification",
-    items: [
-      { id: "colorado-dora", name: "Colorado DORA Search" },
-      { id: "professional-license", name: "Professional License Verification", hasTooltip: true },
-    ]
-  },
-  {
-    title: "Reference Verification",
-    items: [
-      { id: "company-reference", name: "Company Reference Verification" },
-      { id: "international-reference", name: "International Reference Check" },
-      { id: "professional-reference", name: "Professional Reference Verification" },
-      { id: "reference-verification", name: "Reference Verification" },
-    ]
-  },
-  {
-    title: "Social Media Screening",
-    items: [
-      { id: "social-media-search", name: "Social Media Search" },
-    ]
-  },
-  {
-    title: "ADHR Trace",
-    items: [
-      { id: "adhr-trace-address", name: "ADHR Trace/Address History", hasTooltip: true },
-      { id: "adhr-validation", name: "ADHR Validation", hasTooltip: true },
-      { id: "adhr-verification-cbsv", name: "ADHR Verification (UIDAI)", hasTooltip: true },
+      { id: "drug-test", name: "Drug test", hasTooltip: true },
+      { id: "medical-examination-test", name: "Medical Examination Test", hasTooltip: true },
+      { id: "social-media-check", name: "Social Media Check", hasTooltip: true },
+      { id: "right-to-work", name: "Right to Work", hasTooltip: true },
+      { id: "emergency", name: "Emergency", hasTooltip: true },
+      { id: "authorization", name: "Authorization", hasTooltip: true },
+      { id: "exit", name: "Exit", hasTooltip: true },
     ]
   }
 ];
 
 const TOOLTIP_MESSAGES: Record<string, string> = {
-  cdlis: "Identify any undisclosed Commercial Drivers Licenses previously held by an applicant.",
-  "bankruptcies-liens-judgments": "Shows all of the negative information about a person's financial history.",
-  "nationwide-federal-civil": "This search offers nationwide access to federal litigation dockets for adjudicated civil cases from all U.S. Federal District courts excluding Alaska, Guam, Idaho, New Mexico and Northern Marianas Islands.",
-  "az-adult-protective": "Arizona Adult Protective Services (APS) is a program within the DES Division of Aging and Adult Services (DAAS) and is responsible for investigating allegations of abuse, exploitation and neglect of vulnerable adults.",
-  "canada-criminal-national": "The National criminal record covers all provinces and territories within Canada.",
-  "canada-criminal-province": "A Provincial search is an address-based search covering a province.",
-  "county-criminal": "County Criminal Record Searches help find criminal court records such as felonies and misdemeanors. Because the majority of crimes in the U.S. are tried in county courts, these searches should be a baseline for all employee background checks. The searches are performed at more than 3,200 county criminal courts across the United States, and are conducted by our researchers via online access or in-person via an extensive network of court research professionals.",
-  "driving-history": "This search identifies the name, license issue and expiration date, license status, license number, license type, endorsements, restrictions, driving violations and suspensions. Results are available within minutes to 24 hours.",
-  "fmcsa-verification": "PSP helps carriers make more informed hiring decisions by providing secure, electronic access to a commercial drivers five-year crash and three-year inspection history from the FMCSA Motor Carrier Management Information System",
-  "labcorp-10-panel": "Amphetamines, Barbiturates, Benzodiazepines, Cocaine, Marijuana, Methadone, Methaqualone, Opiates, PCP, Propoxyphene",
-  "labcorp-10-panel-6am-oxy": "6-Acetyl Morphine, Amphetamines, Barbiturates, Benzodiazepines, Cocaine, Marijuana, Methadone, Opiates, Oxycodone, Propoxyphene, PCP",
-  "labcorp-10-panel-alcohol": "Amphetamines, Barbiturates, Benzodiazepines, Cocaine, Ethanol, Marijuana, Methadone, Methaqualone, Opiates, PCP, Propoxyphene",
-  "labcorp-10-panel-oxy": "Amphetamines, Barbiturates, Benzodiazepines, Cocaine, Marijuana , Methadone, Methaqualone, Opiates, Oxycodone, PCP, Propoxyphene",
-  "es-audiogram": "A graph showing the results of a hearing test, plotting the softest sounds a person can hear at different pitches (frequencies), used to assess hearing ability and detect hearing loss.",
-  "es-chest-xray-1-2": "A diagnostic X-ray imaging test of the chest taken from one or two angles (views) to evaluate the lungs, heart, and chest wall for conditions such as infection, fluid, or abnormalities.",
-  "es-chest-xray-2": "A chest X-ray taken from two standard angles — typically front (posteroanterior) and side (lateral) — to provide a more complete view of the lungs, heart, and chest structures for diagnostic evaluation.",
-  "es-dot-physical": "A medical exam required by the Department of Transportation to ensure that commercial drivers are physically and mentally fit to safely operate commercial motor vehicles.",
-  "education-verification": "Verification of education credentials that confirm degree received, course of study, and dates of attendance.",
-  "employment-verification": "Verifies an individual's work history, such as company names and locations, dates, positions or titles held along with compensation (if requested and provided by the source), directly with former employers or their authorized agents.",
-  "professional-license": "This search provides information from licensing agencies in various states across the United States. The search includes the type",
-  "adhr-trace-address": "The ADHR Trace creates a compilation from database agencies of addresses and alias names associated with the Aadhaar. Based on this information and your specific package, we will use this address history to determine which jurisdictions to search for court records.",
-  "adhr-validation": "This service identifies if an Aadhaar Number (ADHR) is valid using information from the Unique Identification Authority of India (UIDAI). Note: the ADHR Validation check DOES NOT confirm that the Aadhaar belongs to your candidate.",
-  "adhr-verification-cbsv": "This service can verify if the Aadhaar holder's name, date of birth, and Aadhaar match UIDAI's records by obtaining the information directly with the Unique Identification Authority of India (UIDAI)",
+  "personal-details": "Verify basic personal details (gender, name, father's name, contact info, DOB, PAN, UAN).",
+  "ssn-check": "Verify identity using Social Security Number (SSN) verification search.",
+  "id-verification-aadhar": "Verify candidate identity information against the Aadhaar (UIDAI) records.",
+  "id-verification-pan": "Verify candidate identity information against the Permanent Account Number (PAN) database.",
+  "id-verification-dl": "Verify candidate identity information against their Driving License details.",
+  "id-verification-voterid": "Verify candidate identity information against Voter ID records.",
+  "id-verification-passport": "Verify candidate identity information against Passport records.",
+  "uan-verification": "Verify candidate Universal Account Number (UAN) history for employment details.",
+  "indian-database-check": "Cross-reference candidate details against Indian public and regulatory databases.",
+  "global-database-check": "Cross-reference candidate details against international public and regulatory databases.",
+  "ofac-check": "Check candidate details against the Office of Foreign Assets Control (OFAC) sanctions list.",
+  "criminal-record-check": "Check for local criminal court records (misdemeanors/felonies) in relevant jurisdictions.",
+  "police-verification-check": "Initiate background verification through local police station reports.",
+  "nationwide-criminal-check": "Perform a nationwide criminal database search covering multiple jurisdictions.",
+  "national-sex-offender-registry-check": "Verify candidate registration status against the national sex offender database.",
+  "credit-check": "Perform a credit bureau search to check credit history and financial health.",
+  "26as-check": "Verify employment and income history using candidate's Form 26AS tax statements.",
+  "form-16-check": "Verify employment and tax deductions using candidate's Form 16 statements.",
+  "itr-check": "Verify tax filing records using candidate's Income Tax Return (ITR) details.",
+  "employment-verification": "Verify candidate's employment history, designations, and tenures directly with employers.",
+  "education-verification": "Verify candidate's educational credentials, degrees, and graduation dates directly with institutions.",
+  "reference-check": "Contact candidate references to verify character, work relationship, and performance details.",
+  "freelancing-check": "Verify candidate freelancing/independent contract history and client relationships.",
+  "directorship-check": "Verify candidate directorship listings and corporate registry involvement.",
+  "cv-check": "Cross-check and verify details provided in the candidate's CV/Resume.",
+  "gap-analysis": "Analyze and verify reasons for gaps in candidate's education or employment history.",
+  "address-verification": "Verify candidate's residential address (current, permanent, or previous) via physical or digital means.",
+  "supplier-address": "Verify the registered address and authenticity of suppliers/vendor entities.",
+  "drug-test": "Perform screening for illicit substances or controlled drug panels.",
+  "medical-examination-test": "Conduct health and medical exams as required for specific job roles.",
+  "social-media-check": "Scan public social media profiles for professional and behavioral indicators.",
+  "right-to-work": "Verify candidate's legal eligibility and work authorization in their employment country.",
+  "emergency": "Verify emergency contact details and relationship information.",
+  "authorization": "Ensure correct candidate consent and Authorization LOA is signed and filed.",
+  "exit": "Verify candidate's previous exit procedures, reasons, and clearance status.",
 };
 
 const STATES_LIST = [
@@ -545,12 +506,41 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
 
       const productNames = Array.from(selected).map((id: string) => {
         const knownNames: Record<string, string> = {
-          cdlis: "CDLIS",
-          "county-criminal": "County Criminal Search",
-          "driving-history": "Driving History",
-          "education-verification": "Education Verification",
+          "personal-details": "Personal Details",
+          "ssn-check": "SSN Check",
+          "id-verification-aadhar": "ID Verification (Aadhar)",
+          "id-verification-pan": "ID Verification (PAN)",
+          "id-verification-dl": "ID Verification (DL)",
+          "id-verification-voterid": "ID Verification (Voter ID)",
+          "id-verification-passport": "ID Verification (Passport)",
+          "uan-verification": "UAN Verification",
+          "indian-database-check": "Indian Database Check",
+          "global-database-check": "Global Database Check",
+          "ofac-check": "OFAC Check",
+          "criminal-record-check": "Criminal Record Check",
+          "police-verification-check": "Police Verification Check",
+          "nationwide-criminal-check": "Nationwide Criminal Check",
+          "national-sex-offender-registry-check": "National Sex Offender Registry Check",
+          "credit-check": "Credit Check",
+          "26as-check": "26AS Check",
+          "form-16-check": "Form 16 Check",
+          "itr-check": "ITR Check",
           "employment-verification": "Employment Verification",
-          "labcorp-10-panel": "LabCorp - 10 Panel",
+          "education-verification": "Education Verification",
+          "reference-check": "Reference Check",
+          "freelancing-check": "Freelancing Check",
+          "directorship-check": "Directorship Check",
+          "cv-check": "Cv Check",
+          "gap-analysis": "Gap Analysis",
+          "address-verification": "Address Verification",
+          "supplier-address": "Supplier Address",
+          "drug-test": "Drug test",
+          "medical-examination-test": "Medical Examination Test",
+          "social-media-check": "Social Media Check",
+          "right-to-work": "Right to Work",
+          "emergency": "Emergency",
+          "authorization": "Authorization",
+          "exit": "Exit",
         };
         return knownNames[id] || id;
       });
@@ -2431,12 +2421,41 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   
                   const productNames = Array.from(selected).map(id => {
                     const knownNames: Record<string, string> = {
-                      cdlis: "CDLIS",
-                      "county-criminal": "County Criminal Search",
-                      "driving-history": "Driving History",
-                      "education-verification": "Education Verification",
+                      "personal-details": "Personal Details",
+                      "ssn-check": "SSN Check",
+                      "id-verification-aadhar": "ID Verification (Aadhar)",
+                      "id-verification-pan": "ID Verification (PAN)",
+                      "id-verification-dl": "ID Verification (DL)",
+                      "id-verification-voterid": "ID Verification (Voter ID)",
+                      "id-verification-passport": "ID Verification (Passport)",
+                      "uan-verification": "UAN Verification",
+                      "indian-database-check": "Indian Database Check",
+                      "global-database-check": "Global Database Check",
+                      "ofac-check": "OFAC Check",
+                      "criminal-record-check": "Criminal Record Check",
+                      "police-verification-check": "Police Verification Check",
+                      "nationwide-criminal-check": "Nationwide Criminal Check",
+                      "national-sex-offender-registry-check": "National Sex Offender Registry Check",
+                      "credit-check": "Credit Check",
+                      "26as-check": "26AS Check",
+                      "form-16-check": "Form 16 Check",
+                      "itr-check": "ITR Check",
                       "employment-verification": "Employment Verification",
-                      "labcorp-10-panel": "LabCorp - 10 Panel",
+                      "education-verification": "Education Verification",
+                      "reference-check": "Reference Check",
+                      "freelancing-check": "Freelancing Check",
+                      "directorship-check": "Directorship Check",
+                      "cv-check": "Cv Check",
+                      "gap-analysis": "Gap Analysis",
+                      "address-verification": "Address Verification",
+                      "supplier-address": "Supplier Address",
+                      "drug-test": "Drug test",
+                      "medical-examination-test": "Medical Examination Test",
+                      "social-media-check": "Social Media Check",
+                      "right-to-work": "Right to Work",
+                      "emergency": "Emergency",
+                      "authorization": "Authorization",
+                      "exit": "Exit",
                     };
                     return knownNames[id] || id;
                   });
