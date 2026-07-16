@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Search, Filter } from "lucide-react";
 import { Footer } from "../components/Footer";
 import { Pagination } from "../components/Pagination";
-import { CLIENT_LIST, ClientRecord } from "../data/mockData";
+import { ClientRecord } from "../data/mockData";
 
 interface ClientManagementProps {
   isDarkMode?: boolean;
@@ -59,7 +59,7 @@ export function ClientManagement({ isDarkMode = false, onViewClient, clients }: 
   const inputBg = isDarkMode ? "#2A2D34" : "#FFFFFF";
   const theadBg = isDarkMode ? "#2A2D34" : "#F9FAFB";
 
-  const filtered = (clients || CLIENT_LIST).filter((c) => {
+  const filtered = (clients ?? []).filter((c) => {
     if (search.trim()) {
       const q = search.toLowerCase();
       if (
@@ -287,7 +287,14 @@ export function ClientManagement({ isDarkMode = false, onViewClient, clients }: 
                 </tr>
               </thead>
               <tbody>
-                {paginated.map((client, idx) => (
+                {paginated.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} style={{ padding: "24px 16px", textAlign: "center", fontSize: "13px", color: mutedColor }}>
+                      No clients found. Add a client from the Admin portal or ensure the backend API is running on port 5001.
+                    </td>
+                  </tr>
+                ) : (
+                  paginated.map((client, idx) => (
                   <tr
                     key={client.id}
                     style={{
@@ -319,7 +326,8 @@ export function ClientManagement({ isDarkMode = false, onViewClient, clients }: 
                       <StatusBadge status={client.status} />
                     </td>
                   </tr>
-                ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
