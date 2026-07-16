@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Eye, LogIn } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Eye, LogIn, ArrowLeft, ShieldCheck, RefreshCw } from "lucide-react";
 
 const LOGO_SRC = "/evalright-logo.jpg";
 const CARD_WIDTH = "430px";
@@ -134,6 +134,42 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // OTP Verification State
+  const [showOtpScreen, setShowOtpScreen] = useState(false);
+  const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
+  const [userId, setUserId] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
+
+  const inputRefs = [
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+  ];
+
+  // Cooldown countdown timer
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
+  const maskEmail = (emailStr: string | null) => {
+    if (!emailStr) return "";
+    const parts = emailStr.split("@");
+    if (parts.length !== 2) return emailStr;
+    const [local, domain] = parts;
+    if (local.length <= 2) {
+      return `${local[0]}***@${domain}`;
+    }
+    return `${local[0]}${"*".repeat(local.length - 2)}${local[local.length - 1]}@${domain}`;
+  };
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
@@ -158,7 +194,19 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
         throw new Error(data.error || "Login failed.");
       }
 
-      onLogin(data.user);
+      if (data.otpRequired) {
+        setUserId(data.userId);
+        setEmail(data.email);
+        setShowOtpScreen(true);
+        setError(null);
+        setOtp(Array(6).fill(""));
+        // Focus the first input box after state updates
+        setTimeout(() => {
+          inputRefs[0].current?.focus();
+        }, 100);
+      } else {
+        onLogin(data.user);
+      }
     } catch (err: any) {
       console.error(err);
       setError(err.message || "An error occurred during login.");
@@ -166,6 +214,117 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
       setLoading(false);
     }
   }
+
+  async function handleOtpSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const otpCode = otp.join("").trim();
+    if (otpCode.length !== 6) {
+      setError("Please enter all 6 digits of the verification code.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/verify-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId, otp: otpCode }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "OTP verification failed.");
+      }
+
+      onLogin(data.user);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Invalid verification code.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleResendOtp() {
+    if (cooldown > 0) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/resend-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to resend OTP.");
+      }
+
+      setCooldown(60);
+      setOtp(Array(6).fill(""));
+      setError(null);
+      setTimeout(() => {
+        inputRefs[0].current?.focus();
+      }, 100);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "An error occurred while resending OTP.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleBackToLogin = () => {
+    setShowOtpScreen(false);
+    setError(null);
+    setOtp(Array(6).fill(""));
+  };
+
+  const handleOtpChange = (index: number, val: string) => {
+    if (!/^\d*$/.test(val)) return;
+    const newOtp = [...otp];
+    const digit = val.slice(-1);
+    newOtp[index] = digit;
+    setOtp(newOtp);
+
+    // Auto-focus next input
+    if (digit !== "" && index < 5) {
+      inputRefs[index + 1].current?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace") {
+      if (otp[index] === "" && index > 0) {
+        const newOtp = [...otp];
+        newOtp[index - 1] = "";
+        setOtp(newOtp);
+        inputRefs[index - 1].current?.focus();
+      } else {
+        const newOtp = [...otp];
+        newOtp[index] = "";
+        setOtp(newOtp);
+      }
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text").trim();
+    if (/^\d{6}$/.test(text)) {
+      const digits = text.split("");
+      setOtp(digits);
+      inputRefs[5].current?.focus();
+    }
+  };
 
   return (
     <div
@@ -209,7 +368,7 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
             overflow: "hidden",
           }}
         >
-          {showLogoutBanner && (
+          {showLogoutBanner && !showOtpScreen && (
             <div
               style={{
                 background: "#D4EDDA",
@@ -240,64 +399,191 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
             </div>
           )}
 
-          <form onSubmit={handleSubmit} style={{ padding: "28px 32px 32px" }}>
-            <h1
-              style={{
-                fontSize: "20px",
-                fontWeight: 600,
-                color: "#6B7280",
-                margin: "0 0 6px 0",
-              }}
-            >
-              Welcome Back !
-            </h1>
-            <p
-              style={{
-                fontSize: "13px",
-                color: "#9CA3AF",
-                margin: "0 0 24px 0",
-                lineHeight: 1.5,
-              }}
-            >
-              Enter your username and password to access account.
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-              <LoginField label="Username" value={username} onChange={setUsername} />
-              <LoginField
-                label="Password"
-                value={password}
-                onChange={setPassword}
-                type={showPassword ? "text" : "password"}
-                eyeToggle={{
-                  show: showPassword,
-                  onToggle: () => setShowPassword(!showPassword),
-                }}
-              />
-            </div>
-
-            <div style={{ textAlign: "right", marginTop: "10px", marginBottom: "22px" }}>
-              <button
-                type="button"
+          {showOtpScreen ? (
+            <form onSubmit={handleOtpSubmit} style={{ padding: "28px 32px 32px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                <ShieldCheck size={26} color="#C70039" />
+                <h1
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: 600,
+                    color: "#374151",
+                    margin: 0,
+                  }}
+                >
+                  Two-Step Verification
+                </h1>
+              </div>
+              <p
                 style={{
-                  background: "none",
-                  border: "none",
-                  color: "#9CA3AF",
-                  fontSize: "12px",
-                  cursor: "pointer",
-                  padding: 0,
-                  fontFamily: "inherit",
+                  fontSize: "13.5px",
+                  color: "#6B7280",
+                  margin: "0 0 20px 0",
+                  lineHeight: 1.5,
                 }}
               >
-                Forgot your password?
-              </button>
-            </div>
+                We've sent a 6-digit verification code to your registered email:{" "}
+                <strong style={{ color: "#111827" }}>{maskEmail(email)}</strong>.
+                Please enter it below.
+              </p>
 
-            <button type="submit" disabled={loading} style={{ ...loginButtonStyle, opacity: loading ? 0.7 : 1, cursor: loading ? "not-allowed" : "pointer" }}>
-              {loading ? "Logging in..." : "Log In"}
-              {!loading && <LogIn size={17} strokeWidth={2.25} />}
-            </button>
-          </form>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "8px", margin: "24px 0" }}>
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={inputRefs[index]}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                    onPaste={handleOtpPaste}
+                    style={{
+                      width: "48px",
+                      height: "52px",
+                      textAlign: "center",
+                      fontSize: "20px",
+                      fontWeight: "bold",
+                      border: "1px solid #D1D5DB",
+                      borderRadius: "6px",
+                      backgroundColor: "#F9FAFB",
+                      color: "#1F2937",
+                      outline: "none",
+                      transition: "all 0.2s ease",
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = "#C70039";
+                      e.target.style.boxShadow = "0 0 0 3px rgba(199, 0, 57, 0.15)";
+                      e.target.style.backgroundColor = "#FFFFFF";
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = "#D1D5DB";
+                      e.target.style.boxShadow = "none";
+                      e.target.style.backgroundColor = "#F9FAFB";
+                    }}
+                  />
+                ))}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  ...loginButtonStyle,
+                  opacity: loading ? 0.7 : 1,
+                  cursor: loading ? "not-allowed" : "pointer",
+                  marginBottom: "16px",
+                }}
+              >
+                {loading ? "Verifying..." : "Verify & Log In"}
+                {!loading && <LogIn size={17} strokeWidth={2.25} />}
+              </button>
+
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "14px" }}>
+                <button
+                  type="button"
+                  onClick={handleBackToLogin}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#4B5563",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: 0,
+                    fontFamily: "inherit",
+                    fontWeight: 500,
+                  }}
+                >
+                  <ArrowLeft size={16} /> Back to Login
+                </button>
+
+                <button
+                  type="button"
+                  disabled={cooldown > 0 || loading}
+                  onClick={handleResendOtp}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: cooldown > 0 ? "#9CA3AF" : "#C70039",
+                    fontSize: "13px",
+                    cursor: cooldown > 0 ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: 0,
+                    fontFamily: "inherit",
+                    fontWeight: 600,
+                  }}
+                >
+                  <RefreshCw size={15} style={{ animation: loading ? "spin 1s linear infinite" : "none" }} />
+                  {cooldown > 0 ? `Resend Code (${cooldown}s)` : "Resend Code"}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmit} style={{ padding: "28px 32px 32px" }}>
+              <h1
+                style={{
+                  fontSize: "20px",
+                  fontWeight: 600,
+                  color: "#6B7280",
+                  margin: "0 0 6px 0",
+                }}
+              >
+                Welcome Back !
+              </h1>
+              <p
+                style={{
+                  fontSize: "13px",
+                  color: "#9CA3AF",
+                  margin: "0 0 24px 0",
+                  lineHeight: 1.5,
+                }}
+              >
+                Enter your username and password to access account.
+              </p>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                <LoginField label="Username" value={username} onChange={setUsername} />
+                <LoginField
+                  label="Password"
+                  value={password}
+                  onChange={setPassword}
+                  type={showPassword ? "text" : "password"}
+                  eyeToggle={{
+                    show: showPassword,
+                    onToggle: () => setShowPassword(!showPassword),
+                  }}
+                />
+              </div>
+
+              <div style={{ textAlign: "right", marginTop: "10px", marginBottom: "22px" }}>
+                <button
+                  type="button"
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#9CA3AF",
+                    fontSize: "12px",
+                    cursor: "pointer",
+                    padding: 0,
+                    fontFamily: "inherit",
+                  }}
+                >
+                  Forgot your password?
+                </button>
+              </div>
+
+              <button type="submit" disabled={loading} style={{ ...loginButtonStyle, opacity: loading ? 0.7 : 1, cursor: loading ? "not-allowed" : "pointer" }}>
+                {loading ? "Logging in..." : "Log In"}
+                {!loading && <LogIn size={17} strokeWidth={2.25} />}
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </div>
