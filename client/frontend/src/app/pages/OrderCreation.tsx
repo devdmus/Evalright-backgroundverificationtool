@@ -532,6 +532,53 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
       }
       localStorage.setItem("evalright_invitations", JSON.stringify([newInvite, ...existingInvites]));
 
+      // Also save a pending order in localStorage (evalright_orders)
+      const existingOrdersStr = localStorage.getItem("evalright_orders");
+      let existingOrders = [];
+      if (existingOrdersStr) {
+        try {
+          existingOrders = JSON.parse(existingOrdersStr);
+        } catch (e) {}
+      } else {
+        existingOrders = [...ORDERS];
+      }
+
+      const productNames = Array.from(selected).map((id: string) => {
+        const knownNames: Record<string, string> = {
+          cdlis: "CDLIS",
+          "county-criminal": "County Criminal Search",
+          "driving-history": "Driving History",
+          "education-verification": "Education Verification",
+          "employment-verification": "Employment Verification",
+          "labcorp-10-panel": "LabCorp - 10 Panel",
+        };
+        return knownNames[id] || id;
+      });
+      const verificationType = productNames.join(", ") || "Background Check";
+
+      const pendingOrder = {
+        searchId: "" + Math.floor(8000000 + Math.random() * 1000000),
+        reportId: "RP-" + Math.floor(20000 + Math.random() * 10000),
+        firstName,
+        lastName,
+        applicantName: fullName,
+        verificationType,
+        status: "PENDING" as const,
+        orderedBy: currentUser.firstName && currentUser.lastName
+          ? `${currentUser.firstName} ${currentUser.lastName}`.trim()
+          : currentUser.username,
+        orderDate: new Date().toISOString().substring(0, 10),
+        county: "Pending",
+        state: "Pending",
+        adhr: "Pending",
+        dob: "Pending",
+        applicantEmail: applicantEmail,
+        criminalRecordsFound: "Pending",
+        reference: reference || "",
+        inviteId: inviteId,
+      };
+      localStorage.setItem("evalright_orders", JSON.stringify([pendingOrder, ...existingOrders]));
+
       setStep(4);
     } catch (err: any) {
       console.error(err);
