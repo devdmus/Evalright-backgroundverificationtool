@@ -319,13 +319,13 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
 
     let selectedProducts: string[] = [];
     if (pkg === "Basic Screening") {
-      selectedProducts = ["adhr-trace", "county-criminal"];
+      selectedProducts = ["id-verification-aadhar", "criminal-record-check"];
     } else if (pkg === "Standard") {
-      selectedProducts = ["adhr-trace", "county-criminal", "global-watchlist", "driving-history"];
+      selectedProducts = ["id-verification-aadhar", "criminal-record-check", "global-database-check", "id-verification-dl"];
     } else if (pkg.toLowerCase().includes("federal")) {
-      selectedProducts = ["adhr-trace", "county-criminal", "federal-criminal"];
+      selectedProducts = ["id-verification-aadhar", "criminal-record-check", "nationwide-criminal-check"];
     } else {
-      selectedProducts = ["adhr-trace", "county-criminal", "global-watchlist"];
+      selectedProducts = ["id-verification-aadhar", "criminal-record-check", "global-database-check"];
     }
 
     let templateContent = "";
@@ -465,12 +465,41 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
 
       const productNames = selectedProducts.map((id: string) => {
         const knownNames: Record<string, string> = {
-          cdlis: "CDLIS",
-          "county-criminal": "County Criminal Search",
-          "driving-history": "Driving History",
-          "education-verification": "Education Verification",
+          "personal-details": "Personal Details",
+          "ssn-check": "SSN Check",
+          "id-verification-aadhar": "ID Verification (Aadhar)",
+          "id-verification-pan": "ID Verification (PAN)",
+          "id-verification-dl": "ID Verification (DL)",
+          "id-verification-voterid": "ID Verification (Voter ID)",
+          "id-verification-passport": "ID Verification (Passport)",
+          "uan-verification": "UAN Verification",
+          "indian-database-check": "Indian Database Check",
+          "global-database-check": "Global Database Check",
+          "ofac-check": "OFAC Check",
+          "criminal-record-check": "Criminal Record Check",
+          "police-verification-check": "Police Verification Check",
+          "nationwide-criminal-check": "Nationwide Criminal Check",
+          "national-sex-offender-registry-check": "National Sex Offender Registry Check",
+          "credit-check": "Credit Check",
+          "26as-check": "26AS Check",
+          "form-16-check": "Form 16 Check",
+          "itr-check": "ITR Check",
           "employment-verification": "Employment Verification",
-          "labcorp-10-panel": "LabCorp - 10 Panel",
+          "education-verification": "Education Verification",
+          "reference-check": "Reference Check",
+          "freelancing-check": "Freelancing Check",
+          "directorship-check": "Directorship Check",
+          "cv-check": "Cv Check",
+          "gap-analysis": "Gap Analysis",
+          "address-verification": "Address Verification",
+          "supplier-address": "Supplier Address",
+          "drug-test": "Drug test",
+          "medical-examination-test": "Medical Examination Test",
+          "social-media-check": "Social Media Check",
+          "right-to-work": "Right to Work",
+          "emergency": "Emergency",
+          "authorization": "Authorization",
+          "exit": "Exit",
         };
         return knownNames[id] || id;
       });

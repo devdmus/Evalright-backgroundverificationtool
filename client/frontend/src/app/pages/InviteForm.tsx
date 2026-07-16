@@ -134,7 +134,7 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
     const products = inviteData?.selectedProducts || [];
     
     // Check Driving History products
-    if (products.some((p: string) => p.includes("driving") || p.includes("cdlis"))) {
+    if (products.some((p: string) => p.toLowerCase().includes("driving") || p.toLowerCase().includes("cdlis") || p.toLowerCase().includes("dl"))) {
       if (!formData.licenseNumber.trim() || !formData.licenseState.trim()) {
         setErrorMsg("Please provide your Driver's License Number and Issuing State.");
         return;
@@ -142,13 +142,13 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
     }
 
     // Check Drug Test products
-    if (products.some((p: string) => p.includes("panel") || p.includes("drug"))) {
+    if (products.some((p: string) => p.toLowerCase().includes("panel") || p.toLowerCase().includes("drug"))) {
       if (!formData.clinicZip.trim()) {
         setErrorMsg("Please specify a Clinic Zip Code for your drug testing appointment.");
         return;
       }
       if (!formData.drugConsent) {
-        setErrorMsg("Please consent to the drug screening authorization.");
+        setErrorMsg("Please accept the Drug Testing consent to proceed.");
         return;
       }
     }
@@ -228,12 +228,41 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
         // Map selected products to friendly verification type string
         const productNames = products.map((id: string) => {
           const known: Record<string, string> = {
-            cdlis: "CDLIS",
-            "county-criminal": "County Criminal Search",
-            "driving-history": "Driving History",
-            "education-verification": "Education Verification",
+            "personal-details": "Personal Details",
+            "ssn-check": "SSN Check",
+            "id-verification-aadhar": "ID Verification (Aadhar)",
+            "id-verification-pan": "ID Verification (PAN)",
+            "id-verification-dl": "ID Verification (DL)",
+            "id-verification-voterid": "ID Verification (Voter ID)",
+            "id-verification-passport": "ID Verification (Passport)",
+            "uan-verification": "UAN Verification",
+            "indian-database-check": "Indian Database Check",
+            "global-database-check": "Global Database Check",
+            "ofac-check": "OFAC Check",
+            "criminal-record-check": "Criminal Record Check",
+            "police-verification-check": "Police Verification Check",
+            "nationwide-criminal-check": "Nationwide Criminal Check",
+            "national-sex-offender-registry-check": "National Sex Offender Registry Check",
+            "credit-check": "Credit Check",
+            "26as-check": "26AS Check",
+            "form-16-check": "Form 16 Check",
+            "itr-check": "ITR Check",
             "employment-verification": "Employment Verification",
-            "labcorp-10-panel": "LabCorp - 10 Panel Drug Screen",
+            "education-verification": "Education Verification",
+            "reference-check": "Reference Check",
+            "freelancing-check": "Freelancing Check",
+            "directorship-check": "Directorship Check",
+            "cv-check": "Cv Check",
+            "gap-analysis": "Gap Analysis",
+            "address-verification": "Address Verification",
+            "supplier-address": "Supplier Address",
+            "drug-test": "Drug test",
+            "medical-examination-test": "Medical Examination Test",
+            "social-media-check": "Social Media Check",
+            "right-to-work": "Right to Work",
+            "emergency": "Emergency",
+            "authorization": "Authorization",
+            "exit": "Exit",
           };
           return known[id] || id;
         });
@@ -358,10 +387,10 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
 
 
   const products = inviteData.selectedProducts || [];
-  const hasDriving = products.some((p: string) => p.includes("driving") || p.includes("cdlis"));
-  const hasDrug = products.some((p: string) => p.includes("panel") || p.includes("drug"));
-  const hasEducation = products.some((p: string) => p.includes("education"));
-  const hasEmployment = products.some((p: string) => p.includes("employment"));
+  const hasDriving = products.some((p: string) => p.toLowerCase().includes("driving") || p.toLowerCase().includes("cdlis") || p.toLowerCase().includes("dl"));
+  const hasDrug = products.some((p: string) => p.toLowerCase().includes("panel") || p.toLowerCase().includes("drug"));
+  const hasEducation = products.some((p: string) => p.toLowerCase().includes("education"));
+  const hasEmployment = products.some((p: string) => p.toLowerCase().includes("employment"));
 
   return (
     <div style={{ minHeight: "100vh", background: isDarkMode ? "#1A1C21" : "#F3F4F6", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
