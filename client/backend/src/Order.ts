@@ -4,6 +4,44 @@ import { pool } from './config/db';
 
 const router = Router();
 
+const SERVICE_NAMES: Record<string, string> = {
+  "personal-details": "Personal Details",
+  "ssn-check": "SSN Check",
+  "id-verification-aadhar": "ID Verification (Aadhar)",
+  "id-verification-pan": "ID Verification (PAN)",
+  "id-verification-dl": "ID Verification (DL)",
+  "id-verification-voterid": "ID Verification (Voter ID)",
+  "id-verification-passport": "ID Verification (Passport)",
+  "uan-verification": "UAN Verification",
+  "indian-database-check": "Indian Database Check",
+  "global-database-check": "Global Database Check",
+  "ofac-check": "OFAC Check",
+  "criminal-record-check": "Criminal Record Check",
+  "police-verification-check": "Police Verification Check",
+  "nationwide-criminal-check": "Nationwide Criminal Check",
+  "national-sex-offender-registry-check": "National Sex Offender Registry Check",
+  "credit-check": "Credit Check",
+  "26as-check": "26AS Check",
+  "form-16-check": "Form 16 Check",
+  "itr-check": "ITR Check",
+  "employment-verification": "Employment Verification",
+  "education-verification": "Education Verification",
+  "reference-check": "Reference Check",
+  "freelancing-check": "Freelancing Check",
+  "directorship-check": "Directorship Check",
+  "cv-check": "Cv Check",
+  "gap-analysis": "Gap Analysis",
+  "address-verification": "Address Verification",
+  "supplier-address": "Supplier Address",
+  "drug-test": "Drug test",
+  "medical-examination-test": "Medical Examination Test",
+  "social-media-check": "Social Media Check",
+  "right-to-work": "Right to Work",
+  "emergency": "Emergency",
+  "authorization": "Authorization",
+  "exit": "Exit"
+};
+
 // Encryption key for identity documents (mock key for development purposes)
 const ENCRYPTION_KEY = crypto.scryptSync('evalright_secure_key_123', 'salt', 32);
 const IV_LENGTH = 16;
@@ -365,15 +403,6 @@ router.post('/api/orders', async (req: any, res: any) => {
       [logId, orderedBy || null, companyId, orderId]
     );
 
-    // 9b. Create Email Log for candidate notification
-    const emailLogId = crypto.randomUUID();
-    const emailSubject = `Background Check Process Initiated - ${applicantDetails.firstName} ${applicantDetails.lastName}`;
-    await clientConnection.query(
-      `INSERT INTO email_logs (id, recipient, subject, provider, status, sent_at)
-       VALUES ($1, $2, $3, 'Power Automate', 'sent', NOW())`,
-      [emailLogId, applicantDetails.email, emailSubject]
-    );
-
     // 9c. Create corresponding completed invitation entry to generate inviteToken and inviteUrl
     const inviteToken = 'INV-' + Math.floor(100000 + Math.random() * 900000);
     const expiresAt = new Date();
@@ -398,11 +427,65 @@ router.post('/api/orders', async (req: any, res: any) => {
       ]
     );
 
+    const inviteUrl = `http://localhost:5173/#invite-form?id=${inviteToken}`;
+    const linkHtml = `<div style="text-align: center; margin: 30px 0;">
+      <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
+    </div>`;
+
+    const fullName = `${applicantDetails.firstName} ${applicantDetails.lastName}`.trim();
+    const emailSubject = 'Background Verification Process – Action Required';
+    const checksList = (serviceIds || [])
+      .map((id: string) => {
+        const name = SERVICE_NAMES[id] || id;
+        return `<li>${name}</li>`;
+      })
+      .join('');
+
+    const emailBody = `
+      <p>Hi ${fullName},</p>
+      <p style="margin-top: 16px;">Greetings from Evalright.</p>
+      <p style="margin-top: 16px;">As the next step of the hiring process, your Background Verification needs to be initiated. We, Demo Client, are partnered with Evalright (BGV Agency) for this activity, and they will connect with you via email/phone to complete the process. You are requested to coordinate with the Evalright team and share the required information and documents through the Evalright Background Verification Portal.</p>
+      <p style="margin-top: 16px;">Kindly follow the below steps to fill in the details and upload the documents:</p>
+      <ul style="margin-top: 8px; padding-left: 20px; list-style-type: disc;">
+        <li>Use the Portal URL, User ID, and Password mentioned at the bottom of this email to log in.</li>
+        <li>Complete all the required verification sections on the portal.</li>
+        <li>Please ensure that all required information is submitted within 48 hours of receiving this email.</li>
+      </ul>
+      <p style="margin-top: 16px;"><strong>Checks to be Completed</strong></p>
+      <ul style="margin-top: 8px; padding-left: 20px; list-style-type: disc;">
+        ${checksList}
+      </ul>
+      <p style="margin-top: 16px;"><strong>Important Notes</strong></p>
+      <ul style="margin-top: 8px; padding-left: 20px; list-style-type: disc;">
+        <li>After completing all the required details and uploading the requested documents, click the Final Submission button to receive an acknowledgment email.</li>
+        <li>Please ensure that each uploaded document is less than 2 MB in size.</li>
+      </ul>
+      <p style="margin-top: 16px;">If you have any questions while filling out the information or experience any issues with the portal, please contact the Evalright Support Team at:</p>
+      <p style="margin-top: 8px;"><a href="mailto:support@evalright.com" style="color: rgb(199, 0, 57);">support@evalright.com</a></p>
+      <p style="margin-top: 16px;">You may also contact us at:</p>
+      <p style="margin-top: 8px;">
+        +91 XXXXXXXXXX<br/>
+        <a href="mailto:testingit@gmail.com" style="color: rgb(199, 0, 57);">testingit@gmail.com</a>
+      </p>
+      <p style="margin-top: 16px;">To contact Demo Client, please write to:</p>
+      <p style="margin-top: 8px;">Fetesh – <a href="mailto:fatesh@yopmail.com" style="color: rgb(199, 0, 57);">fatesh@yopmail.com</a></p>
+      ${linkHtml}
+      <p style="margin-top: 24px;">Thanks & Regards,<br/>
+      <strong>Evalright Background Verification Team</strong></p>
+    `;
+
+    // 9b. Create Email Log for candidate notification
+    const emailLogId = crypto.randomUUID();
+    await clientConnection.query(
+      `INSERT INTO email_logs (id, recipient, subject, provider, status, sent_at)
+       VALUES ($1, $2, $3, 'Power Automate', 'sent', NOW())`,
+      [emailLogId, applicantDetails.email, emailSubject]
+    );
+
     await clientConnection.query('COMMIT');
 
     // 10. Trigger Power Automate flow asynchronously for Candidate Notification
     const webhookUrl = process.env.POWER_AUTOMATE_WEBHOOK_URL;
-    const inviteUrl = `http://localhost:5173/#invite-form?id=${inviteToken}`;
     console.log(`✉️ Sending candidate order confirmation webhook via Power Automate. Candidate: ${applicantDetails.email}, URL: ${inviteUrl}`);
     
     if (webhookUrl && webhookUrl.trim() !== '') {
@@ -414,7 +497,12 @@ router.post('/api/orders', async (req: any, res: any) => {
           candidateName: `${applicantDetails.firstName} ${applicantDetails.lastName}`,
           inviteUrl: inviteUrl,
           selectedProducts: serviceIds || [],
-          companyName: 'EvalRight Client Corp'
+          companyName: 'EvalRight Client Corp',
+          emailSubject: emailSubject,
+          emailBody: emailBody,
+          fromName: 'EvalRight Support',
+          replyTo: 'support@evalright.us',
+          copyTo: ''
         })
       }).then(response => {
         if (!response.ok) {
