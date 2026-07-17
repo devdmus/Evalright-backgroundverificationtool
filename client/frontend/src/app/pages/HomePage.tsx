@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Mail, Plus, ArrowRight, Eye } from "lucide-react";
 import { Footer } from "../components/Footer";
-import { ORDERS } from "../data/mockData";
+import { ORDERS, ALA_CARTE_SEARCHES } from "../data/mockData";
 
 // ── Static data ──────────────────────────────────────────────────────────────
 
@@ -312,7 +312,7 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
   ], [counts]);
 
   const handleSendInvitation = async () => {
-    if (!pkg || !template || !firstName.trim() || !lastName.trim() || !emailAddr.trim()) {
+    if (!pkg || !firstName.trim() || !lastName.trim() || !emailAddr.trim()) {
       triggerToast("Please fill in all required fields (marked with *).", true);
       return;
     }
@@ -353,26 +353,58 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
 
     if (!templateContent) {
       templateContent = `
-        <p>Hello [applicant_first_name],</p>
-        <p style="margin-top: 16px;">Below you will find a link to authorize and initiate a background check, which is required as a condition of employment.</p>
-        <p style="margin-top: 16px;">Please save this email and keep it handy as it contains instructions for entering information to process the background check.</p>
-        <p style="margin-top: 16px;">
-          <b>First, please click this link to read and print the <span style="color: rgb(199, 0, 57);">Fair Credit Reporting Act Summary of Rights</span>.</b>
+        <p>Hi [applicant_name],</p>
+        <p style="margin-top: 16px;">Greetings from Evalright.</p>
+        <p style="margin-top: 16px;">As the next step of the hiring process, your Background Verification needs to be initiated. We, Demo Client, are partnered with Evalright (BGV Agency) for this activity, and they will connect with you via email/phone to complete the process. You are requested to coordinate with the Evalright team and share the required information and documents through the Evalright Background Verification Portal.</p>
+        <p style="margin-top: 16px;">Kindly follow the below steps to fill in the details and upload the documents:</p>
+        <ul style="margin-top: 8px; padding-left: 20px; list-style-type: disc;">
+          <li>Use the Portal URL, User ID, and Password mentioned at the bottom of this email to log in.</li>
+          <li>Complete all the required verification sections on the portal.</li>
+          <li>Please ensure that all required information is submitted within 48 hours of receiving this email.</li>
+        </ul>
+        <p style="margin-top: 16px;"><strong>Checks to be Completed</strong></p>
+        <ul style="margin-top: 8px; padding-left: 20px; list-style-type: disc;">
+          [CHECKS_TO_BE_COMPLETED]
+        </ul>
+        <p style="margin-top: 16px;"><strong>Important Notes</strong></p>
+        <ul style="margin-top: 8px; padding-left: 20px; list-style-type: disc;">
+          <li>After completing all the required details and uploading the requested documents, click the Final Submission button to receive an acknowledgment email.</li>
+          <li>Please ensure that each uploaded document is less than 2 MB in size.</li>
+        </ul>
+        <p style="margin-top: 16px;">If you have any questions while filling out the information or experience any issues with the portal, please contact the Evalright Support Team at:</p>
+        <p style="margin-top: 8px;"><a href="mailto:support@evalright.com" style="color: rgb(199, 0, 57);">support@evalright.com</a></p>
+        <p style="margin-top: 16px;">You may also contact us at:</p>
+        <p style="margin-top: 8px;">
+          +91 XXXXXXXXXX<br/>
+          <a href="mailto:testingit@gmail.com" style="color: rgb(199, 0, 57);">testingit@gmail.com</a>
         </p>
+        <p style="margin-top: 16px;">To contact Demo Client, please write to:</p>
+        <p style="margin-top: 8px;">Fetesh – <a href="mailto:fatesh@yopmail.com" style="color: rgb(199, 0, 57);">fatesh@yopmail.com</a></p>
         <p style="margin-top: 24px;">
           [INVITATION_URL]
         </p>
+        <p style="margin-top: 24px;">Thanks & Regards,<br/>
+        <strong>Evalright Background Verification Team</strong></p>
       `;
     }
 
     const fullName = `${firstName} ${middleName ? middleName + " " : ""}${lastName}`.trim();
+    const searchMap = new Map((ALA_CARTE_SEARCHES || []).map((item: any) => [item.id, item]));
+    const checksList = (selectedProducts || [])
+      .map((id: string) => {
+        const item = searchMap.get(id);
+        return item ? `<li>${item.name}</li>` : `<li>${id}</li>`;
+      })
+      .join('');
+
     let formattedBody = templateContent
       .replaceAll("[applicant_first_name]", firstName)
       .replaceAll("[applicant_last_name]", lastName)
       .replaceAll("[applicant_name]", fullName)
       .replaceAll("[company_name]", "EvalRight Client Corp")
       .replaceAll("[FCRA_URL]", "https://www.evalright.com/fcra")
-      .replaceAll("[company_info]", "EvalRight Client Corp, 100 Main St, Chicago, IL");
+      .replaceAll("[company_info]", "EvalRight Client Corp, 100 Main St, Chicago, IL")
+      .replaceAll("[CHECKS_TO_BE_COMPLETED]", checksList);
 
     try {
       const response = await fetch("http://localhost:5000/api/invitations", {
@@ -389,7 +421,7 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
           selectedProducts: selectedProducts,
           orderedBy: currentUser?.id || "fallback-id",
           emailTemplateName: templateName,
-          emailSubject: templateSubject || `Background Check Invitation - ${fullName}`,
+          emailSubject: templateSubject || "Background Verification Process – Action Required",
           emailContent: templateContent,
           replyTo: templateReplyTo,
           fromName: templateFromName,
@@ -416,7 +448,7 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
 
       const newEmail = {
         id: Math.floor(4000000 + Math.random() * 1000000),
-        subject: templateSubject || `Background Check Invitation - ${fullName}`,
+        subject: templateSubject || "Background Verification Process – Action Required",
         recipient: emailAddr,
         dateSent: new Date().toISOString().replace('T', ' ').substring(0, 19),
         displayDateSent: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -728,7 +760,6 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
               />
               <FloatingField
                 label="Invitation Template"
-                required
                 isSelect
                 value={template}
                 onChange={(e: any) => setTemplate(e.target.value)}

@@ -179,7 +179,50 @@ const STATES_LIST = [
   "Puducherry"
 ];
 
-const GENERATION_LIST = ["None", "Jr", "Sr", "II", "III", "IV"];
+
+
+const SERVICE_PRICES: Record<string, number> = {
+  "personal-details": 300,
+  "ssn-check": 300,
+  "id-verification-aadhar": 300,
+  "id-verification-pan": 300,
+  "id-verification-dl": 300,
+  "id-verification-voterid": 300,
+  "id-verification-passport": 300,
+  "uan-verification": 350,
+  "indian-database-check": 600,
+  "global-database-check": 600,
+  "ofac-check": 600,
+  "criminal-record-check": 600,
+  "police-verification-check": 700,
+  "nationwide-criminal-check": 600,
+  "national-sex-offender-registry-check": 600,
+  "credit-check": 700,
+  "26as-check": 350,
+  "form-16-check": 350,
+  "itr-check": 350,
+  "employment-verification": 600,
+  "education-verification": 900,
+  "reference-check": 450,
+  "freelancing-check": 600,
+  "directorship-check": 750,
+  "cv-check": 200,
+  "gap-analysis": 200,
+  "address-verification": 650,
+  "supplier-address": 650,
+  "drug-test": 2500,
+  "medical-examination-test": 600,
+  "social-media-check": 675,
+  "right-to-work": 550,
+  "emergency": 200,
+  "authorization": 200,
+  "exit": 600,
+  "cdlis": 300,
+  "driving-history": 300,
+  "labcorp-10-panel": 2500,
+  "adhr-trace": 300,
+  "adhr-validation": 300
+};
 
 const allSearchItems = [
   ...COL1_CATEGORIES.flatMap((cat) => cat.items),
@@ -236,7 +279,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
   const [middleName, setMiddleName] = useState("");
   const [middleNameDisabled, setMiddleNameDisabled] = useState(false);
   const [lastName, setLastName] = useState("");
-  const [generation, setGeneration] = useState("None");
+
   const [dob, setDob] = useState("");
   const [showMinorModal, setShowMinorModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -291,7 +334,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
     setMiddleName("");
     setMiddleNameDisabled(false);
     setLastName("");
-    setGeneration("None");
+
     setDob("");
     setAdhr("");
     setStreetAddress("");
@@ -358,7 +401,6 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
   async function handleSendInvitation() {
     const isMiddleNameValid = middleNameDisabled || middleName.trim() !== "";
     if (
-      invitationTemplate === "Select Template" ||
       !firstName.trim() ||
       !isMiddleNameValid ||
       !lastName.trim() ||
@@ -394,26 +436,57 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
 
     if (!templateContent) {
       templateContent = `
-        <p>Hello [applicant_first_name],</p>
-        <p style="margin-top: 16px;">Below you will find a link to authorize and initiate a background check, which is required as a condition of employment.</p>
-        <p style="margin-top: 16px;">Please save this email and keep it handy as it contains instructions for entering information to process the background check.</p>
-        <p style="margin-top: 16px;">
-          <b>First, please click this link to read and print the <span style="color: rgb(199, 0, 57);">Fair Credit Reporting Act Summary of Rights</span>.</b>
+        <p>Hi [applicant_name],</p>
+        <p style="margin-top: 16px;">Greetings from Evalright.</p>
+        <p style="margin-top: 16px;">As the next step of the hiring process, your Background Verification needs to be initiated. We, Demo Client, are partnered with Evalright (BGV Agency) for this activity, and they will connect with you via email/phone to complete the process. You are requested to coordinate with the Evalright team and share the required information and documents through the Evalright Background Verification Portal.</p>
+        <p style="margin-top: 16px;">Kindly follow the below steps to fill in the details and upload the documents:</p>
+        <ul style="margin-top: 8px; padding-left: 20px; list-style-type: disc;">
+          <li>Use the Portal URL, User ID, and Password mentioned at the bottom of this email to log in.</li>
+          <li>Complete all the required verification sections on the portal.</li>
+          <li>Please ensure that all required information is submitted within 48 hours of receiving this email.</li>
+        </ul>
+        <p style="margin-top: 16px;"><strong>Checks to be Completed</strong></p>
+        <ul style="margin-top: 8px; padding-left: 20px; list-style-type: disc;">
+          [CHECKS_TO_BE_COMPLETED]
+        </ul>
+        <p style="margin-top: 16px;"><strong>Important Notes</strong></p>
+        <ul style="margin-top: 8px; padding-left: 20px; list-style-type: disc;">
+          <li>After completing all the required details and uploading the requested documents, click the Final Submission button to receive an acknowledgment email.</li>
+          <li>Please ensure that each uploaded document is less than 2 MB in size.</li>
+        </ul>
+        <p style="margin-top: 16px;">If you have any questions while filling out the information or experience any issues with the portal, please contact the Evalright Support Team at:</p>
+        <p style="margin-top: 8px;"><a href="mailto:support@evalright.com" style="color: rgb(199, 0, 57);">support@evalright.com</a></p>
+        <p style="margin-top: 16px;">You may also contact us at:</p>
+        <p style="margin-top: 8px;">
+          +91 XXXXXXXXXX<br/>
+          <a href="mailto:testingit@gmail.com" style="color: rgb(199, 0, 57);">testingit@gmail.com</a>
         </p>
+        <p style="margin-top: 16px;">To contact Demo Client, please write to:</p>
+        <p style="margin-top: 8px;">Fetesh – <a href="mailto:fatesh@yopmail.com" style="color: rgb(199, 0, 57);">fatesh@yopmail.com</a></p>
         <p style="margin-top: 24px;">
           [INVITATION_URL]
         </p>
+        <p style="margin-top: 24px;">Thanks & Regards,<br/>
+        <strong>Evalright Background Verification Team</strong></p>
       `;
     }
 
     const fullName = `${firstName} ${middleNameDisabled ? "" : middleName + " "}${lastName}`.trim();
+    const checksList = Array.from(selected)
+      .map(id => {
+        const item = itemMap.get(id);
+        return item ? `<li>${item.name}</li>` : `<li>${id}</li>`;
+      })
+      .join('');
+
     let formattedBody = templateContent
       .replaceAll("[applicant_first_name]", firstName)
       .replaceAll("[applicant_last_name]", lastName)
       .replaceAll("[applicant_name]", fullName)
       .replaceAll("[company_name]", "EvalRight Client Corp")
       .replaceAll("[FCRA_URL]", "https://www.evalright.com/fcra")
-      .replaceAll("[company_info]", "EvalRight Client Corp, 100 Main St, Chicago, IL");
+      .replaceAll("[company_info]", "EvalRight Client Corp, 100 Main St, Chicago, IL")
+      .replaceAll("[CHECKS_TO_BE_COMPLETED]", checksList);
 
     try {
       const response = await fetch("http://localhost:5000/api/invitations", {
@@ -430,7 +503,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
           selectedProducts: Array.from(selected),
           orderedBy: currentUser.id,
           emailTemplateName: templateName,
-          emailSubject: templateSubject || `Background Check Invitation - ${fullName}`,
+          emailSubject: templateSubject || "Background Verification Process – Action Required",
           emailContent: templateContent,
           replyTo: templateReplyTo,
           fromName: templateFromName,
@@ -457,7 +530,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
 
       const newEmail = {
         id: Math.floor(4000000 + Math.random() * 1000000),
-        subject: `Background Check Invitation - ${fullName}`,
+        subject: templateSubject || "Background Verification Process – Action Required",
         recipient: applicantEmail,
         dateSent: new Date().toISOString().replace('T', ' ').substring(0, 19),
         lastUpdate: "N/A",
@@ -632,7 +705,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                       setMiddleName("");
                       setMiddleNameDisabled(false);
                       setLastName("");
-                      setGeneration("None");
+
                       setDob("");
                       setAdhr("");
                       setStreetAddress("");
@@ -673,7 +746,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                         setMiddleName("");
                         setMiddleNameDisabled(false);
                         setLastName("");
-                        setGeneration("None");
+
                         setDob("");
                         setAdhr("");
                         setStreetAddress("");
@@ -1233,7 +1306,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1.2fr 1.3fr 1.2fr 1.2fr",
+                  gridTemplateColumns: "1.2fr 1.3fr 1.2fr",
                   gap: "16px",
                   alignItems: "center",
                 }}
@@ -1274,12 +1347,6 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   </label>
                 </div>
                 <FloatingInput label="Last Name" value={lastName} onChange={setLastName} required />
-                <FloatingSelect
-                  label="Generation"
-                  value={generation}
-                  options={GENERATION_LIST}
-                  onChange={setGeneration}
-                />
               </div>
 
               {/* Row 2 */}
@@ -1457,12 +1524,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     value={invitationTemplate}
                     options={availableTemplates}
                     onChange={setInvitationTemplate}
-                    required
                   />
                 </div>
 
                 {/* Name Inputs Row */}
-                <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1.3fr 1.2fr 1.2fr", gap: "16px", alignItems: "center", marginBottom: "20px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1.3fr 1.2fr", gap: "16px", alignItems: "center", marginBottom: "20px" }}>
                   <FloatingInput label="First Name" value={firstName} onChange={setFirstName} required />
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <FloatingInput
@@ -1499,12 +1565,6 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     </label>
                   </div>
                   <FloatingInput label="Last Name" value={lastName} onChange={setLastName} required />
-                  <FloatingSelect
-                    label="Generation"
-                    value={generation}
-                    options={GENERATION_LIST}
-                    onChange={setGeneration}
-                  />
                 </div>
 
                 {/* Email & Reference Row */}
@@ -1686,57 +1746,66 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     </tr>
                   </thead>
                   <tbody>
-                    {Array.from(selected).map((itemId) => {
-                      const item = itemMap.get(itemId);
-                      const productName = item ? item.name : itemId;
-                      const editLabel = itemId === "adhr-trace-address" ? "Show ADHR Report" : "Show Report";
-                      
+                    {(() => {
+                      let orderSubtotal = 0;
                       return (
-                        <tr key={itemId} style={{ borderBottom: "1px solid #E5E7EB" }}>
-                          <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", fontWeight: 500 }}>{productName}</td>
-                          <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151" }}></td>
-                          <td style={{ padding: "16px 20px", fontSize: "14px" }}>
-                            <span 
-                              style={{ color: "#2563EB", cursor: "pointer", fontWeight: 500 }}
-                              onClick={() => setStep(1)}
-                            >
-                              {editLabel}
-                            </span>
-                          </td>
-                          <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 500 }}>₹5.00</td>
-                          <td style={{ padding: "16px 20px", textAlign: "right" }}>
-                            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "18px", height: "18px", background: "#C70039", borderRadius: "4px", color: "#FFFFFF", fontSize: "11px", fontWeight: "bold" }}>
-                              ✓
-                            </div>
-                          </td>
-                        </tr>
+                        <>
+                          {Array.from(selected).map((itemId) => {
+                            const item = itemMap.get(itemId);
+                            const productName = item ? item.name : itemId;
+                            const editLabel = itemId === "adhr-trace-address" ? "Show ADHR Report" : "Show Report";
+                            const price = SERVICE_PRICES[itemId] || 200;
+                            orderSubtotal += price;
+                            
+                            return (
+                              <tr key={itemId} style={{ borderBottom: "1px solid #E5E7EB" }}>
+                                <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", fontWeight: 500 }}>{productName}</td>
+                                <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151" }}></td>
+                                <td style={{ padding: "16px 20px", fontSize: "14px" }}>
+                                  <span 
+                                    style={{ color: "#2563EB", cursor: "pointer", fontWeight: 500 }}
+                                    onClick={() => setStep(1)}
+                                  >
+                                    {editLabel}
+                                  </span>
+                                </td>
+                                <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 500 }}>₹{price.toFixed(2)}</td>
+                                <td style={{ padding: "16px 20px", textAlign: "right" }}>
+                                  <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "18px", height: "18px", background: "#C70039", borderRadius: "4px", color: "#FFFFFF", fontSize: "11px", fontWeight: "bold" }}>
+                                    ✓
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          
+                          {rushOrder && (
+                            <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                              <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", fontWeight: 500 }}>Rush Order Fee</td>
+                              <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151" }}></td>
+                              <td style={{ padding: "16px 20px", fontSize: "14px" }}></td>
+                              <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 500 }}>₹25.00</td>
+                              <td style={{ padding: "16px 20px", textAlign: "right" }}>
+                                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "18px", height: "18px", background: "#C70039", borderRadius: "4px", color: "#FFFFFF", fontSize: "11px", fontWeight: "bold" }}>
+                                  ✓
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                          
+                          {/* Total Row */}
+                          <tr style={{ background: "#F9FAFB" }}>
+                            <td style={{ padding: "16px 20px", fontSize: "15px", color: "#1F2937", fontWeight: "bold" }}>Total</td>
+                            <td style={{ padding: "16px 20px" }}></td>
+                            <td style={{ padding: "16px 20px" }}></td>
+                            <td style={{ padding: "16px 20px", fontSize: "15px", color: "#1F2937", textAlign: "right", fontWeight: "bold" }}>
+                              ₹{(orderSubtotal + (rushOrder ? 25 : 0)).toFixed(2)}
+                            </td>
+                            <td style={{ padding: "16px 20px" }}></td>
+                          </tr>
+                        </>
                       );
-                    })}
-                    
-                    {rushOrder && (
-                      <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
-                        <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", fontWeight: 500 }}>Rush Order Fee</td>
-                        <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151" }}></td>
-                        <td style={{ padding: "16px 20px", fontSize: "14px" }}></td>
-                        <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 500 }}>₹25.00</td>
-                        <td style={{ padding: "16px 20px", textAlign: "right" }}>
-                          <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "18px", height: "18px", background: "#C70039", borderRadius: "4px", color: "#FFFFFF", fontSize: "11px", fontWeight: "bold" }}>
-                            ✓
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                    
-                    {/* Total Row */}
-                    <tr style={{ background: "#F9FAFB" }}>
-                      <td style={{ padding: "16px 20px", fontSize: "15px", color: "#1F2937", fontWeight: "bold" }}>Total</td>
-                      <td style={{ padding: "16px 20px" }}></td>
-                      <td style={{ padding: "16px 20px" }}></td>
-                      <td style={{ padding: "16px 20px", fontSize: "15px", color: "#1F2937", textAlign: "right", fontWeight: "bold" }}>
-                        ₹{(selected.size * 5 + (rushOrder ? 25 : 0)).toFixed(2)}
-                      </td>
-                      <td style={{ padding: "16px 20px" }}></td>
-                    </tr>
+                    })()}
                   </tbody>
                 </table>
               </div>
