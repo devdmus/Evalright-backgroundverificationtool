@@ -105,6 +105,9 @@ async function initializeSchema() {
       ALTER TABLE orders ADD COLUMN IF NOT EXISTS discount_amount NUMERIC(12,2) DEFAULT 0.00;
       ALTER TABLE orders ADD COLUMN IF NOT EXISTS tax_amount NUMERIC(12,2) DEFAULT 0.00;
       ALTER TABLE orders ADD COLUMN IF NOT EXISTS total_amount NUMERIC(12,2) DEFAULT 0.00;
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS razorpay_order_id VARCHAR(255);
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS razorpay_payment_id VARCHAR(255);
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS razorpay_signature VARCHAR(255);
     `);
 
     // Ensure orders currency defaults to INR (Indian Rupees)
@@ -142,7 +145,11 @@ router.post('/api/orders', async (req: any, res: any) => {
     serviceIds, // array of UUIDs
     priority,
     notes,
-    idempotencyKey
+    idempotencyKey,
+    // Payment details
+    razorpayPaymentId,
+    razorpayOrderId,
+    razorpaySignature
   } = req.body;
 
   // Derive company from the authenticated user — never trust client-supplied company_id
@@ -241,9 +248,25 @@ router.post('/api/orders', async (req: any, res: any) => {
     }
   }
 
-  const taxRate = 0.08; // 8% mock tax
+  // Verify payment details
+  if (!razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
+    return res.status(400).json({ error: 'Missing payment details. Order must be paid before submission.' });
+  }
+
+  const keySecret = process.env.RAZORPAY_KEY_SECRET || 'nFCtPM9v79Vh4fIgyrXICBeJ';
+  const shasum = crypto.createHmac('sha256', keySecret);
+  shasum.update(razorpayOrderId + '|' + razorpayPaymentId);
+  const digest = shasum.digest('hex');
+
+  if (digest !== razorpaySignature) {
+    return res.status(400).json({ error: 'Payment signature verification failed.' });
+  }
+
+  const rushFee = (priority === 'rush') ? 25.00 : 0.00;
+  const taxRate = 0.00; // Set tax rate to 0 to align database totals with what is actually charged on the frontend
   const taxAmount = subtotal * taxRate;
-  const totalAmount = subtotal + taxAmount;
+  const totalAmount = subtotal + rushFee + taxAmount;
+
 
   const clientConnection = await pool.connect();
   try {
@@ -339,8 +362,8 @@ router.post('/api/orders', async (req: any, res: any) => {
       }
     }
     await clientConnection.query(
-      `INSERT INTO orders (id, company_id, branch_id, applicant_id, package_id, ordered_by, order_number, idempotency_key, status, priority, currency, subtotal, discount_amount, tax_amount, total_amount, notes, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', $9, 'INR', $10, 0.00, $11, $12, $13, NOW(), NOW())`,
+      `INSERT INTO orders (id, company_id, branch_id, applicant_id, package_id, ordered_by, order_number, idempotency_key, status, priority, currency, subtotal, discount_amount, tax_amount, total_amount, notes, razorpay_order_id, razorpay_payment_id, razorpay_signature, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', $9, 'INR', $10, 0.00, $11, $12, $13, $14, $15, $16, NOW(), NOW())`,
       [
         orderId,
         companyId,
@@ -354,7 +377,10 @@ router.post('/api/orders', async (req: any, res: any) => {
         subtotal,
         taxAmount,
         totalAmount,
-        notes || null
+        notes || null,
+        razorpayOrderId,
+        razorpayPaymentId,
+        razorpaySignature
       ]
     );
 
@@ -533,6 +559,48 @@ router.post('/api/orders', async (req: any, res: any) => {
     res.status(500).json({ error: err.message });
   } finally {
     clientConnection.release();
+  }
+});
+
+
+router.post('/api/payments/create-order', async (req: any, res: any) => {
+  const { amount } = req.body;
+  if (!amount || isNaN(amount)) {
+    return res.status(400).json({ error: 'Invalid or missing amount' });
+  }
+
+  const keyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_TG2yfIRWihUoMx';
+  const keySecret = process.env.RAZORPAY_KEY_SECRET || 'nFCtPM9v79Vh4fIgyrXICBeJ';
+
+  const authString = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+  try {
+    const amountInPaise = Math.round(amount * 100);
+    const response = await fetch('https://api.razorpay.com/v1/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${authString}`
+      },
+      body: JSON.stringify({
+        amount: amountInPaise,
+        currency: 'INR',
+        receipt: 'rcpt_' + crypto.randomBytes(4).toString('hex')
+      })
+    });
+
+    const data: any = await response.json();
+    if (!response.ok) {
+      return res.status(response.status).json({ error: data.error || 'Razorpay order creation failed' });
+    }
+
+    res.json({
+      success: true,
+      key: keyId,
+      order: data
+    });
+  } catch (error: any) {
+    console.error('Error creating Razorpay order:', error);
+    res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 });
 
