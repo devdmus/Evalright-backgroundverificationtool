@@ -1,0 +1,83 @@
+EVALRIGHT - CLIENT LOGIN 2-STEP OTP AUTHENTICATION FLOW
+
+This document explains the architecture, database changes, and API workflows implemented to support the two-step verification (OTP) layer for client user logins in EvalRight.
+
+================================================================================
+1. FLOW OVERVIEW
+================================================================================
+The client authentication now consists of two distinct stages:
+
+STAGE 1: Username & Password Verification
+1. The client enters their username and password in the login page.
+2. The frontend sends a POST request to "/api/auth/login" with the credentials.
+3. The backend validates the password hash:
+   - If incorrect, returns a credential error.
+   - If correct, instead of logging in directly, the backend:
+     a. Generates a secure, 6-digit numeric OTP (e.g., 634005).
+     b. Inserts the OTP into the "user_otps" table with a 5-minute expiration window.
+     c. Triggers the Power Automate webhook asynchronously, passing the recipient's name, email, and the raw OTP.
+     d. Responds with "otpRequired: true", the user ID, and their email.
+4. The login screen automatically transitions to the "Two-Step Verification" screen.
+
+STAGE 2: OTP Verification
+1. The user retrieves the 6-digit OTP code sent to their registered email.
+2. The user enters the code on the verification screen.
+3. The frontend sends a POST request to "/api/auth/verify-otp" with the user ID and OTP.
+4. The backend:
+   - Queries the latest active, non-expired, non-verified OTP for that user.
+   - Compares the codes.
+   - Marks the database OTP record as verified (is_verified = true).
+   - Retrieves and returns the complete authenticated user metadata.
+5. The frontend logs the user in and redirects them to the home page.
+
+================================================================================
+2. FILES MODIFIED & CREATED
+================================================================================
+1. [MODIFY] client/backend/src/index.ts
+   - Added automatic database schema migration on startup to verify and create the "user_otps" table and indexes.
+   - Updated POST "/api/auth/login" to handle OTP generation and Power Automate webhook dispatch.
+   - Added POST "/api/auth/verify-otp" to validate OTP inputs and complete login.
+   - Added POST "/api/auth/resend-otp" to regenerate and resend OTP.
+
+2. [MODIFY] client/backend/.env
+   - Decoupled Power Automate integrations by adding "POWER_AUTOMATE_OTP_WEBHOOK_URL" specifically for the OTP flow, leaving the candidate invitation webhook ("POWER_AUTOMATE_WEBHOOK_URL") intact.
+
+3. [MODIFY] client/frontend/src/app/pages/LoginPage.tsx
+   - Upgraded frontend to transition state when the API returns "otpRequired".
+   - Implemented a premium, focus-shifting 6-digit OTP entry field with auto-advance, backspace-rewind, and paste-to-fill features.
+   - Added resend functionality equipped with a 60-second cooldown countdown timer.
+   - Integrated "Back to Login" navigation.
+
+================================================================================
+3. DATABASE SCHEMA
+================================================================================
+The new "user_otps" table is configured as follows:
+- id: UUID (Primary Key)
+- user_id: UUID (Foreign Key referencing users.id ON DELETE CASCADE)
+- otp_code: VARCHAR(6) (The numeric verification code)
+- created_at: TIMESTAMP WITH TIME ZONE (Defaults to NOW())
+- expires_at: TIMESTAMP WITH TIME ZONE (Validity deadline)
+- is_verified: BOOLEAN (Defaults to FALSE)
+
+An index is placed on "user_id" (idx_user_otps_user_id) for high performance.
+
+================================================================================
+4. POWER AUTOMATE WEBHOOK PAYLOAD
+================================================================================
+To simplify design and give MS Flow complete control over email formatting, the backend sends raw payload attributes:
+
+URL Env: POWER_AUTOMATE_OTP_WEBHOOK_URL
+Payload:
+{
+  "clientName": "Demo User",
+  "clientEmail": "Demo@gmail.com",
+  "otp": "634005"
+}
+
+================================================================================
+5. VERIFICATION & DB CLEANUP
+================================================================================
+- Code was successfully checked for TypeScript compilation errors (vite and tsc builds complete with 100% success).
+- Full integration tests successfully verified login requests, DB insertions, incorrect code rejection, correct code verification, and resend.
+- Database can be cleared of temporary test OTP records by executing:
+  DELETE FROM user_otps;

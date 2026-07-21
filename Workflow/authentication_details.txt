@@ -1,0 +1,108 @@
+================================================================================
+EVALRIGHT AUTHENTICATION SYSTEM DOCUMENTATION
+================================================================================
+
+This document describes how the authentication flow operates in the EvalRight
+Background Verification Tool and details the developers who implemented it.
+
+--------------------------------------------------------------------------------
+1. IMPLEMENTATION HISTORY & CONTRIBUTORS
+--------------------------------------------------------------------------------
+
+The authentication system was built in two main phases:
+
+* PHASE 1: Mock Front-end Login Screen
+  - Date: June 17, 2026 (Commit: 1d4c458)
+  - Implemented by: Sandeep (sandeepDigitMarketUs / jvvsandeep@asofttek.com)
+  - Details: Created the initial react-based LoginPage component and local login
+    state on the frontend (client/frontend/src/app/pages/LoginPage.tsx).
+
+* PHASE 2: Production OTP Authentication & Backend Integration
+  - Date: July 16, 2026 (Commit: 277e1f9)
+  - Implemented by: Dinesh (DineshReddyAsoft / tdinesh@asofttek.com)
+  - Details:
+    - Designed and implemented the backend client login API routes, database OTP
+      schemas, and Power Automate integration for automated email dispatch of OTPs.
+    - Updated the LoginPage to handle the OTP input boxes, verification logic,
+      resend mechanisms, and cooldown timers.
+    - Configured the API routers to verify request authentication headers.
+
+--------------------------------------------------------------------------------
+2. HOW AUTHENTICATION WORKS (STEP-BY-STEP FLOW)
+--------------------------------------------------------------------------------
+
+The application employs a 2-Factor Authentication (2FA) flow utilizing password
+verification followed by a One-Time Password (OTP) verification:
+
+Step 1: Credentials Submission (Frontend)
+- The user enters their username and password at the LoginPage component.
+- The frontend triggers a POST request to:
+  POST http://localhost:5000/api/auth/login
+  Body: { "username": "<username>", "password": "<password>" }
+
+Step 2: Password Verification (Backend)
+- The backend queries the Postgres database for the user:
+  SELECT id, password_hash, is_active, ... FROM users WHERE username = $1
+- The backend compares the SHA-256 hash of the submitted password with the stored
+  hash.
+- If verified, the backend generates a random 6-digit numeric OTP code.
+- It stores this code in the database table `user_otps` with an expiration window
+  set to 5 minutes from generation.
+
+Step 3: OTP Delivery (Power Automate Integration)
+- The backend checks if the `POWER_AUTOMATE_OTP_WEBHOOK_URL` environment variable
+  is configured.
+- If present, it executes a POST request containing:
+  - clientName (Full Name)
+  - clientEmail (User's registered email)
+  - otp (The generated 6-digit code)
+- Power Automate then triggers an email flow to deliver the code to the user.
+- The backend returns `{ success: true, otpRequired: true, userId, email, message }`.
+
+Step 4: OTP Verification (Frontend & Backend)
+- On receiving the `otpRequired` response, the frontend renders a 6-digit OTP
+  numeric text verification field with auto-focusing inputs and a 60-second
+  resend cooldown timer.
+- Once submitted, the frontend calls:
+  POST http://localhost:5000/api/auth/verify-otp
+  Body: { "userId": "<user_uuid>", "otp": "<6_digit_otp>" }
+- The backend queries the database for the latest unverified, non-expired OTP
+  for the given user ID:
+  SELECT id, otp_code, expires_at FROM user_otps WHERE user_id = $1 AND is_verified = FALSE AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1
+- If the code matches, it updates the record (`is_verified = TRUE`) and returns the
+  user's metadata: id, company_id, branch_id, username, email, firstName, lastName.
+
+Step 5: Session & API Authorization
+- The frontend updates React states (`currentUser` and `isAuthenticated = true`)
+  to log the user in.
+- All subsequent API requests to the client backend (e.g. creating orders or
+  invitations) set the following header:
+  Headers: { "x-user-id": "<current_user_id>" }
+- Backend controllers verify `req.headers['x-user-id']` by querying the database
+  to fetch the user's active status and retrieve their authoritative `company_id`
+  and `branch_id`.
+
+--------------------------------------------------------------------------------
+3. DATABASE SCHEMA REFERENCE
+--------------------------------------------------------------------------------
+
+The database table to track OTP states is initialized dynamically upon server startup:
+
+CREATE TABLE IF NOT EXISTS user_otps (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  otp_code VARCHAR(6) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  is_verified BOOLEAN DEFAULT FALSE NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_otps_user_id ON user_otps(user_id);
+
+--------------------------------------------------------------------------------
+4. ADMIN PORTAL NOTE
+--------------------------------------------------------------------------------
+Currently, the Admin Portal (admin/frontend and admin/backend) does not have active
+session authentication. It uses a default administrative profile ("Raghu Adaveni")
+and endpoints run without verify-token middleware checks.
+================================================================================

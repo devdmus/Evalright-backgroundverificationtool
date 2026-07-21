@@ -1,0 +1,100 @@
+EVALRIGHT - ADMIN CLIENT CREATION PROCESS
+
+This document outlines the workflow, API architecture, and database updates required to implement the "Add New Client" feature from the Evalright Admin Portal.
+
+================================================================================
+1. FRONTEND INTEGRATION FLOW
+================================================================================
+The page "admin/frontend/src/app/pages/AddNewClient.tsx" manages the form state inside React but requires submission integration:
+
+1. SUBMIT HANDLER: Connect the "Add Client" button to a submission handler function.
+2. API CALL: Perform a POST request to the admin backend endpoint:
+   - Endpoint: http://localhost:5001/api/clients
+   - Method: POST
+   - Headers: { "Content-Type": "application/json" }
+   - Body: JSON string containing the form object and the sendAccountMessage boolean flag.
+3. FEEDBACK: Manage loading states, and display success or error notifications to the administrator based on the API response.
+
+================================================================================
+2. BACKEND API ROUTE DESIGN
+================================================================================
+A new Express route handler is required in the admin backend ("admin/backend/src/index.ts"):
+- Route: POST /api/clients
+- Validation: Verify that the incoming request payload contains all required attributes (e.g., companyName, email, username, password, firstName).
+- Transaction Safety: Execute all queries within a SQL TRANSACTION (BEGIN ... COMMIT) so that if any step fails, the database rolls back to keep data integrity.
+
+================================================================================
+3. DATABASE TRANSACTION & TABLE UPDATES
+================================================================================
+The database transaction executes the following inserts sequentially:
+
+STEP 1: Create the Company Record
+* Table: companies
+* Fields:
+  - id: Generate a new UUID
+  - name: form.companyName
+  - legal_name: form.companyName
+  - status: form.status.toLowerCase() (e.g., 'active')
+  - created_at / updated_at: CURRENT_TIMESTAMP
+* Action: Retrieve the generated company_id.
+
+STEP 2: Create the Default Company Branch (Headquarters)
+* Table: branches
+* Fields:
+  - id: Generate a new UUID
+  - company_id: company_id from Step 1
+  - name: 'Headquarters'
+  - address: Concatenated string: "${form.address1}, ${form.address2 || ''}, ${form.city}, ${form.state} ${form.postcode}"
+  - status: 'active'
+* Action: Retrieve the generated branch_id.
+
+STEP 3: Create the Primary User Account
+* Table: users
+* Fields:
+  - id: Generate a new UUID
+  - company_id: company_id from Step 1
+  - branch_id: branch_id from Step 2
+  - username: form.username
+  - email: form.email
+  - password_hash: Salted hash of form.password (using bcrypt or similar)
+  - first_name: form.firstName
+  - last_name: form.lastName
+  - phone: form.phoneNumber
+  - is_active: true
+  - email_verified: false
+* Action: Retrieve the generated user_id.
+
+STEP 4: Assign Role in user_roles
+* Table: user_roles
+* Action:
+  1. Lookup the ID of the client manager/admin role (e.g., 'client_admin') from the 'roles' table.
+  2. Insert a record linking user_id to role_id.
+
+STEP 5: Save Custom settings
+* Table: company_settings
+* Fields:
+  - company_id: company_id from Step 1
+  - dont_apply_late_fees: form.dontApplyLateFees
+  - dont_send_overdue_emails: form.dontSendOverdueEmails
+  - dont_apply_tax: form.dontApplyTax
+  - client_group: form.clientGroup
+  - credit_balance: form.creditBalance || 0
+  - admin_notes: form.adminNotes
+
+STEP 6: Log the Administrative Action
+* Table: activity_logs
+* Fields:
+  - user_id: ID of the admin user executing the request
+  - company_id: Client's company_id
+  - action: 'create_client'
+  - module: 'clients'
+
+================================================================================
+4. ONBOARDING & WELCOME MESSAGE FLOW
+================================================================================
+If "sendAccountMessage" is checked:
+1. Trigger a background task to compose a welcome email.
+2. Send the welcome email to form.email containing their login credentials (username) and instructions on how to access the portal.
+3. Log the outbound email:
+   - Table: email_logs
+   - Fields: recipient, subject, status, sent_at

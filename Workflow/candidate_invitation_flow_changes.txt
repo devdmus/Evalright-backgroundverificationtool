@@ -1,0 +1,67 @@
+EVALRIGHT - CANDIDATE INVITATION & POWER AUTOMATE INTEGRATION FLOW
+
+This document summarizes the changes made to the EvalRight BGV platform to support triggering candidate email invitations via Power Automate, presenting dynamic questionnaires to candidates, and securely storing their details in the database upon submission.
+
+================================================================================
+1. FILES CREATED & MODIFIED
+================================================================================
+
+1. [NEW] client/backend/src/Invitation.ts
+   - Implements Express API router routes for candidate invitations.
+   - Automatically migrates columns for the "invitations" table on startup.
+   - Contains:
+     - POST /api/invitations (Initiates invitation, saves it in DB, logs email log, and calls Power Automate flow).
+     - GET /api/invitations/:token (Retrieves invitation details to customize the candidate form dynamically).
+     - POST /api/invitations/:token/submit (Submits candidate details in a SQL transaction).
+
+2. [MODIFY] client/backend/src/index.ts
+   - Imports and registers the new Invitation router (invitationRouter) inside the main Express application middleware.
+
+3. [MODIFY] client/backend/.env
+   - Added POWER_AUTOMATE_WEBHOOK_URL environment variable configuration placeholder.
+
+4. [MODIFY] client/frontend/src/app/App.tsx
+   - Added hash-based routing detection for URL format "#invite-form?id=INV-XXXXXX".
+   - When detected, sets active invite ID and forwards directly to InviteForm, bypassing client authentication logic.
+
+5. [MODIFY] client/frontend/src/app/pages/InviteForm.tsx
+   - Upgraded form data initialization to fetch details dynamically from "GET /api/invitations/:inviteId" on page load.
+   - Upgraded form submission to execute a "POST /api/invitations/:inviteId/submit" containing candidate details.
+   - Falls back to localStorage if backend API is not found (backward compatibility).
+
+6. [MODIFY] client/frontend/src/app/pages/OrderCreation.tsx
+   - Updated handleSendInvitation to perform a "POST /api/invitations" request to backend instead of only storing details in localStorage.
+
+================================================================================
+2. DATABASE SCHEMA UPDATES
+================================================================================
+Added the following columns to the "invitations" table:
+- first_name (VARCHAR(100)) - Stores applicant first name.
+- last_name (VARCHAR(100)) - Stores applicant last name.
+- selected_services (JSONB) - Stores selected BGV services.
+- branch_id (UUID) - Links the invitation to the appropriate client branch.
+
+================================================================================
+3. TRANSACTION & RELATIONAL TABLE STORAGE (UPON CANDIDATE SUBMISSION)
+================================================================================
+When the candidate submits their questionnaire, a secure transaction commits the following details:
+- Find/Create applicant in "applicants" table (prevents cross-company duplicates).
+- Insert current address into "applicant_addresses".
+- Store Aadhaar & Driver's License details securely encrypted in "identity_documents".
+- Store education history in "education_histories" (if selected).
+- Store employment history in "employment_histories" (if selected).
+- Generate a unique order number (e.g. EVR-2026-00000X) and save in "orders".
+- Insert line items for each selected service in "order_verifications" with pricing snapshots.
+- Store signed consent in "consents" with IP address and timestamp.
+- Update invitation status to "completed" in "invitations" table.
+- Log status change in "order_status_history" and administrative action in "activity_logs".
+
+================================================================================
+4. VERIFICATION RESULTS
+================================================================================
+- TypeScript compilation checked and verified cleanly with no warnings or errors.
+- End-to-end integration test executed successfully (using script test_apis.js):
+  1. POST /api/invitations created the invitation INV-439532.
+  2. GET /api/invitations/INV-439532 resolved candidate details correctly.
+  3. POST /api/invitations/INV-439532/submit saved all fields to PostgreSQL.
+  4. Verified all PostgreSQL row insertions (orders, applicants, identity_documents, consents, education, employment) match inputs exactly.
