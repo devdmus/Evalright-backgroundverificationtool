@@ -8,6 +8,6 @@
     "dev:admin-backend": "npm run dev --prefix admin/backend",
     "build": "npm run build --prefix client/frontend",
     "build:admin": "npm run build --prefix admin/frontend",
-    "install-all": "npm install --prefix client/frontend && npm install --prefix admin/frontend"
+    "install-all": "npm install --prefix client/frontend && npm install --prefix admin/frontend && npm install --prefix client/backend && npm install --prefix admin/backend"
   }
 }

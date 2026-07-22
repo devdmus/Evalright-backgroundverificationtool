@@ -5,10 +5,7 @@ import crypto from 'crypto';
 import { pool } from './config/db';
 import orderRouter from './Order';
 import invitationRouter from './Invitation';
-<<<<<<< HEAD
 import paymentRouter from './Payment';
-=======
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 
 dotenv.config();
 
@@ -19,10 +16,7 @@ app.use(cors());
 app.use(express.json());
 app.use(orderRouter);
 app.use(invitationRouter);
-<<<<<<< HEAD
 app.use(paymentRouter);
-=======
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 
 // API Health Check
 app.get('/api/health', async (req, res) => {
@@ -63,7 +57,6 @@ app.get('/api/invitations', async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 // Database schema initialization for OTP verification
 async function initializeOtpSchema() {
   const client = await pool.connect();
@@ -96,9 +89,6 @@ async function initializeOtpSchema() {
 initializeOtpSchema();
 
 // Client authentication route: validates username & password, generates and sends OTP
-=======
-// Client authentication route: validates username & password
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body;
 
@@ -132,7 +122,6 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid username or password' });
     }
 
-<<<<<<< HEAD
     // 4. Generate 6-digit numeric OTP and set expiry (5 minutes)
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     const otpId = crypto.randomUUID();
@@ -227,9 +216,6 @@ app.post('/api/auth/verify-otp', async (req, res) => {
 
     const user = userRes.rows[0];
 
-=======
-    // 4. Return user metadata on success
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     res.json({
       success: true,
       message: 'Login successful',
@@ -244,7 +230,6 @@ app.post('/api/auth/verify-otp', async (req, res) => {
       }
     });
   } catch (error: any) {
-<<<<<<< HEAD
     console.error('❌ Error verifying OTP:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -315,9 +300,6 @@ app.post('/api/auth/resend-otp', async (req, res) => {
     });
   } catch (error: any) {
     console.error('❌ Error resending OTP:', error);
-=======
-    console.error('❌ Error executing client login:', error);
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     res.status(500).json({ error: 'Internal server error' });
   }
 });

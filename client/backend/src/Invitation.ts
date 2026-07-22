@@ -4,7 +4,6 @@ import { pool } from './config/db';
 
 const router = Router();
 
-<<<<<<< HEAD
 const SERVICE_NAMES: Record<string, string> = {
   "personal-details": "Personal Details",
   "ssn-check": "SSN Check",
@@ -43,8 +42,6 @@ const SERVICE_NAMES: Record<string, string> = {
   "exit": "Exit"
 };
 
-=======
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 // Encryption configuration for identity documents (matches Order.ts)
 const ENCRYPTION_KEY = crypto.scryptSync('evalright_secure_key_123', 'salt', 32);
 const IV_LENGTH = 16;
@@ -215,11 +212,7 @@ router.post('/api/invitations', async (req: any, res: any) => {
       );
 
       // Resolve subject
-<<<<<<< HEAD
       const resolvedSubject = emailSubject || 'Background Verification Process – Action Required';
-=======
-      const resolvedSubject = emailSubject || `Background Check Invitation - ${firstName} ${lastName}`;
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 
       // 2. Insert into email_logs
       const emailLogId = crypto.randomUUID();
@@ -235,7 +228,6 @@ router.post('/api/invitations', async (req: any, res: any) => {
       const webhookUrl = process.env.POWER_AUTOMATE_WEBHOOK_URL;
       const inviteUrl = `http://localhost:5173/#invite-form?id=${inviteToken}`;
 
-<<<<<<< HEAD
       const checksList = (selectedProducts || [])
         .map((id: string) => {
           const name = SERVICE_NAMES[id] || id;
@@ -243,8 +235,6 @@ router.post('/api/invitations', async (req: any, res: any) => {
         })
         .join('');
 
-=======
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
       let emailBody = '';
       if (emailContent && emailContent.trim() !== '') {
         const fullName = `${firstName} ${lastName}`.trim();
@@ -254,12 +244,8 @@ router.post('/api/invitations', async (req: any, res: any) => {
           .replaceAll("[applicant_name]", fullName)
           .replaceAll("[company_name]", "EvalRight Client Corp")
           .replaceAll("[FCRA_URL]", "https://www.evalright.com/fcra")
-<<<<<<< HEAD
           .replaceAll("[company_info]", "EvalRight Client Corp, 100 Main St, Chicago, IL")
           .replaceAll("[CHECKS_TO_BE_COMPLETED]", checksList);
-=======
-          .replaceAll("[company_info]", "EvalRight Client Corp, 100 Main St, Chicago, IL");
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 
         const linkHtml = `<div style="text-align: center; margin: 30px 0;">
           <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
@@ -272,7 +258,6 @@ router.post('/api/invitations', async (req: any, res: any) => {
         }
       } else {
         // Fallback default body
-<<<<<<< HEAD
         const fullName = `${firstName} ${lastName}`.trim();
         emailBody = `
           <p>Hi ${fullName},</p>
@@ -307,15 +292,6 @@ router.post('/api/invitations', async (req: any, res: any) => {
           </div>
           <p style="margin-top: 24px;">Thanks & Regards,<br/>
           <strong>Evalright Background Verification Team</strong></p>
-=======
-        emailBody = `
-          <p>Hello ${firstName},</p>
-          <p style="margin-top: 16px;">Below you will find a link to authorize and initiate a background check, which is required as a condition of employment.</p>
-          <p style="margin-top: 16px;">Please save this email and keep it handy as it contains instructions for entering information to process the background check.</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
-          </div>
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
         `;
       }
       

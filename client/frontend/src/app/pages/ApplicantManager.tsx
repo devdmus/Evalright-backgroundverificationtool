@@ -241,7 +241,6 @@ export function ApplicantManager({ isDarkMode = false, onNavigate }: { isDarkMod
                     <ul style={{ margin: 0, paddingLeft: "16px", color: isDarkMode ? "#D1D5DB" : "#4B5563" }}>
                       {applicant.selectedProducts.map((p: string) => {
                         const known: Record<string, string> = {
-<<<<<<< HEAD
                           "personal-details": "Personal Details",
                           "ssn-check": "SSN Check",
                           "id-verification-aadhar": "ID Verification (Aadhar)",
@@ -277,14 +276,6 @@ export function ApplicantManager({ isDarkMode = false, onNavigate }: { isDarkMod
                           "emergency": "Emergency",
                           "authorization": "Authorization",
                           "exit": "Exit",
-=======
-                          cdlis: "CDLIS",
-                          "county-criminal": "County Criminal Search",
-                          "driving-history": "Driving History",
-                          "education-verification": "Education Verification",
-                          "employment-verification": "Employment Verification",
-                          "labcorp-10-panel": "LabCorp - 10 Panel Drug Screen",
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                         };
                         return <li key={p}>{known[p] || p}</li>;
                       })}

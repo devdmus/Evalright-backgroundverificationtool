@@ -4,7 +4,6 @@ import { pool } from './config/db';
 
 const router = Router();
 
-<<<<<<< HEAD
 const SERVICE_NAMES: Record<string, string> = {
   "personal-details": "Personal Details",
   "ssn-check": "SSN Check",
@@ -43,8 +42,6 @@ const SERVICE_NAMES: Record<string, string> = {
   "exit": "Exit"
 };
 
-=======
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 // Encryption key for identity documents (mock key for development purposes)
 const ENCRYPTION_KEY = crypto.scryptSync('evalright_secure_key_123', 'salt', 32);
 const IV_LENGTH = 16;
@@ -406,18 +403,6 @@ router.post('/api/orders', async (req: any, res: any) => {
       [logId, orderedBy || null, companyId, orderId]
     );
 
-<<<<<<< HEAD
-=======
-    // 9b. Create Email Log for candidate notification
-    const emailLogId = crypto.randomUUID();
-    const emailSubject = `Background Check Process Initiated - ${applicantDetails.firstName} ${applicantDetails.lastName}`;
-    await clientConnection.query(
-      `INSERT INTO email_logs (id, recipient, subject, provider, status, sent_at)
-       VALUES ($1, $2, $3, 'Power Automate', 'sent', NOW())`,
-      [emailLogId, applicantDetails.email, emailSubject]
-    );
-
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     // 9c. Create corresponding completed invitation entry to generate inviteToken and inviteUrl
     const inviteToken = 'INV-' + Math.floor(100000 + Math.random() * 900000);
     const expiresAt = new Date();
@@ -442,7 +427,6 @@ router.post('/api/orders', async (req: any, res: any) => {
       ]
     );
 
-<<<<<<< HEAD
     const inviteUrl = `http://localhost:5173/#invite-form?id=${inviteToken}`;
     const linkHtml = `<div style="text-align: center; margin: 30px 0;">
       <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
@@ -498,16 +482,10 @@ router.post('/api/orders', async (req: any, res: any) => {
       [emailLogId, applicantDetails.email, emailSubject]
     );
 
-=======
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     await clientConnection.query('COMMIT');
 
     // 10. Trigger Power Automate flow asynchronously for Candidate Notification
     const webhookUrl = process.env.POWER_AUTOMATE_WEBHOOK_URL;
-<<<<<<< HEAD
-=======
-    const inviteUrl = `http://localhost:5173/#invite-form?id=${inviteToken}`;
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     console.log(`✉️ Sending candidate order confirmation webhook via Power Automate. Candidate: ${applicantDetails.email}, URL: ${inviteUrl}`);
     
     if (webhookUrl && webhookUrl.trim() !== '') {
@@ -519,16 +497,12 @@ router.post('/api/orders', async (req: any, res: any) => {
           candidateName: `${applicantDetails.firstName} ${applicantDetails.lastName}`,
           inviteUrl: inviteUrl,
           selectedProducts: serviceIds || [],
-<<<<<<< HEAD
           companyName: 'EvalRight Client Corp',
           emailSubject: emailSubject,
           emailBody: emailBody,
           fromName: 'EvalRight Support',
           replyTo: 'support@evalright.us',
           copyTo: ''
-=======
-          companyName: 'EvalRight Client Corp'
->>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
         })
       }).then(response => {
         if (!response.ok) {
