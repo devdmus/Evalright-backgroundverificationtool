@@ -35,7 +35,7 @@ import { BillingSetupPage } from "./pages/BillingSetupPage";
 import { ManageSalesOperatorsPage } from "./pages/ManageSalesOperatorsPage";
 import { ManageEmailTemplatesPage } from "./pages/ManageEmailTemplatesPage";
 import { SetupWelcomeEmailPage } from "./pages/SetupWelcomeEmailPage";
-import { CLIENT_LIST, ClientRecord } from "./data/mockData";
+import { ClientRecord } from "./data/mockData";
 
 const USER_NAME = "Raghu Adaveni";
 
@@ -89,21 +89,30 @@ export default function App() {
   async function fetchClients() {
     try {
       const response = await fetch("http://localhost:5001/api/clients");
-      const dbClients = await response.json();
-      if (Array.isArray(dbClients)) {
-        setClients([...dbClients, ...CLIENT_LIST]);
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || `Failed to fetch clients (${response.status})`);
+      }
+      if (Array.isArray(data)) {
+        setClients(data);
       } else {
-        setClients(CLIENT_LIST);
+        throw new Error("Unexpected clients response from server");
       }
     } catch (error) {
       console.error("Error fetching clients:", error);
-      setClients(CLIENT_LIST);
+      setClients([]);
     }
   }
 
   useEffect(() => {
     fetchClients();
   }, []);
+
+  useEffect(() => {
+    if (currentPage === "client-management") {
+      fetchClients();
+    }
+  }, [currentPage]);
 
   useEffect(() => {
     const pageLabel = PAGE_TITLES[currentPage] ?? currentPage;

@@ -4,7 +4,7 @@ import { INDIA_STATES } from "../data/mockData";
 
 interface AddNewClientProps {
   isDarkMode?: boolean;
-  onClientAdded?: () => void;
+  onClientAdded?: () => void | Promise<void>;
 }
 
 export function AddNewClient({ isDarkMode = false, onClientAdded }: AddNewClientProps) {
@@ -73,9 +73,12 @@ export function AddNewClient({ isDarkMode = false, onClientAdded }: AddNewClient
         throw new Error(result.error || "Failed to create client.");
       }
 
-      setMessage({ type: "success", text: "Client added successfully!" });
+      setMessage({
+        type: "success",
+        text: `Client added successfully! (ID: ${result.companyId || "created"})`,
+      });
       if (onClientAdded) {
-        onClientAdded();
+        await onClientAdded();
       }
       // Reset form fields
       setForm({

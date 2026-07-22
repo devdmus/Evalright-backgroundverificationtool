@@ -227,12 +227,18 @@ app.get('/api/clients', async (req, res) => {
         c.name AS "companyName",
         c.status AS status,
         c.created_at AS created,
-        u.first_name || ' ' || u.last_name AS "primaryUser",
+        u.first_name || ' ' || COALESCE(u.last_name, '') AS "primaryUser",
         u.email,
         u.phone,
         b.address
       FROM companies c
-      LEFT JOIN users u ON u.company_id = c.id
+      LEFT JOIN LATERAL (
+        SELECT first_name, last_name, email, phone
+        FROM users
+        WHERE company_id = c.id
+        ORDER BY created_at ASC
+        LIMIT 1
+      ) u ON true
       LEFT JOIN branches b ON b.company_id = c.id AND b.name = 'Headquarters'
       ORDER BY c.created_at DESC;
     `;
