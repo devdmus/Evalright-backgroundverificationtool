@@ -1,0 +1,142 @@
+import { getPageTheme, sortIconColors } from "./pageTheme";
+
+export function getListPageStyles(isDarkMode: boolean) {
+  const t = getPageTheme(isDarkMode);
+
+  return {
+    t,
+    sortColors: (active: boolean, direction: "asc" | "desc") => sortIconColors(isDarkMode, active, direction),
+    outer: {
+      flex: 1,
+      display: "flex",
+      flexDirection: "column" as const,
+      minHeight: 0,
+      fontFamily: "'Wix Madefor Display', sans-serif",
+    },
+    content: {
+      flex: 1,
+      padding: "16px 20px",
+      background: t.contentBg,
+      overflowY: "auto" as const,
+    },
+    title: {
+      fontSize: "20px",
+      fontWeight: 500,
+      color: t.title,
+      marginBottom: "14px",
+    },
+    card: {
+      background: t.cardBg,
+      border: t.cardBorder,
+      borderRadius: "4px",
+      padding: "24px",
+      boxShadow: t.cardShadow,
+    },
+    controlsRow: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "16px",
+    },
+    controlsLabel: {
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      fontSize: "14px",
+      color: t.label,
+    },
+    select: {
+      background: t.inputBg,
+      border: t.inputBorder,
+      borderRadius: "4px",
+      padding: "4px 8px",
+      fontSize: "14px",
+      color: t.text,
+      outline: "none",
+      cursor: "pointer",
+    },
+    search: {
+      width: "100%",
+      padding: "8px 12px 8px 32px",
+      fontSize: "14px",
+      background: t.inputBgMuted,
+      border: t.inputBorder,
+      borderRadius: "4px",
+      outline: "none",
+      boxSizing: "border-box" as const,
+      color: t.text,
+    },
+    theadRow: {
+      background: t.tableHeadBg,
+      borderBottom: t.tableHeadBorder,
+    },
+    th: {
+      padding: "12px 16px",
+      fontSize: "13px",
+      fontWeight: 600,
+      color: t.label,
+      cursor: "pointer",
+      userSelect: "none" as const,
+    },
+    thStatic: {
+      padding: "12px 16px",
+      fontSize: "13px",
+      fontWeight: 600,
+      color: t.label,
+    },
+    row: (idx: number) => ({
+      borderBottom: t.tableRowBorder,
+      background: idx % 2 === 0 ? t.tableRowEven : t.tableRowOdd,
+    }),
+    td: {
+      padding: "12px 16px",
+      fontSize: "13px",
+      color: t.textSecondary,
+    },
+    tdPrimary: {
+      padding: "12px 16px",
+      fontSize: "13px",
+      color: t.text,
+      fontWeight: 600,
+    },
+    emptyCell: {
+      textAlign: "center" as const,
+      padding: "32px",
+      fontSize: "14px",
+      color: t.textMuted,
+    },
+    pagination: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginTop: "20px",
+      fontSize: "14px",
+      color: t.label,
+    },
+    pageBtn: (active: boolean) => ({
+      padding: "6px 12px",
+      border: active ? "1px solid #C70039" : t.inputBorder,
+      background: active ? "#C70039" : t.inputBg,
+      color: active ? "#FFFFFF" : t.textSecondary,
+      borderRadius: "4px",
+      fontWeight: 500,
+      cursor: "pointer",
+    }),
+    navBtn: (disabled: boolean) => ({
+      padding: "6px 8px",
+      border: "none",
+      background: "transparent",
+      color: disabled ? t.sortInactive : t.textSecondary,
+      cursor: disabled ? "not-allowed" : "pointer",
+      fontSize: "16px",
+    }),
+    actionLink: {
+      background: "none",
+      border: "none",
+      color: t.link,
+      fontWeight: 500,
+      fontSize: "13px",
+      cursor: "pointer",
+    },
+  };
+}

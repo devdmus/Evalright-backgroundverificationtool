@@ -1,0 +1,459 @@
+ 
+## 1. COLOR SYSTEM
+ 
+### 1.1 Brand Colors
+ 
+| Token Name               | Hex       | Usage                                         |
+|--------------------------|-----------|-----------------------------------------------|
+| `color-brand-red`        | `#B7042C` | EvalRight logo — primary brand red            |
+| `color-brand-purple`     | `#3B1D7D` | EvalRight logo — secondary brand purple       |
+ 
+### 1.2 Background Colors
+ 
+| Token Name               | Hex       | Usage                                         |
+|--------------------------|-----------|-----------------------------------------------|
+| `color-bg-page`          | `#F6F6F6` | Full page/body background                     |
+| `color-bg-form-section`  | `#F2F2F2` | Section/group backgrounds inside forms        |
+| `color-bg-billing`       | `#FFF3CF` | Billing information section background        |
+| `color-bg-white`         | `#FFFFFF` | Card/form container background                |
+ 
+### 1.3 Text Colors
+ 
+| Token Name               | Hex       | Usage                                         |
+|--------------------------|-----------|-----------------------------------------------|
+| `color-text-primary`     | `#6C7589` | Default body text, labels, placeholders       |
+| `color-text-highlight`   | `#BE967D` | Highlighted/accent text inside form sections  |
+| `color-text-dark`        | `#1A1A2E` | Headings, strong labels (suggested dark)      |
+| `color-text-link`        | `#3B1D7D` | Hyperlinks (use brand purple)                 |
+| `color-text-error`       | `#B7042C` | Validation error messages (use brand red)     |
+ 
+### 1.4 Border & Input Colors
+ 
+| Token Name               | Hex       | Usage                                         |
+|--------------------------|-----------|-----------------------------------------------|
+| `color-border-input`     | `#E0E0E0` | Input field borders (default state)           |
+| `color-border-focus`     | `#3B1D7D` | Input focus ring — brand purple               |
+| `color-border-error`     | `#B7042C` | Input error border — brand red                |
+ 
+---
+ 
+## 2. TYPOGRAPHY
+ 
+### 2.1 Font Stack
+ 
+| Role             | Family Recommendation | Weight(s)       | Usage                           |
+|------------------|-----------------------|------------------|---------------------------------|
+| **Display/Logo** | Inter / Outfit        | 700, 800         | Page title, logo text           |
+| **Heading**      | Inter                 | 600, 700         | Section headings (h2, h3)       |
+| **Body/Label**   | Inter / DM Sans       | 400, 500         | Form labels, body copy          |
+| **Input Text**   | Inter                 | 400              | User input inside fields        |
+| **Caption**      | Inter                 | 400              | Helper text, error messages     |
+ 
+### 2.2 Type Scale
+ 
+| Element            | Size     | Weight | Line Height | Color Token              |
+|--------------------|----------|--------|-------------|--------------------------|
+| Page Title         | 24px     | 700    | 1.3         | `color-text-dark`        |
+| Section Heading    | 16px     | 600    | 1.4         | `color-text-dark`        |
+| Form Label         | 13px     | 500    | 1.5         | `color-text-primary`     |
+| Input Text         | 14px     | 400    | 1.5         | `color-text-dark`        |
+| Placeholder Text   | 14px     | 400    | 1.5         | `color-text-primary`     |
+| Highlighted Label  | 13px     | 600    | 1.4         | `color-text-highlight`   |
+| Helper / Caption   | 12px     | 400    | 1.4         | `color-text-primary`     |
+| Error Text         | 12px     | 400    | 1.4         | `color-text-error`       |
+| Button Text        | 14px     | 600    | 1          | `#FFFFFF`                |
+| Link Text          | 13px     | 400    | 1.5         | `color-text-link`        |
+ 
+---
+ 
+## 3. SPACING SYSTEM
+ 
+Use an **8px base grid**.
+ 
+| Token           | Value  | Usage                                  |
+|-----------------|--------|----------------------------------------|
+| `space-xs`      | 4px    | Icon gaps, tight row gaps              |
+| `space-sm`      | 8px    | Input inner padding (vertical)         |
+| `space-md`      | 16px   | Input inner padding (horizontal), gaps |
+| `space-lg`      | 24px   | Section internal padding               |
+| `space-xl`      | 32px   | Section-to-section spacing             |
+| `space-2xl`     | 48px   | Page top/bottom padding                |
+ 
+---
+ 
+## 4. BORDER RADIUS
+ 
+| Token               | Value  | Usage                              |
+|---------------------|--------|------------------------------------|
+| `radius-input`      | 6px    | Input fields, select dropdowns     |
+| `radius-card`       | 10px   | Form container / card              |
+| `radius-section`    | 8px    | Highlighted group sections         |
+| `radius-button`     | 6px    | CTA buttons                        |
+| `radius-badge`      | 999px  | Pills / tag badges                 |
+ 
+---
+ 
+## 5. PAGE LAYOUT
+ 
+### 5.1 Outer Page Structure
+ 
+```
+┌─────────────────────────────────────────────────────────┐
+│  HEADER: EvalRight Logo (centered or left-aligned)      │
+│  bg: #FFFFFF  |  height: ~64px  |  border-bottom: 1px   │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│   PAGE BODY  (bg: #F6F6F6)                              │
+│   max-width: 960px, centered, padding: 48px 16px        │
+│                                                         │
+│   ┌─────────────────────────────────────────────────┐   │
+│   │  FORM CARD  (bg: #FFFFFF, radius: 10px,         │   │
+│   │  box-shadow: 0 2px 12px rgba(0,0,0,0.08))       │   │
+│   │                                                 │   │
+│   │  [Page Title]                                   │   │
+│   │  [Section 1: Account Information]               │   │
+│   │  [Section 2: Personal Information]              │   │
+│   │  [Section 3: Billing Information]               │   │
+│   │  [Submit Button]                                │   │
+│   └─────────────────────────────────────────────────┘   │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+ 
+### 5.2 Form Card Internals
+ 
+```
+┌─────────────────────────────────────────────────────┐
+│  FORM CARD  padding: 32px                           │
+│                                                     │
+│  Page Title: "Create Your Account"  (h1)            │
+│  Subtitle: "Fill in the details below"  (p)         │
+│                                                     │
+│  ──────────────────────────────────────────────     │
+│  SECTION: Account Information  (bg: #F2F2F2)        │
+│  ┌─────────────────────────────────────────────┐    │
+│  │ Section label text: #BE967D                 │    │
+│  │ [Username]          [Email Address]         │    │
+│  │ [Password]          [Confirm Password]      │    │
+│  └─────────────────────────────────────────────┘    │
+│                                                     │
+│  ──────────────────────────────────────────────     │
+│  SECTION: Personal Information  (bg: #F2F2F2)       │
+│  ┌─────────────────────────────────────────────┐    │
+│  │ [First Name]        [Last Name]             │    │
+│  │ [Phone Number]      [Country]               │    │
+│  └─────────────────────────────────────────────┘    │
+│                                                     │
+│  ──────────────────────────────────────────────     │
+│  SECTION: Billing Information  (bg: #FFF3CF)        │
+│  ┌─────────────────────────────────────────────┐    │
+│  │ [Company/Org Name]  [Tax ID / VAT]          │    │
+│  │ [Address Line 1]    [Address Line 2]        │    │
+│  │ [City]              [State / Province]      │    │
+│  │ [Zip / Postal Code] [Billing Country]       │    │
+│  └─────────────────────────────────────────────┘    │
+│                                                     │
+│  [  REGISTER / CREATE ACCOUNT  ]  (CTA Button)      │
+│  Already have an account? [Sign In]                 │
+└─────────────────────────────────────────────────────┘
+```
+ 
+---
+ 
+## 6. COMPONENT SPECIFICATIONS
+ 
+### 6.1 Header / Navbar
+ 
+| Property         | Value                                      |
+|------------------|--------------------------------------------|
+| Background       | `#FFFFFF`                                  |
+| Height           | 64px                                       |
+| Border-bottom    | 1px solid `#E0E0E0`                        |
+| Logo: "Eval"     | Color `#B7042C` (red), Font-weight 800     |
+| Logo: "Right"    | Color `#3B1D7D` (purple), Font-weight 800  |
+| Logo Font Size   | 22px                                       |
+| Padding          | 0 24px                                     |
+ 
+---
+ 
+### 6.2 Form Section Block (Account / Personal Info)
+ 
+| Property         | Value                                      |
+|------------------|--------------------------------------------|
+| Background       | `#F2F2F2`                                  |
+| Border-radius    | 8px                                        |
+| Padding          | 20px 24px                                  |
+| Section Label    | Font 13px, Weight 600, Color `#BE967D`     |
+| Margin-bottom    | 24px                                       |
+| Grid             | 2-column responsive grid (gap: 16px)       |
+ 
+---
+ 
+### 6.3 Billing Information Section Block
+ 
+| Property         | Value                                      |
+|------------------|--------------------------------------------|
+| Background       | `#FFF3CF`                                  |
+| Border-radius    | 8px                                        |
+| Padding          | 20px 24px                                  |
+| Section Label    | Font 13px, Weight 600, Color `#BE967D`     |
+| Margin-bottom    | 24px                                       |
+| Grid             | 2-column responsive grid (gap: 16px)       |
+| Optional border  | 1px solid `#F5DFA0`                        |
+ 
+---
+ 
+### 6.4 Input Field
+ 
+| State        | Border                         | Background  | Text Color  |
+|--------------|-------------------------------|-------------|-------------|
+| Default      | 1px solid `#E0E0E0`           | `#FFFFFF`   | `#1A1A2E`   |
+| Focus        | 1.5px solid `#3B1D7D`         | `#FFFFFF`   | `#1A1A2E`   |
+| Error        | 1.5px solid `#B7042C`         | `#FFF5F5`   | `#1A1A2E`   |
+| Disabled     | 1px solid `#E0E0E0`           | `#F6F6F6`   | `#6C7589`   |
+| Placeholder  | —                             | —           | `#6C7589`   |
+ 
+| Property      | Value                  |
+|---------------|------------------------|
+| Height        | 42px                   |
+| Border-radius | 6px                    |
+| Padding       | 0 14px                 |
+| Font-size     | 14px                   |
+| Font-weight   | 400                    |
+| Width         | 100% of column         |
+ 
+---
+ 
+### 6.5 Select / Dropdown
+ 
+Same specs as Input Field above. Add:
+- Right-side chevron icon, color `#6C7589`
+- Custom styled using `appearance: none`
+ 
+---
+ 
+### 6.6 Form Label
+ 
+| Property      | Value        |
+|---------------|--------------|
+| Font-size     | 13px         |
+| Font-weight   | 500          |
+| Color         | `#6C7589`    |
+| Margin-bottom | 4px          |
+| Display       | block        |
+ 
+---
+ 
+### 6.7 Error Message
+ 
+| Property      | Value        |
+|---------------|--------------|
+| Font-size     | 12px         |
+| Font-weight   | 400          |
+| Color         | `#B7042C`    |
+| Margin-top    | 4px          |
+| Display       | flex + icon  |
+ 
+---
+ 
+### 6.8 Primary CTA Button (Register / Submit)
+ 
+| State    | Background  | Text      | Border   |
+|----------|-------------|-----------|----------|
+| Default  | `#3B1D7D`   | `#FFFFFF` | none     |
+| Hover    | `#2E166A`   | `#FFFFFF` | none     |
+| Active   | `#250F58`   | `#FFFFFF` | none     |
+| Disabled | `#A89CC8`   | `#FFFFFF` | none     |
+ 
+| Property        | Value                         |
+|-----------------|-------------------------------|
+| Height          | 46px                          |
+| Width           | 100% or min 200px centered    |
+| Border-radius   | 6px                           |
+| Font-size       | 15px                          |
+| Font-weight     | 600                           |
+| Letter-spacing  | 0.3px                         |
+| Margin-top      | 8px                           |
+ 
+---
+ 
+### 6.9 Password Visibility Toggle
+ 
+| Property    | Value                              |
+|-------------|------------------------------------|
+| Position    | Absolute right inside input        |
+| Icon        | Eye / Eye-off icon                 |
+| Icon Color  | `#6C7589`                          |
+| Size        | 18px                               |
+ 
+---
+ 
+### 6.10 Checkbox (Terms & Conditions)
+ 
+| Property        | Value                         |
+|-----------------|-------------------------------|
+| Unchecked border| 1.5px solid `#C0C0C0`         |
+| Checked fill    | `#3B1D7D`                     |
+| Check icon      | White `#FFFFFF`               |
+| Border-radius   | 3px                           |
+| Size            | 16x16px                       |
+| Label font-size | 13px, color `#6C7589`         |
+| Link color      | `#3B1D7D`                     |
+ 
+---
+ 
+## 7. RESPONSIVE BREAKPOINTS
+ 
+| Breakpoint   | Width         | Layout Change                             |
+|--------------|---------------|-------------------------------------------|
+| Desktop      | ≥ 1024px      | 2-column grid inside sections             |
+| Tablet       | 768px–1023px  | 2-column grid, reduced padding            |
+| Mobile       | < 768px       | 1-column stack, full-width inputs         |
+ 
+- Form card: full-width on mobile, `max-width: 600px` on tablet, `max-width: 960px` on desktop.
+- Padding on mobile: `16px`
+- Section blocks stack vertically on mobile
+ 
+---
+ 
+## 8. FORM FIELDS INVENTORY
+ 
+### Section A: Account Information *(bg: #F2F2F2)*
+ 
+| # | Field Label       | Type      | Required | Placeholder             | Width       |
+|---|-------------------|-----------|----------|-------------------------|-------------|
+| 1 | Username          | text      | Yes      | Enter username          | 50% (col 1) |
+| 2 | Email Address     | email     | Yes      | Enter email             | 50% (col 2) |
+| 3 | Password          | password  | Yes      | Create password         | 50% (col 1) |
+| 4 | Confirm Password  | password  | Yes      | Re-enter password       | 50% (col 2) |
+ 
+---
+ 
+### Section B: Personal Information *(bg: #F2F2F2)*
+ 
+| # | Field Label       | Type      | Required | Placeholder             | Width       |
+|---|-------------------|-----------|----------|-------------------------|-------------|
+| 5 | First Name        | text      | Yes      | First name              | 50% (col 1) |
+| 6 | Last Name         | text      | Yes      | Last name               | 50% (col 2) |
+| 7 | Phone Number      | tel       | No       | e.g. +1 555 000 000     | 50% (col 1) |
+| 8 | Country           | select    | Yes      | Select your country     | 50% (col 2) |
+ 
+---
+ 
+### Section C: Billing Information *(bg: #FFF3CF)*
+ 
+| # | Field Label           | Type    | Required | Placeholder               | Width       |
+|---|-----------------------|---------|----------|---------------------------|-------------|
+| 9 | Company / Org Name    | text    | No       | Company name              | 50% (col 1) |
+|10 | Tax ID / VAT Number   | text    | No       | Tax or VAT number         | 50% (col 2) |
+|11 | Address Line 1        | text    | Yes      | Street address            | 100%        |
+|12 | Address Line 2        | text    | No       | Apt, suite, unit          | 100%        |
+|13 | City                  | text    | Yes      | City                      | 50% (col 1) |
+|14 | State / Province      | text    | No       | State or province         | 50% (col 2) |
+|15 | ZIP / Postal Code     | text    | Yes      | Postal code               | 50% (col 1) |
+|16 | Billing Country       | select  | Yes      | Select country            | 50% (col 2) |
+ 
+---
+ 
+### Section D: Agreement & Submit
+ 
+| # | Element              | Type      | Notes                                          |
+|---|----------------------|-----------|------------------------------------------------|
+|17 | Terms checkbox       | checkbox  | "I agree to the Terms & Conditions" link       |
+|18 | Register Button      | submit    | "Create Account" or "Register" — full width   |
+|19 | Sign In Link         | link      | "Already have an account? Sign In"             |
+ 
+---
+ 
+## 9. VALIDATION RULES
+ 
+| Field            | Rules                                                   |
+|------------------|---------------------------------------------------------|
+| Username         | Required, min 3 chars, alphanumeric + underscore only   |
+| Email            | Required, valid email format                            |
+| Password         | Required, min 8 chars, 1 uppercase, 1 number            |
+| Confirm Password | Required, must match Password                           |
+| First Name       | Required, text only                                     |
+| Last Name        | Required, text only                                     |
+| Address Line 1   | Required                                                |
+| City             | Required                                                |
+| ZIP              | Required                                                |
+| Country          | Required                                                |
+| Terms checkbox   | Must be checked before submit                           |
+ 
+Error display: show error text (12px, `#B7042C`) below the field and add red border `#B7042C` on the field.
+ 
+---
+ 
+## 10. SHADOW & ELEVATION
+ 
+| Token                 | Value                                          |
+|-----------------------|------------------------------------------------|
+| `shadow-card`         | `0px 2px 12px rgba(0, 0, 0, 0.08)`            |
+| `shadow-input-focus`  | `0px 0px 0px 3px rgba(59, 29, 125, 0.15)`     |
+| `shadow-button`       | `0px 4px 10px rgba(59, 29, 125, 0.25)`        |
+ 
+---
+ 
+## 11. ICON GUIDELINES
+ 
+- Use **Phosphor Icons** or **Lucide** (both free, clean, consistent)
+- Default icon color: `#6C7589`
+- Error icon color: `#B7042C`
+- Success icon color: `#16A34A`
+- Size: `18px` inline, `20px` for standalone icons
+ 
+---
+ 
+## 12. FIGMA SETUP CHECKLIST
+ 
+### Styles to create in Figma:
+- [ ] All **Color Styles** from Section 1 (name them exactly as token names)
+- [ ] All **Text Styles** from Section 2 (Page Title, Section Heading, Body, Label, Caption, Error)
+- [ ] **Effect Styles**: `shadow-card`, `shadow-input-focus`, `shadow-button`
+ 
+### Components to build:
+- [ ] `InputField` (states: default, focus, error, disabled)
+- [ ] `SelectDropdown` (same states as InputField)
+- [ ] `FormLabel`
+- [ ] `ErrorMessage`
+- [ ] `FormSectionBlock` — bg `#F2F2F2`, contains label + grid of inputs
+- [ ] `BillingSectionBlock` — bg `#FFF3CF`, same structure
+- [ ] `PrimaryButton` (states: default, hover, active, disabled)
+- [ ] `Checkbox` (unchecked, checked)
+- [ ] `PasswordInput` (with eye toggle)
+- [ ] `PageHeader` (logo + nav)
+- [ ] `FormCard` (assembles all sections)
+ 
+### Auto Layout Rules:
+- All section blocks: Auto Layout vertical, gap `16px`, padding `20px 24px`
+- Input grid inside section: Auto Layout horizontal, wrap, gap `16px`
+- Form card: Auto Layout vertical, gap `24px`, padding `32px`
+ 
+---
+ 
+## 13. QUICK REFERENCE COLOR CARD
+ 
+```
+PAGE BACKGROUND         #F6F6F6   ░░░░░
+LOGO RED (Eval)         #B7042C   ████  
+LOGO PURPLE (Right)     #3B1D7D   ████  
+FORM SECTION BG         #F2F2F2   ░░░░░
+BILLING SECTION BG      #FFF3CF   ░░░░░ (warm yellow)
+HIGHLIGHT TEXT          #BE967D   ████  (warm brown)
+BODY TEXT               #6C7589   ████  (cool grey)
+INPUT BORDER            #E0E0E0   ░░░░░
+BUTTON / FOCUS RING     #3B1D7D   ████  (same as logo purple)
+ERROR / LOGO RED        #B7042C   ████  (same as logo red)
+CARD BACKGROUND         #FFFFFF   □□□□□
+```
+ 
+---
+ 
+*Document prepared for Figma AI / Figma developer handoff.*  
+*All measurements are in pixels at 1x. Export assets at 1x, 2x, 3x.*
+
+
+font family :- "Wix Madefor Display", sans-serif;
+
+Branding colors : #3B1D7D;    #3B1D7D;
