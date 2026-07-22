@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
+<<<<<<< HEAD
 import { 
   ArrowLeft, ArrowRight, CheckCircle, Shield, FileText, Landmark, User, Award, 
   Briefcase, Car, Fingerprint, Activity, Globe, MapPin, Users, Droplet, Clock, 
   DollarSign, Key, Search, ShieldAlert, FileSpreadsheet, Eye, Check 
 } from "lucide-react";
+=======
+import { ArrowLeft, CheckCircle, Shield, FileText, Landmark, User, Award, Briefcase, Car } from "lucide-react";
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 import { Footer } from "../components/Footer";
 import { getPageTheme } from "../theme/pageTheme";
 import { ORDERS } from "../data/mockData";
@@ -13,6 +17,7 @@ interface InviteFormProps {
   onNavigate?: (page: any) => void;
 }
 
+<<<<<<< HEAD
 interface TabItem {
   id: string;
   label: string;
@@ -120,6 +125,8 @@ function FileDigitIcon(props: any) {
   );
 }
 
+=======
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) {
   const t = getPageTheme(isDarkMode);
   const [inviteId, setInviteId] = useState<string | null>(null);
@@ -127,6 +134,7 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+<<<<<<< HEAD
   const [activeTab, setActiveTab] = useState<string>("personal-info");
   const [validatedTabs, setValidatedTabs] = useState<string[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -134,18 +142,28 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
   // Form States
   const [formData, setFormData] = useState<any>({
     // General
+=======
+
+  // Form States
+  const [formData, setFormData] = useState({
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     firstName: "",
     middleName: "",
     lastName: "",
     email: "",
     phone: "",
     dob: "",
+<<<<<<< HEAD
     gender: "",
     fatherName: "",
+=======
+    adhr: "",
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     street: "",
     city: "",
     state: "",
     zip: "",
+<<<<<<< HEAD
     country: "India",
     panNumber: "",
     uan: "",
@@ -384,10 +402,35 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
     emp_fileName: "",
 
     // FCRA E-Signature
+=======
+    // Driving
+    licenseNumber: "",
+    licenseState: "",
+    // Drug Test
+    clinicZip: "",
+    drugConsent: false,
+    // Education
+    schoolName: "",
+    degree: "",
+    major: "",
+    gradDate: "",
+    // Employment
+    employerName: "",
+    jobTitle: "",
+    empStart: "",
+    empEnd: "",
+    supervisorPhone: "",
+    // Signature
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     fcraConsent: false,
     signatureName: "",
   });
 
+<<<<<<< HEAD
+=======
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
   useEffect(() => {
     const id = localStorage.getItem("evalright_active_invite_id");
     setInviteId(id);
@@ -404,7 +447,11 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
             const matched = data.invitation;
             setInviteData(matched);
             const nameParts = (matched.name || "").split(" ");
+<<<<<<< HEAD
             setFormData((prev: any) => ({
+=======
+            setFormData((prev) => ({
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
               ...prev,
               firstName: nameParts[0] || "",
               middleName: nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : "",
@@ -416,6 +463,10 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
         })
         .catch((err) => {
           console.warn("DB invitation load failed, checking local storage fallback:", err);
+<<<<<<< HEAD
+=======
+          // Fallback to local storage
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
           const saved = localStorage.getItem("evalright_invitations");
           if (saved) {
             try {
@@ -424,7 +475,11 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
               if (matched) {
                 setInviteData(matched);
                 const nameParts = (matched.name || "").split(" ");
+<<<<<<< HEAD
                 setFormData((prev: any) => ({
+=======
+                setFormData((prev) => ({
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                   ...prev,
                   firstName: nameParts[0] || "",
                   middleName: nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : "",
@@ -444,6 +499,7 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
   }, []);
 
   const handleChange = (field: string, value: any) => {
+<<<<<<< HEAD
     setFormData((prev: any) => ({ ...prev, [field]: value }));
   };
 
@@ -735,12 +791,16 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
     if (prevIndex >= 0) {
       setActiveTab(tabs[prevIndex].id);
     }
+=======
+    setFormData((prev) => ({ ...prev, [field]: value }));
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
 
+<<<<<<< HEAD
     // Validate current tab first
     if (!validateTab(activeTab)) return;
 
@@ -748,10 +808,32 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
     for (const tab of tabs) {
       if (!validateTab(tab.id)) {
         setActiveTab(tab.id);
+=======
+    // Validate Required Common Fields
+    if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() || !formData.dob.trim() || !formData.adhr.trim() || !formData.street.trim() || !formData.city.trim() || !formData.state.trim() || !formData.zip.trim()) {
+      setErrorMsg("Please complete all general personal information fields.");
+      return;
+    }
+
+    // Validate Aadhaar and DOB simple format
+    if (formData.adhr.replace(/\D/g, "").length < 12) {
+      setErrorMsg("Please enter a valid 12-digit Aadhaar Number.");
+      return;
+    }
+
+    // Validate Dynamic Fields based on invitation selection
+    const products = inviteData?.selectedProducts || [];
+    
+    // Check Driving History products
+    if (products.some((p: string) => p.includes("driving") || p.includes("cdlis"))) {
+      if (!formData.licenseNumber.trim() || !formData.licenseState.trim()) {
+        setErrorMsg("Please provide your Driver's License Number and Issuing State.");
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
         return;
       }
     }
 
+<<<<<<< HEAD
     setSubmitting(true);
 
     // Backend compatibility mapping
@@ -770,13 +852,61 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
       empStart: formData.emp_dateOfJoining || formData.empStart,
       empEnd: formData.emp_dateOfRelieving || formData.empEnd,
     };
+=======
+    // Check Drug Test products
+    if (products.some((p: string) => p.includes("panel") || p.includes("drug"))) {
+      if (!formData.clinicZip.trim()) {
+        setErrorMsg("Please specify a Clinic Zip Code for your drug testing appointment.");
+        return;
+      }
+      if (!formData.drugConsent) {
+        setErrorMsg("Please consent to the drug screening authorization.");
+        return;
+      }
+    }
+
+    // Check Education Verification products
+    if (products.some((p: string) => p.includes("education"))) {
+      if (!formData.schoolName.trim() || !formData.degree.trim() || !formData.gradDate.trim()) {
+        setErrorMsg("Please complete all Education History fields.");
+        return;
+      }
+    }
+
+    // Check Employment Verification products
+    if (products.some((p: string) => p.includes("employment"))) {
+      if (!formData.employerName.trim() || !formData.jobTitle.trim() || !formData.empStart.trim()) {
+        setErrorMsg("Please complete all Employment History fields.");
+        return;
+      }
+    }
+
+    // Validate FCRA E-Signature
+    if (!formData.fcraConsent) {
+      setErrorMsg("You must check the authorization box to consent to the background screening.");
+      return;
+    }
+
+    const expectedSignName = `${formData.firstName} ${formData.lastName}`.toLowerCase().trim();
+    const enteredSignName = formData.signatureName.toLowerCase().trim();
+    if (!enteredSignName || expectedSignName !== enteredSignName) {
+      setErrorMsg(`Please sign the form by typing your full legal name: "${formData.firstName} ${formData.lastName}"`);
+      return;
+    }
+
+    setSubmitting(true);
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 
     fetch(`http://localhost:5000/api/invitations/${inviteId}/submit`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+<<<<<<< HEAD
       body: JSON.stringify(payload),
+=======
+      body: JSON.stringify(formData),
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     })
       .then((res) => {
         if (!res.ok) {
@@ -813,7 +943,21 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
         }
 
         // Map selected products to friendly verification type string
+<<<<<<< HEAD
         const productNames = products.map((id: string) => PRODUCT_TAB_NAMES[id] || id);
+=======
+        const productNames = products.map((id: string) => {
+          const known: Record<string, string> = {
+            cdlis: "CDLIS",
+            "county-criminal": "County Criminal Search",
+            "driving-history": "Driving History",
+            "education-verification": "Education Verification",
+            "employment-verification": "Employment Verification",
+            "labcorp-10-panel": "LabCorp - 10 Panel Drug Screen",
+          };
+          return known[id] || id;
+        });
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
         const verificationType = productNames.join(", ") || "Background Check";
 
         const idx = existingOrders.findIndex((o: any) => o.inviteId === inviteId || (o.applicantEmail === formData.email && o.status === "PENDING"));
@@ -829,10 +973,17 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
             status: "IN PROGRESS" as const,
             county: formData.city,
             state: formData.state,
+<<<<<<< HEAD
             adhr: (formData.id_aadhar_number || formData.adhr || "000000000000").replace(/.(?=.{4})/g, '*'),
             dob: formData.dob,
             criminalRecordsFound: "Pending Court Records",
             details: payload,
+=======
+            adhr: formData.adhr.replace(/.(?=.{4})/g, '*'),
+            dob: formData.dob,
+            criminalRecordsFound: "Pending Court Records",
+            details: formData,
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
           };
         } else {
           // Create new order as fallback
@@ -848,11 +999,19 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
             orderDate: new Date().toISOString().substring(0, 10),
             county: formData.city,
             state: formData.state,
+<<<<<<< HEAD
             adhr: (formData.id_aadhar_number || formData.adhr || "000000000000").replace(/.(?=.{4})/g, '*'),
             dob: formData.dob,
             applicantEmail: formData.email,
             criminalRecordsFound: "None",
             details: payload,
+=======
+            adhr: formData.adhr.replace(/.(?=.{4})/g, '*'),
+            dob: formData.dob,
+            applicantEmail: formData.email,
+            criminalRecordsFound: "Pending Court Records",
+            details: formData,
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
           };
           existingOrders = [newOrder, ...existingOrders];
         }
@@ -864,7 +1023,11 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
       })
       .catch((err) => {
         console.error("Database submission failed:", err);
+<<<<<<< HEAD
         setErrorMsg(err.message || "An error occurred while saving your details.");
+=======
+        setErrorMsg(err.message || "An error occurred while saving your details to the database.");
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
         setSubmitting(false);
       });
   };
@@ -932,6 +1095,7 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
     );
   }
 
+<<<<<<< HEAD
   // Render fields for current active tab
   const renderFields = () => {
     switch (activeTab) {
@@ -940,6 +1104,62 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
           <div>
             <h3 style={sectionHeading}>Personal Information</h3>
             <div style={grid3}>
+=======
+
+
+  const products = inviteData.selectedProducts || [];
+  const hasDriving = products.some((p: string) => p.includes("driving") || p.includes("cdlis"));
+  const hasDrug = products.some((p: string) => p.includes("panel") || p.includes("drug"));
+  const hasEducation = products.some((p: string) => p.includes("education"));
+  const hasEmployment = products.some((p: string) => p.includes("employment"));
+
+  return (
+    <div style={{ minHeight: "100vh", background: isDarkMode ? "#1A1C21" : "#F3F4F6", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      {/* Branding Top bar */}
+      <div style={{ background: "#FFFFFF", borderBottom: "1px solid #E5E7EB", padding: "16px 40px", boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: "1200px", margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <img src="/evalright-logo.jpg" alt="EvalRight Logo" style={{ height: "36px", width: "auto" }} />
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#4B5563" }}>
+            <Shield size={14} color="#10B981" />
+            <span>Secure SSL Encrypted Portal</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Container */}
+      <div style={{ flex: 1, maxWidth: "900px", width: "100%", margin: "32px auto", padding: "0 20px" }}>
+        {/* Intro */}
+        <div style={{ background: "linear-gradient(135deg, #C70039 0%, #900028 100%)", borderRadius: "8px 8px 0 0", padding: "28px 30px", color: "#FFFFFF" }}>
+          <span style={{ fontSize: "12px", fontWeight: 700, textTransform: "uppercase", background: "rgba(255,255,255,0.2)", padding: "4px 8px", borderRadius: "4px", letterSpacing: "0.5px" }}>
+            Invitation Code: {inviteData.inviteId}
+          </span>
+          <h1 style={{ fontSize: "22px", fontWeight: 600, marginTop: "12px", marginBottom: "8px" }}>Background Check Authorization Portal</h1>
+          <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.85)", lineHeight: 1.5, margin: 0 }}>
+            Dear {inviteData.name}, please complete the dynamic authorization form below. The fields in this form are customized based on the background check searches ordered by the employer.
+          </p>
+        </div>
+
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} style={{ background: "#FFFFFF", borderRadius: "0 0 8px 8px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)", padding: "30px" }}>
+          
+
+
+          {errorMsg && (
+            <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: "4px", padding: "12px 16px", color: "#B91C1C", fontSize: "14px", fontWeight: 500, marginBottom: "24px" }}>
+              ⚠️ {errorMsg}
+            </div>
+          )}
+
+          {/* Section 1: General Personal Info */}
+          <div style={{ marginBottom: "32px" }}>
+            <h3 style={{ fontSize: "16px", fontWeight: 600, color: "rgb(199, 0, 57)", marginBottom: "16px", borderBottom: "2px solid #F3F4F6", paddingBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <User size={16} /> 1. Personal Information
+            </h3>
+            
+            <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr 1.2fr", gap: "16px", marginBottom: "16px" }}>
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
               <div>
                 <label style={formLabel}>First Name *</label>
                 <input style={formInput} value={formData.firstName} onChange={(e) => handleChange("firstName", e.target.value)} required />
@@ -953,12 +1173,18 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
                 <input style={formInput} value={formData.lastName} onChange={(e) => handleChange("lastName", e.target.value)} required />
               </div>
             </div>
+<<<<<<< HEAD
             <div style={grid3}>
+=======
+
+            <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr 1.2fr", gap: "16px", marginBottom: "16px" }}>
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
               <div>
                 <label style={formLabel}>Email Address *</label>
                 <input style={formInput} type="email" value={formData.email} onChange={(e) => handleChange("email", e.target.value)} required />
               </div>
               <div>
+<<<<<<< HEAD
                 <label style={formLabel}>Contact Phone *</label>
                 <input style={formInput} value={formData.phone} onChange={(e) => handleChange("phone", e.target.value)} required />
               </div>
@@ -988,6 +1214,19 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
             </div>
             <div style={grid4}>
               <div style={{ gridColumn: "span 2" }}>
+=======
+                <label style={formLabel}>Date of Birth * (MM/DD/YYYY)</label>
+                <input style={formInput} placeholder="e.g. 05/18/1992" value={formData.dob} onChange={(e) => handleChange("dob", e.target.value)} required />
+              </div>
+              <div>
+                <label style={formLabel}>Aadhaar Number (ADHR) *</label>
+                <input style={formInput} type="password" placeholder="12 digits, e.g. 123456789012" maxLength={12} value={formData.adhr} onChange={(e) => handleChange("adhr", e.target.value.replace(/\D/g, ""))} required />
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1.8fr 1.2fr 1fr 1fr", gap: "16px" }}>
+              <div>
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                 <label style={formLabel}>Street Address *</label>
                 <input style={formInput} value={formData.street} onChange={(e) => handleChange("street", e.target.value)} required />
               </div>
@@ -1007,6 +1246,7 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
                 <input style={formInput} maxLength={6} value={formData.zip} onChange={(e) => handleChange("zip", e.target.value.replace(/\D/g, ""))} required />
               </div>
             </div>
+<<<<<<< HEAD
           </div>
         );
 
@@ -1771,6 +2011,181 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
         return (
           <div>
             <h3 style={sectionHeading}>FCRA Disclosure & Authorization</h3>
+=======
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginTop: "16px" }}>
+              <div>
+                <DocumentUploadField 
+                  label="Upload Aadhaar Card *" 
+                  onChange={(file) => console.log("Uploaded Aadhaar Card:", file)}
+                />
+              </div>
+              <div>
+                <DocumentUploadField 
+                  label="Upload PAN Card" 
+                  onChange={(file) => console.log("Uploaded PAN Card:", file)}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Dynamic Requirements based on Order Selections */}
+          {(hasDriving || hasDrug || hasEducation || hasEmployment) && (
+            <div style={{ marginBottom: "32px" }}>
+              <h3 style={{ fontSize: "16px", fontWeight: 600, color: "rgb(199, 0, 57)", marginBottom: "16px", borderBottom: "2px solid #F3F4F6", paddingBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <Landmark size={16} /> 2. Order Specific Requirements
+              </h3>
+
+              {/* Dynamic Sub-section: Driving Record */}
+              {hasDriving && (
+                <div style={dynamicCard}>
+                  <h4 style={dynamicHeader}>
+                    <Car size={16} color="rgb(199, 0, 57)" /> Motor Vehicle / Driving History Details
+                  </h4>
+                  <p style={dynamicDescription}>The employer has ordered a Driving History background check. Please enter your license details.</p>
+                  <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "16px" }}>
+                    <div>
+                      <label style={formLabel}>Driver's License Number *</label>
+                      <input style={formInput} value={formData.licenseNumber} onChange={(e) => handleChange("licenseNumber", e.target.value)} />
+                    </div>
+                    <div>
+                      <label style={formLabel}>State of Issuance *</label>
+                      <select style={formSelect} value={formData.licenseState} onChange={(e) => handleChange("licenseState", e.target.value)}>
+                        <option value="">Select State</option>
+                        {INDIA_STATES.map(st => <option key={st} value={st}>{st}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <DocumentUploadField 
+                    label="Upload Driver's License Document" 
+                    onChange={(file) => console.log("Uploaded License:", file)}
+                  />
+                </div>
+              )}
+
+              {/* Dynamic Sub-section: Drug Test */}
+              {hasDrug && (
+                <div style={dynamicCard}>
+                  <h4 style={dynamicHeader}>
+                    <Award size={16} color="rgb(199, 0, 57)" /> Drug Screening Authorization
+                  </h4>
+                  <p style={dynamicDescription}>The employer has requested a Drug Screen test. Please provide a ZIP code so we can schedule you at the closest LabCorp or Quest Diagnostics clinic.</p>
+                  
+                  <div style={{ marginBottom: "16px" }}>
+                    <label style={formLabel}>Preferred Clinic ZIP Code / City *</label>
+                    <input style={formInput} placeholder="e.g. 60611" value={formData.clinicZip} onChange={(e) => handleChange("clinicZip", e.target.value)} />
+                  </div>
+
+                  <label style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer", userSelect: "none" }}>
+                    <input 
+                      type="checkbox" 
+                      checked={formData.drugConsent} 
+                      onChange={(e) => handleChange("drugConsent", e.target.checked)}
+                      style={{ marginTop: "4px", width: "16px", height: "16px", accentColor: "rgb(199, 0, 57)" }} 
+                    />
+                    <span style={{ fontSize: "13px", color: "#4B5563", lineHeight: 1.4 }}>
+                      I hereby authorize EvalRight and its partner drug screening laboratories to collect a specimen for testing, analyze it for controlled substances, and report the findings back to the requesting employer. *
+                    </span>
+                  </label>
+                  <DocumentUploadField 
+                    label="Upload Drug Test Consent / Prescription Document" 
+                    onChange={(file) => console.log("Uploaded Drug Test:", file)}
+                  />
+                </div>
+              )}
+
+              {/* Dynamic Sub-section: Education Verification */}
+              {hasEducation && (
+                <div style={dynamicCard}>
+                  <h4 style={dynamicHeader}>
+                    <Award size={16} color="rgb(199, 0, 57)" /> Education History Verification
+                  </h4>
+                  <p style={dynamicDescription}>The employer has requested an Education Verification. Please supply information regarding your highest degree earned.</p>
+                  
+                  <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "16px", marginBottom: "16px" }}>
+                    <div>
+                      <label style={formLabel}>School/University Name *</label>
+                      <input style={formInput} placeholder="e.g. University of Illinois" value={formData.schoolName} onChange={(e) => handleChange("schoolName", e.target.value)} />
+                    </div>
+                    <div>
+                      <label style={formLabel}>Degree Earned *</label>
+                      <select style={formSelect} value={formData.degree} onChange={(e) => handleChange("degree", e.target.value)}>
+                        <option value="">Select Degree</option>
+                        <option value="High School">High School Diploma</option>
+                        <option value="Associate">Associate's Degree</option>
+                        <option value="Bachelor">Bachelor's Degree</option>
+                        <option value="Master">Master's Degree</option>
+                        <option value="Doctorate">Doctorate / Ph.D.</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "16px" }}>
+                    <div>
+                      <label style={formLabel}>Major / Field of Study</label>
+                      <input style={formInput} placeholder="e.g. Computer Science" value={formData.major} onChange={(e) => handleChange("major", e.target.value)} />
+                    </div>
+                    <div>
+                      <label style={formLabel}>Graduation Date * (MM/YYYY)</label>
+                      <input style={formInput} placeholder="e.g. 05/2014" value={formData.gradDate} onChange={(e) => handleChange("gradDate", e.target.value)} />
+                    </div>
+                  </div>
+                  <DocumentUploadField 
+                    label="Upload Degree Certificate / Transcript" 
+                    onChange={(file) => console.log("Uploaded Education:", file)}
+                  />
+                </div>
+              )}
+
+              {/* Dynamic Sub-section: Employment Verification */}
+              {hasEmployment && (
+                <div style={dynamicCard}>
+                  <h4 style={dynamicHeader}>
+                    <Briefcase size={16} color="rgb(199, 0, 57)" /> Previous Employment History
+                  </h4>
+                  <p style={dynamicDescription}>The employer has requested an Employment Verification. Please supply information regarding your most recent employer.</p>
+                  
+                  <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "16px", marginBottom: "16px" }}>
+                    <div>
+                      <label style={formLabel}>Employer / Company Name *</label>
+                      <input style={formInput} placeholder="e.g. Acme Corporation" value={formData.employerName} onChange={(e) => handleChange("employerName", e.target.value)} />
+                    </div>
+                    <div>
+                      <label style={formLabel}>Job Title *</label>
+                      <input style={formInput} placeholder="e.g. Senior Software Engineer" value={formData.jobTitle} onChange={(e) => handleChange("jobTitle", e.target.value)} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
+                    <div>
+                      <label style={formLabel}>Start Date * (MM/YYYY)</label>
+                      <input style={formInput} placeholder="e.g. 09/2019" value={formData.empStart} onChange={(e) => handleChange("empStart", e.target.value)} />
+                    </div>
+                    <div>
+                      <label style={formLabel}>End Date (MM/YYYY or 'Present')</label>
+                      <input style={formInput} placeholder="e.g. Present" value={formData.empEnd} onChange={(e) => handleChange("empEnd", e.target.value)} />
+                    </div>
+                    <div>
+                      <label style={formLabel}>Supervisor/HR Contact Phone</label>
+                      <input style={formInput} placeholder="e.g. 555-0199" value={formData.supervisorPhone} onChange={(e) => handleChange("supervisorPhone", e.target.value)} />
+                    </div>
+                  </div>
+                  <DocumentUploadField 
+                    label="Upload Experience Letter / Paystub" 
+                    onChange={(file) => console.log("Uploaded Employment:", file)}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Section 3: FCRA Disclosure & Signature */}
+          <div style={{ marginBottom: "32px" }}>
+            <h3 style={{ fontSize: "16px", fontWeight: 600, color: "rgb(199, 0, 57)", marginBottom: "16px", borderBottom: "2px solid #F3F4F6", paddingBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <FileText size={16} /> 3. FCRA Disclosure & Authorization
+            </h3>
+
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
             <div style={{
               background: "#F9FAFB",
               border: "1px solid #E5E7EB",
@@ -1781,8 +2196,12 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
               fontSize: "12px",
               color: "#4B5563",
               lineHeight: 1.6,
+<<<<<<< HEAD
               marginBottom: "20px",
               textAlign: "left"
+=======
+              marginBottom: "20px"
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
             }}>
               <p style={{ margin: "0 0 10px 0", fontWeight: 700 }}>DISCLOSURE REGARDING BACKGROUND INVESTIGATION</p>
               <p style={{ margin: "0 0 10px 0" }}>
@@ -1799,7 +2218,11 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
               </p>
             </div>
 
+<<<<<<< HEAD
             <div style={{ marginBottom: "20px", textAlign: "left" }}>
+=======
+            <div style={{ marginBottom: "20px" }}>
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
               <label style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer", userSelect: "none" }}>
                 <input 
                   type="checkbox" 
@@ -1813,7 +2236,11 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
               </label>
             </div>
 
+<<<<<<< HEAD
             <div style={{ maxWidth: "480px", textAlign: "left" }}>
+=======
+            <div style={{ maxWidth: "480px" }}>
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
               <label style={formLabel}>E-Signature (Please type your full name: "{formData.firstName} {formData.lastName}") *</label>
               <input 
                 style={formInput} 
@@ -1823,6 +2250,7 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
               />
             </div>
           </div>
+<<<<<<< HEAD
         );
 
       default:
@@ -2288,6 +2716,32 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
           </form>
 
         </div>
+=======
+
+          {/* Submit Button */}
+          <div style={{ display: "flex", justifyContent: "flex-end", borderTop: "1px solid #F3F4F6", paddingTop: "24px" }}>
+            <button
+              type="submit"
+              disabled={submitting || (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete'))}
+              style={{
+                background: (submitting || (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete'))) ? "#E5E7EB" : "rgb(199, 0, 57)",
+                color: (submitting || (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete'))) ? "#9CA3AF" : "#FFFFFF",
+                border: "none",
+                borderRadius: "4px",
+                padding: "12px 36px",
+                fontSize: "15px",
+                fontWeight: 600,
+                cursor: (submitting || (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete'))) ? "not-allowed" : "pointer",
+                transition: "all 0.15s ease",
+                boxShadow: (submitting || (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete'))) ? "none" : "0 2px 8px rgba(199, 0, 57, 0.15)"
+              }}
+            >
+              {submitting ? "Submitting Authorization..." : (inviteData && (inviteData.status === 'completed' || inviteData.status === 'Complete')) ? "Submission Completed" : "Submit Authorization"}
+            </button>
+          </div>
+
+        </form>
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
       </div>
 
       <Footer isDarkMode={isDarkMode} />
@@ -2295,12 +2749,16 @@ export function InviteForm({ isDarkMode = false, onNavigate }: InviteFormProps) 
   );
 }
 
+<<<<<<< HEAD
 // ── DocumentUploadField Helper Component ──────────────────────────────────────
+=======
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 
 interface DocumentUploadFieldProps {
   label: string;
   onChange: (file: File | null) => void;
   disabled?: boolean;
+<<<<<<< HEAD
   fileName?: string | null;
 }
 
@@ -2310,20 +2768,38 @@ function DocumentUploadField({ label, onChange, disabled = false, fileName }: Do
       const file = e.target.files[0];
       onChange(file);
     } else {
+=======
+}
+
+function DocumentUploadField({ label, onChange, disabled = false }: DocumentUploadFieldProps) {
+  const [fileName, setFileName] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setFileName(file.name);
+      onChange(file);
+    } else {
+      setFileName(null);
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
       onChange(null);
     }
   };
 
+<<<<<<< HEAD
   const handleClear = () => {
     onChange(null);
   };
 
+=======
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
   return (
     <div style={{ marginTop: "16px", textAlign: "left" }}>
       <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#4B5563", marginBottom: "6px" }}>
         {label}
       </label>
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+<<<<<<< HEAD
         {fileName ? (
           <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#F3F4F6", padding: "6px 12px", borderRadius: "4px", border: "1px solid #E5E7EB" }}>
             <span style={{ fontSize: "13px", color: "#1F2937", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "250px" }}>
@@ -2366,11 +2842,43 @@ function DocumentUploadField({ label, onChange, disabled = false, fileName }: Do
             />
           </label>
         )}
+=======
+        <label
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "38px",
+            padding: "0 16px",
+            background: disabled ? "#E5E7EB" : "rgb(199, 0, 57)",
+            color: disabled ? "#9CA3AF" : "#FFFFFF",
+            borderRadius: "4px",
+            fontSize: "13px",
+            fontWeight: 600,
+            cursor: disabled ? "not-allowed" : "pointer",
+            border: "none",
+            boxShadow: disabled ? "none" : "0 2px 4px rgba(199,0,57,0.15)",
+            transition: "all 0.15s ease",
+          }}
+        >
+          Choose File
+          <input
+            type="file"
+            onChange={handleFileChange}
+            disabled={disabled}
+            style={{ display: "none" }}
+          />
+        </label>
+        <span style={{ fontSize: "13px", color: fileName ? "#1F2937" : "#9CA3AF", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "250px" }}>
+          {fileName || "No file selected"}
+        </span>
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
       </div>
     </div>
   );
 }
 
+<<<<<<< HEAD
 // ── Styles & Form Formatting Helpers ──────────────────────────────────────────
 
 const sectionHeading: React.CSSProperties = {
@@ -2390,6 +2898,9 @@ const subLabel: React.CSSProperties = {
   textAlign: "left",
   lineHeight: 1.4
 };
+=======
+// ── Styles & Data Helpers ──────────────────────────────────────────────────────
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 
 const formLabel: React.CSSProperties = {
   display: "block",
@@ -2413,6 +2924,7 @@ const formInput: React.CSSProperties = {
   background: "#FFFFFF",
 };
 
+<<<<<<< HEAD
 const formTextarea: React.CSSProperties = {
   width: "100%",
   height: "80px",
@@ -2427,6 +2939,8 @@ const formTextarea: React.CSSProperties = {
   resize: "vertical"
 };
 
+=======
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 const formSelect: React.CSSProperties = {
   width: "100%",
   height: "38px",
@@ -2441,6 +2955,7 @@ const formSelect: React.CSSProperties = {
   cursor: "pointer"
 };
 
+<<<<<<< HEAD
 const grid2: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "1fr 1fr",
@@ -2504,6 +3019,32 @@ const reviewGrid: React.CSSProperties = {
 
 const reviewField: React.CSSProperties = {
   wordBreak: "break-all"
+=======
+const dynamicCard: React.CSSProperties = {
+  background: "#FAF5F5",
+  border: "1px solid #F3E8E8",
+  borderRadius: "6px",
+  padding: "20px",
+  marginBottom: "16px",
+  textAlign: "left"
+};
+
+const dynamicHeader: React.CSSProperties = {
+  margin: "0 0 6px 0",
+  fontSize: "14px",
+  fontWeight: 700,
+  color: "#1F2937",
+  display: "flex",
+  alignItems: "center",
+  gap: "8px"
+};
+
+const dynamicDescription: React.CSSProperties = {
+  margin: "0 0 16px 0",
+  fontSize: "12px",
+  color: "#6B7280",
+  lineHeight: 1.4
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 };
 
 const INDIA_STATES = [

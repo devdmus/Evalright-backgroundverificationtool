@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Search, Filter } from "lucide-react";
 import { Footer } from "../components/Footer";
 import { Pagination } from "../components/Pagination";
+<<<<<<< HEAD
 import { ClientRecord } from "../data/mockData";
+=======
+import { CLIENT_LIST, ClientRecord } from "../data/mockData";
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 
 interface ClientManagementProps {
   isDarkMode?: boolean;
@@ -59,7 +63,11 @@ export function ClientManagement({ isDarkMode = false, onViewClient, clients }: 
   const inputBg = isDarkMode ? "#2A2D34" : "#FFFFFF";
   const theadBg = isDarkMode ? "#2A2D34" : "#F9FAFB";
 
+<<<<<<< HEAD
   const filtered = (clients ?? []).filter((c) => {
+=======
+  const filtered = (clients || CLIENT_LIST).filter((c) => {
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     if (search.trim()) {
       const q = search.toLowerCase();
       if (
@@ -287,6 +295,7 @@ export function ClientManagement({ isDarkMode = false, onViewClient, clients }: 
                 </tr>
               </thead>
               <tbody>
+<<<<<<< HEAD
                 {paginated.length === 0 ? (
                   <tr>
                     <td colSpan={5} style={{ padding: "24px 16px", textAlign: "center", fontSize: "13px", color: mutedColor }}>
@@ -295,6 +304,9 @@ export function ClientManagement({ isDarkMode = false, onViewClient, clients }: 
                   </tr>
                 ) : (
                   paginated.map((client, idx) => (
+=======
+                {paginated.map((client, idx) => (
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                   <tr
                     key={client.id}
                     style={{
@@ -326,8 +338,12 @@ export function ClientManagement({ isDarkMode = false, onViewClient, clients }: 
                       <StatusBadge status={client.status} />
                     </td>
                   </tr>
+<<<<<<< HEAD
                   ))
                 )}
+=======
+                ))}
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
               </tbody>
             </table>
           </div>

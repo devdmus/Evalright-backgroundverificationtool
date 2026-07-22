@@ -26,6 +26,7 @@ interface AlaCarteCategory {
 
 const COL1_CATEGORIES: AlaCarteCategory[] = [
   {
+<<<<<<< HEAD
     title: "Identity & Database Verifications",
     hasExpand: true,
     items: [
@@ -60,12 +61,71 @@ const COL1_CATEGORIES: AlaCarteCategory[] = [
       { id: "26as-check", name: "26AS Check", hasTooltip: true },
       { id: "form-16-check", name: "Form 16 Check", hasTooltip: true },
       { id: "itr-check", name: "ITR Check", hasTooltip: true },
+=======
+    title: "CDLIS",
+    items: [
+      { id: "cdlis", name: "CDLIS", hasTooltip: true },
+    ]
+  },
+  {
+    title: "Civil",
+    hasExpand: true,
+    items: [
+      { id: "bankruptcies-liens-judgments", name: "Bankruptcies, Liens, Judgments", hasTooltip: true },
+      { id: "county-civil", name: "County Civil" },
+      { id: "ffiec", name: "FFIEC" },
+      { id: "nationwide-federal-civil", name: "Nationwide Federal Civil", hasTooltip: true },
+    ]
+  },
+  {
+    title: "Criminal Search",
+    hasExpand: true,
+    items: [
+      { id: "az-adult-protective", name: "AZ Adult Protective Services", hasTooltip: true },
+      { id: "canada-criminal-national", name: "Canada Criminal Search (National Level)", hasTooltip: true },
+      { id: "canada-criminal-province", name: "Canada Criminal Search (Province Level)", hasTooltip: true },
+      { id: "county-criminal", name: "County Criminal", hasTooltip: true },
+    ]
+  },
+  {
+    title: "Driving History",
+    items: [
+      { id: "canadian-driving-history", name: "Canadian Driving History" },
+      { id: "driving-history", name: "Driving History", hasTooltip: true },
+      { id: "fmcsa-verification", name: "FMCSA Verification (PSP Driver History)", hasTooltip: true },
+    ]
+  },
+  {
+    title: "Drug Test",
+    hasExpand: true,
+    items: [
+      { id: "labcorp-10-panel", name: "(AF) LabCorp - 10 Panel", hasTooltip: true },
+      { id: "labcorp-10-panel-6am-oxy", name: "(AF) LabCorp - 10 Panel 6AM/ OXY", hasTooltip: true },
+      { id: "labcorp-10-panel-alcohol", name: "(AF) LabCorp - 10 Panel ALCOHOL", hasTooltip: true },
+      { id: "labcorp-10-panel-oxy", name: "(AF) LabCorp - 10 Panel OXY", hasTooltip: true },
+    ]
+  },
+  {
+    title: "Education Verification",
+    items: [
+      { id: "education-verification", name: "Education Verification", hasTooltip: true },
+      { id: "international-education", name: "International Education Verification" },
+    ]
+  },
+  {
+    title: "Employment Verification",
+    items: [
+      { id: "employment-verification", name: "Employment Verification", hasTooltip: true },
+      { id: "international-employment", name: "International Employment Verification" },
+      { id: "military-service", name: "Military Service Verification" },
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     ]
   }
 ];
 
 const COL2_CATEGORIES: AlaCarteCategory[] = [
   {
+<<<<<<< HEAD
     title: "Professional & Education Verifications",
     hasExpand: true,
     items: [
@@ -97,11 +157,74 @@ const COL2_CATEGORIES: AlaCarteCategory[] = [
       { id: "emergency", name: "Emergency", hasTooltip: true },
       { id: "authorization", name: "Authorization", hasTooltip: true },
       { id: "exit", name: "Exit", hasTooltip: true },
+=======
+    title: "Financial",
+    items: [
+      { id: "hud-ldp", name: "HUD Limited Denial of Participation List (LDP)" },
+      { id: "pep", name: "PEP" },
+    ]
+  },
+  {
+    title: "Generic, No Special Forms Required",
+    hasExpand: true,
+    items: [
+      { id: "colorado-caps", name: "Colorado CAPS" },
+      { id: "death-records-index", name: "Death Records Index" },
+      { id: "international-gov-id", name: "International Government ID Verification" },
+      { id: "ny-medicaid-inspector", name: "NY Office of the Medicaid Inspector General" },
+    ]
+  },
+  {
+    title: "Occupational Services",
+    hasExpand: true,
+    items: [
+      { id: "es-audiogram", name: "ES - Audiogram", hasTooltip: true },
+      { id: "es-chest-xray-1-2", name: "ES - Chest X-Ray (1 or 2 Views)", hasTooltip: true },
+      { id: "es-chest-xray-2", name: "ES - Chest X-Ray (2 Views)", hasTooltip: true },
+      { id: "es-dot-physical", name: "ES - DOT Physical", hasTooltip: true },
+    ]
+  },
+  {
+    title: "OIG",
+    items: [
+      { id: "oig-exclusions", name: "Office of Inspector General (OIG) - Exclusions List" },
+    ]
+  },
+  {
+    title: "Professional License Verification",
+    items: [
+      { id: "colorado-dora", name: "Colorado DORA Search" },
+      { id: "professional-license", name: "Professional License Verification", hasTooltip: true },
+    ]
+  },
+  {
+    title: "Reference Verification",
+    items: [
+      { id: "company-reference", name: "Company Reference Verification" },
+      { id: "international-reference", name: "International Reference Check" },
+      { id: "professional-reference", name: "Professional Reference Verification" },
+      { id: "reference-verification", name: "Reference Verification" },
+    ]
+  },
+  {
+    title: "Social Media Screening",
+    items: [
+      { id: "social-media-search", name: "Social Media Search" },
+    ]
+  },
+  {
+    title: "ADHR Trace",
+    items: [
+      { id: "adhr-trace-address", name: "ADHR Trace/Address History", hasTooltip: true },
+      { id: "adhr-validation", name: "ADHR Validation", hasTooltip: true },
+      { id: "adhr-verification-cbsv", name: "ADHR Verification (UIDAI)", hasTooltip: true },
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     ]
   }
 ];
 
 const TOOLTIP_MESSAGES: Record<string, string> = {
+<<<<<<< HEAD
   "personal-details": "Verify basic personal details (gender, name, father's name, contact info, DOB, PAN, UAN).",
   "ssn-check": "Verify identity using Social Security Number (SSN) verification search.",
   "id-verification-aadhar": "Verify candidate identity information against the Aadhaar (UIDAI) records.",
@@ -137,6 +260,31 @@ const TOOLTIP_MESSAGES: Record<string, string> = {
   "emergency": "Verify emergency contact details and relationship information.",
   "authorization": "Ensure correct candidate consent and Authorization LOA is signed and filed.",
   "exit": "Verify candidate's previous exit procedures, reasons, and clearance status.",
+=======
+  cdlis: "Identify any undisclosed Commercial Drivers Licenses previously held by an applicant.",
+  "bankruptcies-liens-judgments": "Shows all of the negative information about a person's financial history.",
+  "nationwide-federal-civil": "This search offers nationwide access to federal litigation dockets for adjudicated civil cases from all U.S. Federal District courts excluding Alaska, Guam, Idaho, New Mexico and Northern Marianas Islands.",
+  "az-adult-protective": "Arizona Adult Protective Services (APS) is a program within the DES Division of Aging and Adult Services (DAAS) and is responsible for investigating allegations of abuse, exploitation and neglect of vulnerable adults.",
+  "canada-criminal-national": "The National criminal record covers all provinces and territories within Canada.",
+  "canada-criminal-province": "A Provincial search is an address-based search covering a province.",
+  "county-criminal": "County Criminal Record Searches help find criminal court records such as felonies and misdemeanors. Because the majority of crimes in the U.S. are tried in county courts, these searches should be a baseline for all employee background checks. The searches are performed at more than 3,200 county criminal courts across the United States, and are conducted by our researchers via online access or in-person via an extensive network of court research professionals.",
+  "driving-history": "This search identifies the name, license issue and expiration date, license status, license number, license type, endorsements, restrictions, driving violations and suspensions. Results are available within minutes to 24 hours.",
+  "fmcsa-verification": "PSP helps carriers make more informed hiring decisions by providing secure, electronic access to a commercial drivers five-year crash and three-year inspection history from the FMCSA Motor Carrier Management Information System",
+  "labcorp-10-panel": "Amphetamines, Barbiturates, Benzodiazepines, Cocaine, Marijuana, Methadone, Methaqualone, Opiates, PCP, Propoxyphene",
+  "labcorp-10-panel-6am-oxy": "6-Acetyl Morphine, Amphetamines, Barbiturates, Benzodiazepines, Cocaine, Marijuana, Methadone, Opiates, Oxycodone, Propoxyphene, PCP",
+  "labcorp-10-panel-alcohol": "Amphetamines, Barbiturates, Benzodiazepines, Cocaine, Ethanol, Marijuana, Methadone, Methaqualone, Opiates, PCP, Propoxyphene",
+  "labcorp-10-panel-oxy": "Amphetamines, Barbiturates, Benzodiazepines, Cocaine, Marijuana , Methadone, Methaqualone, Opiates, Oxycodone, PCP, Propoxyphene",
+  "es-audiogram": "A graph showing the results of a hearing test, plotting the softest sounds a person can hear at different pitches (frequencies), used to assess hearing ability and detect hearing loss.",
+  "es-chest-xray-1-2": "A diagnostic X-ray imaging test of the chest taken from one or two angles (views) to evaluate the lungs, heart, and chest wall for conditions such as infection, fluid, or abnormalities.",
+  "es-chest-xray-2": "A chest X-ray taken from two standard angles — typically front (posteroanterior) and side (lateral) — to provide a more complete view of the lungs, heart, and chest structures for diagnostic evaluation.",
+  "es-dot-physical": "A medical exam required by the Department of Transportation to ensure that commercial drivers are physically and mentally fit to safely operate commercial motor vehicles.",
+  "education-verification": "Verification of education credentials that confirm degree received, course of study, and dates of attendance.",
+  "employment-verification": "Verifies an individual's work history, such as company names and locations, dates, positions or titles held along with compensation (if requested and provided by the source), directly with former employers or their authorized agents.",
+  "professional-license": "This search provides information from licensing agencies in various states across the United States. The search includes the type",
+  "adhr-trace-address": "The ADHR Trace creates a compilation from database agencies of addresses and alias names associated with the Aadhaar. Based on this information and your specific package, we will use this address history to determine which jurisdictions to search for court records.",
+  "adhr-validation": "This service identifies if an Aadhaar Number (ADHR) is valid using information from the Unique Identification Authority of India (UIDAI). Note: the ADHR Validation check DOES NOT confirm that the Aadhaar belongs to your candidate.",
+  "adhr-verification-cbsv": "This service can verify if the Aadhaar holder's name, date of birth, and Aadhaar match UIDAI's records by obtaining the information directly with the Unique Identification Authority of India (UIDAI)",
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 };
 
 const STATES_LIST = [
@@ -179,6 +327,7 @@ const STATES_LIST = [
   "Puducherry"
 ];
 
+<<<<<<< HEAD
 
 
 const SERVICE_PRICES: Record<string, number> = {
@@ -223,6 +372,9 @@ const SERVICE_PRICES: Record<string, number> = {
   "adhr-trace": 300,
   "adhr-validation": 300
 };
+=======
+const GENERATION_LIST = ["None", "Jr", "Sr", "II", "III", "IV"];
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 
 const allSearchItems = [
   ...COL1_CATEGORIES.flatMap((cat) => cat.items),
@@ -230,6 +382,7 @@ const allSearchItems = [
 ];
 const itemMap = new Map(allSearchItems.map((item) => [item.id, item]));
 
+<<<<<<< HEAD
 function calculateOrderAmounts(selectedIds: Set<string>, rushOrder: boolean) {
   let grossAmount = 0;
   selectedIds.forEach((id) => {
@@ -261,6 +414,8 @@ function loadRazorpayScript(): Promise<boolean> {
   });
 }
 
+=======
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 function maskAdhr(val: string) {
   if (!val) return "";
   if (val.includes("X") || val.includes("x") || val.includes("*")) return val;
@@ -310,7 +465,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
   const [middleName, setMiddleName] = useState("");
   const [middleNameDisabled, setMiddleNameDisabled] = useState(false);
   const [lastName, setLastName] = useState("");
+<<<<<<< HEAD
 
+=======
+  const [generation, setGeneration] = useState("None");
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
   const [dob, setDob] = useState("");
   const [showMinorModal, setShowMinorModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -365,7 +524,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
     setMiddleName("");
     setMiddleNameDisabled(false);
     setLastName("");
+<<<<<<< HEAD
 
+=======
+    setGeneration("None");
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     setDob("");
     setAdhr("");
     setStreetAddress("");
@@ -432,6 +595,10 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
   async function handleSendInvitation() {
     const isMiddleNameValid = middleNameDisabled || middleName.trim() !== "";
     if (
+<<<<<<< HEAD
+=======
+      invitationTemplate === "Select Template" ||
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
       !firstName.trim() ||
       !isMiddleNameValid ||
       !lastName.trim() ||
@@ -467,6 +634,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
 
     if (!templateContent) {
       templateContent = `
+<<<<<<< HEAD
         <p>Hi [applicant_name],</p>
         <p style="margin-top: 16px;">Greetings from Evalright.</p>
         <p style="margin-top: 16px;">As the next step of the hiring process, your Background Verification needs to be initiated. We, Demo Client, are partnered with Evalright (BGV Agency) for this activity, and they will connect with you via email/phone to complete the process. You are requested to coordinate with the Evalright team and share the required information and documents through the Evalright Background Verification Portal.</p>
@@ -499,10 +667,22 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
         </p>
         <p style="margin-top: 24px;">Thanks & Regards,<br/>
         <strong>Evalright Background Verification Team</strong></p>
+=======
+        <p>Hello [applicant_first_name],</p>
+        <p style="margin-top: 16px;">Below you will find a link to authorize and initiate a background check, which is required as a condition of employment.</p>
+        <p style="margin-top: 16px;">Please save this email and keep it handy as it contains instructions for entering information to process the background check.</p>
+        <p style="margin-top: 16px;">
+          <b>First, please click this link to read and print the <span style="color: rgb(199, 0, 57);">Fair Credit Reporting Act Summary of Rights</span>.</b>
+        </p>
+        <p style="margin-top: 24px;">
+          [INVITATION_URL]
+        </p>
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
       `;
     }
 
     const fullName = `${firstName} ${middleNameDisabled ? "" : middleName + " "}${lastName}`.trim();
+<<<<<<< HEAD
     const checksList = Array.from(selected)
       .map(id => {
         const item = itemMap.get(id);
@@ -510,14 +690,20 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
       })
       .join('');
 
+=======
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     let formattedBody = templateContent
       .replaceAll("[applicant_first_name]", firstName)
       .replaceAll("[applicant_last_name]", lastName)
       .replaceAll("[applicant_name]", fullName)
       .replaceAll("[company_name]", "EvalRight Client Corp")
       .replaceAll("[FCRA_URL]", "https://www.evalright.com/fcra")
+<<<<<<< HEAD
       .replaceAll("[company_info]", "EvalRight Client Corp, 100 Main St, Chicago, IL")
       .replaceAll("[CHECKS_TO_BE_COMPLETED]", checksList);
+=======
+      .replaceAll("[company_info]", "EvalRight Client Corp, 100 Main St, Chicago, IL");
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 
     try {
       const response = await fetch("http://localhost:5000/api/invitations", {
@@ -534,7 +720,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
           selectedProducts: Array.from(selected),
           orderedBy: currentUser.id,
           emailTemplateName: templateName,
+<<<<<<< HEAD
           emailSubject: templateSubject || "Background Verification Process – Action Required",
+=======
+          emailSubject: templateSubject || `Background Check Invitation - ${fullName}`,
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
           emailContent: templateContent,
           replyTo: templateReplyTo,
           fromName: templateFromName,
@@ -561,7 +751,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
 
       const newEmail = {
         id: Math.floor(4000000 + Math.random() * 1000000),
+<<<<<<< HEAD
         subject: templateSubject || "Background Verification Process – Action Required",
+=======
+        subject: `Background Check Invitation - ${fullName}`,
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
         recipient: applicantEmail,
         dateSent: new Date().toISOString().replace('T', ' ').substring(0, 19),
         lastUpdate: "N/A",
@@ -610,6 +804,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
 
       const productNames = Array.from(selected).map((id: string) => {
         const knownNames: Record<string, string> = {
+<<<<<<< HEAD
           "personal-details": "Personal Details",
           "ssn-check": "SSN Check",
           "id-verification-aadhar": "ID Verification (Aadhar)",
@@ -645,6 +840,14 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
           "emergency": "Emergency",
           "authorization": "Authorization",
           "exit": "Exit",
+=======
+          cdlis: "CDLIS",
+          "county-criminal": "County Criminal Search",
+          "driving-history": "Driving History",
+          "education-verification": "Education Verification",
+          "employment-verification": "Employment Verification",
+          "labcorp-10-panel": "LabCorp - 10 Panel",
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
         };
         return knownNames[id] || id;
       });
@@ -736,7 +939,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                       setMiddleName("");
                       setMiddleNameDisabled(false);
                       setLastName("");
+<<<<<<< HEAD
 
+=======
+                      setGeneration("None");
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                       setDob("");
                       setAdhr("");
                       setStreetAddress("");
@@ -777,7 +984,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                         setMiddleName("");
                         setMiddleNameDisabled(false);
                         setLastName("");
+<<<<<<< HEAD
 
+=======
+                        setGeneration("None");
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                         setDob("");
                         setAdhr("");
                         setStreetAddress("");
@@ -1337,7 +1548,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               <div
                 style={{
                   display: "grid",
+<<<<<<< HEAD
                   gridTemplateColumns: "1.2fr 1.3fr 1.2fr",
+=======
+                  gridTemplateColumns: "1.2fr 1.3fr 1.2fr 1.2fr",
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                   gap: "16px",
                   alignItems: "center",
                 }}
@@ -1378,6 +1593,15 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   </label>
                 </div>
                 <FloatingInput label="Last Name" value={lastName} onChange={setLastName} required />
+<<<<<<< HEAD
+=======
+                <FloatingSelect
+                  label="Generation"
+                  value={generation}
+                  options={GENERATION_LIST}
+                  onChange={setGeneration}
+                />
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
               </div>
 
               {/* Row 2 */}
@@ -1555,11 +1779,19 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     value={invitationTemplate}
                     options={availableTemplates}
                     onChange={setInvitationTemplate}
+<<<<<<< HEAD
+=======
+                    required
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                   />
                 </div>
 
                 {/* Name Inputs Row */}
+<<<<<<< HEAD
                 <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1.3fr 1.2fr", gap: "16px", alignItems: "center", marginBottom: "20px" }}>
+=======
+                <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1.3fr 1.2fr 1.2fr", gap: "16px", alignItems: "center", marginBottom: "20px" }}>
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                   <FloatingInput label="First Name" value={firstName} onChange={setFirstName} required />
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <FloatingInput
@@ -1596,6 +1828,15 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     </label>
                   </div>
                   <FloatingInput label="Last Name" value={lastName} onChange={setLastName} required />
+<<<<<<< HEAD
+=======
+                  <FloatingSelect
+                    label="Generation"
+                    value={generation}
+                    options={GENERATION_LIST}
+                    onChange={setGeneration}
+                  />
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                 </div>
 
                 {/* Email & Reference Row */}
@@ -1777,6 +2018,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     </tr>
                   </thead>
                   <tbody>
+<<<<<<< HEAD
                     {(() => {
                       let orderSubtotal = 0;
                       return (
@@ -1837,6 +2079,59 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                         </>
                       );
                     })()}
+=======
+                    {Array.from(selected).map((itemId) => {
+                      const item = itemMap.get(itemId);
+                      const productName = item ? item.name : itemId;
+                      const editLabel = itemId === "adhr-trace-address" ? "Show ADHR Report" : "Show Report";
+                      
+                      return (
+                        <tr key={itemId} style={{ borderBottom: "1px solid #E5E7EB" }}>
+                          <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", fontWeight: 500 }}>{productName}</td>
+                          <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151" }}></td>
+                          <td style={{ padding: "16px 20px", fontSize: "14px" }}>
+                            <span 
+                              style={{ color: "#2563EB", cursor: "pointer", fontWeight: 500 }}
+                              onClick={() => setStep(1)}
+                            >
+                              {editLabel}
+                            </span>
+                          </td>
+                          <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 500 }}>₹5.00</td>
+                          <td style={{ padding: "16px 20px", textAlign: "right" }}>
+                            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "18px", height: "18px", background: "#C70039", borderRadius: "4px", color: "#FFFFFF", fontSize: "11px", fontWeight: "bold" }}>
+                              ✓
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    
+                    {rushOrder && (
+                      <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                        <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", fontWeight: 500 }}>Rush Order Fee</td>
+                        <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151" }}></td>
+                        <td style={{ padding: "16px 20px", fontSize: "14px" }}></td>
+                        <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 500 }}>₹25.00</td>
+                        <td style={{ padding: "16px 20px", textAlign: "right" }}>
+                          <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "18px", height: "18px", background: "#C70039", borderRadius: "4px", color: "#FFFFFF", fontSize: "11px", fontWeight: "bold" }}>
+                            ✓
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    
+                    {/* Total Row */}
+                    <tr style={{ background: "#F9FAFB" }}>
+                      <td style={{ padding: "16px 20px", fontSize: "15px", color: "#1F2937", fontWeight: "bold" }}>Total</td>
+                      <td style={{ padding: "16px 20px" }}></td>
+                      <td style={{ padding: "16px 20px" }}></td>
+                      <td style={{ padding: "16px 20px", fontSize: "15px", color: "#1F2937", textAlign: "right", fontWeight: "bold" }}>
+                        ₹{(selected.size * 5 + (rushOrder ? 25 : 0)).toFixed(2)}
+                      </td>
+                      <td style={{ padding: "16px 20px" }}></td>
+                    </tr>
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                   </tbody>
                 </table>
               </div>
@@ -2217,7 +2512,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 Add Another Search
               </button>
 
+<<<<<<< HEAD
               {/* Pay Now */}
+=======
+              {/* Submit Order */}
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
               <button
                 onClick={() => setShowSubmitModal(true)}
                 style={{
@@ -2235,7 +2534,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   fontWeight: 500,
                 }}
               >
+<<<<<<< HEAD
                 Pay Now
+=======
+                Submit Order
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
               </button>
             </div>
           )
@@ -2457,6 +2760,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             }}
           >
             <div style={{ fontSize: "14px", color: "#374151", lineHeight: "1.6" }}>
+<<<<<<< HEAD
               By clicking "Pay Now", you agree to the <span style={{ color: "#C70039", fontWeight: "bold" }}>₹{calculateOrderAmounts(selected, rushOrder).netAmount.toFixed(2)}</span> charge, and to the following certifications:
             </div>
 
@@ -2475,6 +2779,9 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
               <div>• <b>Netbanking:</b> choose any bank → click <b>Success</b> on the mock page (most reliable).</div>
               <div>• <b>Card:</b> enter any Razorpay test card → on the bank/OTP page click <b>Success</b>.</div>
               <div>• <b>UPI QR:</b> cannot be scanned by real apps in test mode — use Netbanking or Card instead.</div>
+=======
+              By clicking "Submit Order", you agree to the <span style={{ color: "#C70039", fontWeight: "bold" }}>₹{(selected.size * 5 + (rushOrder ? 25 : 0)).toFixed(2)}</span> charge to your credit card, and to the following certifications:
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
             </div>
 
             <div style={{ color: "#C70039", fontSize: "14px", lineHeight: "1.6", display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -2526,17 +2833,22 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 disabled={isSubmittingOrder}
                 onClick={async () => {
                   if (!currentUser) {
+<<<<<<< HEAD
                     triggerToast("You must be logged in to pay for an order.", true);
                     return;
                   }
 
                   if (selected.size === 0) {
                     triggerToast("Please select at least one search product.", true);
+=======
+                    triggerToast("You must be logged in to submit an order.", true);
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                     return;
                   }
 
                   setIsSubmittingOrder(true);
 
+<<<<<<< HEAD
                   const { grossAmount, deductions, netAmount } = calculateOrderAmounts(selected, rushOrder);
                   const fullName = `${firstName} ${middleNameDisabled ? "" : middleName + " "}${lastName}`.trim();
                   const searchId = "" + Math.floor(8000000 + Math.random() * 1000000);
@@ -2579,6 +2891,20 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                       "emergency": "Emergency",
                       "authorization": "Authorization",
                       "exit": "Exit",
+=======
+                  const fullName = `${firstName} ${middleNameDisabled ? "" : middleName + " "}${lastName}`.trim();
+                  const searchId = "" + Math.floor(8000000 + Math.random() * 1000000);
+                  const reportId = "RP-" + Math.floor(20000 + Math.random() * 10000);
+                  
+                  const productNames = Array.from(selected).map(id => {
+                    const knownNames: Record<string, string> = {
+                      cdlis: "CDLIS",
+                      "county-criminal": "County Criminal Search",
+                      "driving-history": "Driving History",
+                      "education-verification": "Education Verification",
+                      "employment-verification": "Employment Verification",
+                      "labcorp-10-panel": "LabCorp - 10 Panel",
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                     };
                     return knownNames[id] || id;
                   });
@@ -2599,7 +2925,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     orderDate: new Date().toISOString().substring(0, 10),
                     county: "Cook",
                     state: jobState !== "Select State" ? jobState : "IL",
+<<<<<<< HEAD
                     adhr: adhr ? adhr.replace(/.(?=.{4})/g, "*") : "********XXXX",
+=======
+                    adhr: adhr ? adhr.replace(/.(?=.{4})/g, '*') : "********XXXX",
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                     dob: dob || "N/A",
                     applicantEmail: applicantEmail,
                     criminalRecordsFound: "None",
@@ -2607,6 +2937,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   };
 
                   try {
+<<<<<<< HEAD
                     const razorpayReady = await loadRazorpayScript();
                     if (!razorpayReady || !window.Razorpay) {
                       throw new Error("Unable to load Razorpay checkout. Please try again.");
@@ -2786,6 +3117,89 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   } catch (err: any) {
                     console.error("Error starting payment:", err);
                     triggerToast(err.message || "Failed to start payment. Please try again.", true);
+=======
+                    const response = await fetch("http://localhost:5000/api/orders", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        "x-user-id": currentUser.id
+                      },
+                      body: JSON.stringify({
+                        applicantDetails: {
+                          firstName,
+                          middleName: middleNameDisabled ? undefined : middleName,
+                          lastName,
+                          email: applicantEmail,
+                          dob,
+                          adhr,
+                          street1: streetAddress,
+                          zipCode,
+                          state: jobState !== "Select State" ? jobState : "IL"
+                        },
+                        branchId: currentUser.branch_id,
+                        serviceIds: Array.from(selected),
+                        priority: rushOrder ? 'rush' : 'standard',
+                        notes: reference || '',
+                        idempotencyKey: 'idem-' + searchId
+                      })
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok || !data.success) {
+                      throw new Error(data.error || "Failed to save order to database.");
+                    }
+
+                    const existingOrdersStr = localStorage.getItem("evalright_orders");
+                    let existingOrders = [];
+                    if (existingOrdersStr) {
+                      try {
+                        existingOrders = JSON.parse(existingOrdersStr);
+                      } catch (e) {}
+                    } else {
+                      existingOrders = [...ORDERS];
+                    }
+                    localStorage.setItem("evalright_orders", JSON.stringify([newOrder, ...existingOrders]));
+
+                    // Log candidate email notification in localStorage (evalright_emails)
+                    const inviteUrl = data.inviteUrl || `http://localhost:5173/#invite-form?id=${data.inviteToken}`;
+                    const linkHtml = `<div style="text-align: center; margin: 30px 0;">
+                      <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
+                    </div>`;
+
+                    const mailSubject = `Background Check Process Initiated - ${fullName}`;
+                    const mailBody = `
+                      <p>Hello ${firstName},</p>
+                      <p style="margin-top: 16px;">We wanted to inform you that a background check order has been submitted for you by EvalRight Client Corp.</p>
+                      <p style="margin-top: 16px;"><b>Verification Services:</b> ${verificationType}</p>
+                      <p style="margin-top: 16px;"><b>Order Date:</b> ${new Date().toLocaleDateString()}</p>
+                      <p style="margin-top: 16px;"><b>Please click the button below to view details:</b></p>
+                      ${linkHtml}
+                    `;
+                    const newEmail = {
+                      id: Math.floor(4000000 + Math.random() * 1000000),
+                      subject: mailSubject,
+                      recipient: applicantEmail,
+                      dateSent: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                      lastUpdate: "N/A",
+                      displayDateSent: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                      body: mailBody
+                    };
+                    const existingEmailsStr = localStorage.getItem("evalright_emails");
+                    let existingEmails = [];
+                    if (existingEmailsStr) {
+                      try {
+                        existingEmails = JSON.parse(existingEmailsStr);
+                      } catch (e) {}
+                    }
+                    localStorage.setItem("evalright_emails", JSON.stringify([newEmail, ...existingEmails]));
+
+                    setShowSubmitModal(false);
+                    setStep(4);
+                  } catch (err: any) {
+                    console.error("Error saving order:", err);
+                    triggerToast(err.message || "Failed to submit order. Please try again.", true);
+                  } finally {
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                     setIsSubmittingOrder(false);
                   }
                 }}
@@ -2801,7 +3215,11 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   cursor: isSubmittingOrder ? "not-allowed" : "pointer",
                 }}
               >
+<<<<<<< HEAD
                 {isSubmittingOrder ? "Processing..." : "Pay Now"}
+=======
+                {isSubmittingOrder ? "Submitting..." : "Submit Order"}
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
               </button>
             </div>
 

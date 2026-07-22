@@ -1,7 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { Mail, Plus, ArrowRight, Eye } from "lucide-react";
 import { Footer } from "../components/Footer";
+<<<<<<< HEAD
 import { ORDERS, ALA_CARTE_SEARCHES } from "../data/mockData";
+=======
+import { ORDERS } from "../data/mockData";
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 
 // ── Static data ──────────────────────────────────────────────────────────────
 
@@ -312,13 +316,18 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
   ], [counts]);
 
   const handleSendInvitation = async () => {
+<<<<<<< HEAD
     if (!pkg || !firstName.trim() || !lastName.trim() || !emailAddr.trim()) {
+=======
+    if (!pkg || !template || !firstName.trim() || !lastName.trim() || !emailAddr.trim()) {
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
       triggerToast("Please fill in all required fields (marked with *).", true);
       return;
     }
 
     let selectedProducts: string[] = [];
     if (pkg === "Basic Screening") {
+<<<<<<< HEAD
       selectedProducts = ["id-verification-aadhar", "criminal-record-check"];
     } else if (pkg === "Standard") {
       selectedProducts = ["id-verification-aadhar", "criminal-record-check", "global-database-check", "id-verification-dl"];
@@ -326,6 +335,15 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
       selectedProducts = ["id-verification-aadhar", "criminal-record-check", "nationwide-criminal-check"];
     } else {
       selectedProducts = ["id-verification-aadhar", "criminal-record-check", "global-database-check"];
+=======
+      selectedProducts = ["adhr-trace", "county-criminal"];
+    } else if (pkg === "Standard") {
+      selectedProducts = ["adhr-trace", "county-criminal", "global-watchlist", "driving-history"];
+    } else if (pkg.toLowerCase().includes("federal")) {
+      selectedProducts = ["adhr-trace", "county-criminal", "federal-criminal"];
+    } else {
+      selectedProducts = ["adhr-trace", "county-criminal", "global-watchlist"];
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     }
 
     let templateContent = "";
@@ -353,6 +371,7 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
 
     if (!templateContent) {
       templateContent = `
+<<<<<<< HEAD
         <p>Hi [applicant_name],</p>
         <p style="margin-top: 16px;">Greetings from Evalright.</p>
         <p style="margin-top: 16px;">As the next step of the hiring process, your Background Verification needs to be initiated. We, Demo Client, are partnered with Evalright (BGV Agency) for this activity, and they will connect with you via email/phone to complete the process. You are requested to coordinate with the Evalright team and share the required information and documents through the Evalright Background Verification Portal.</p>
@@ -385,10 +404,22 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
         </p>
         <p style="margin-top: 24px;">Thanks & Regards,<br/>
         <strong>Evalright Background Verification Team</strong></p>
+=======
+        <p>Hello [applicant_first_name],</p>
+        <p style="margin-top: 16px;">Below you will find a link to authorize and initiate a background check, which is required as a condition of employment.</p>
+        <p style="margin-top: 16px;">Please save this email and keep it handy as it contains instructions for entering information to process the background check.</p>
+        <p style="margin-top: 16px;">
+          <b>First, please click this link to read and print the <span style="color: rgb(199, 0, 57);">Fair Credit Reporting Act Summary of Rights</span>.</b>
+        </p>
+        <p style="margin-top: 24px;">
+          [INVITATION_URL]
+        </p>
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
       `;
     }
 
     const fullName = `${firstName} ${middleName ? middleName + " " : ""}${lastName}`.trim();
+<<<<<<< HEAD
     const searchMap = new Map((ALA_CARTE_SEARCHES || []).map((item: any) => [item.id, item]));
     const checksList = (selectedProducts || [])
       .map((id: string) => {
@@ -397,14 +428,20 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
       })
       .join('');
 
+=======
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     let formattedBody = templateContent
       .replaceAll("[applicant_first_name]", firstName)
       .replaceAll("[applicant_last_name]", lastName)
       .replaceAll("[applicant_name]", fullName)
       .replaceAll("[company_name]", "EvalRight Client Corp")
       .replaceAll("[FCRA_URL]", "https://www.evalright.com/fcra")
+<<<<<<< HEAD
       .replaceAll("[company_info]", "EvalRight Client Corp, 100 Main St, Chicago, IL")
       .replaceAll("[CHECKS_TO_BE_COMPLETED]", checksList);
+=======
+      .replaceAll("[company_info]", "EvalRight Client Corp, 100 Main St, Chicago, IL");
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 
     try {
       const response = await fetch("http://localhost:5000/api/invitations", {
@@ -421,7 +458,11 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
           selectedProducts: selectedProducts,
           orderedBy: currentUser?.id || "fallback-id",
           emailTemplateName: templateName,
+<<<<<<< HEAD
           emailSubject: templateSubject || "Background Verification Process – Action Required",
+=======
+          emailSubject: templateSubject || `Background Check Invitation - ${fullName}`,
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
           emailContent: templateContent,
           replyTo: templateReplyTo,
           fromName: templateFromName,
@@ -448,7 +489,11 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
 
       const newEmail = {
         id: Math.floor(4000000 + Math.random() * 1000000),
+<<<<<<< HEAD
         subject: templateSubject || "Background Verification Process – Action Required",
+=======
+        subject: templateSubject || `Background Check Invitation - ${fullName}`,
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
         recipient: emailAddr,
         dateSent: new Date().toISOString().replace('T', ' ').substring(0, 19),
         displayDateSent: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -497,6 +542,7 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
 
       const productNames = selectedProducts.map((id: string) => {
         const knownNames: Record<string, string> = {
+<<<<<<< HEAD
           "personal-details": "Personal Details",
           "ssn-check": "SSN Check",
           "id-verification-aadhar": "ID Verification (Aadhar)",
@@ -532,6 +578,14 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
           "emergency": "Emergency",
           "authorization": "Authorization",
           "exit": "Exit",
+=======
+          cdlis: "CDLIS",
+          "county-criminal": "County Criminal Search",
+          "driving-history": "Driving History",
+          "education-verification": "Education Verification",
+          "employment-verification": "Employment Verification",
+          "labcorp-10-panel": "LabCorp - 10 Panel",
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
         };
         return knownNames[id] || id;
       });
@@ -760,6 +814,10 @@ export function HomePage({ isDarkMode = false, onNavigate, currentUser }: HomePa
               />
               <FloatingField
                 label="Invitation Template"
+<<<<<<< HEAD
+=======
+                required
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
                 isSelect
                 value={template}
                 onChange={(e: any) => setTemplate(e.target.value)}

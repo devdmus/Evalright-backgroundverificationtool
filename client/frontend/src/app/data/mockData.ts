@@ -10,6 +10,7 @@ export const PACKAGES = [
 ];
 
 export const ALA_CARTE_SEARCHES = [
+<<<<<<< HEAD
   { id: "personal-details", name: "Personal Details" },
   { id: "ssn-check", name: "SSN Check" },
   { id: "id-verification-aadhar", name: "ID Verification (Aadhar)" },
@@ -45,6 +46,16 @@ export const ALA_CARTE_SEARCHES = [
   { id: "emergency", name: "Emergency" },
   { id: "authorization", name: "Authorization" },
   { id: "exit", name: "Exit" },
+=======
+  { id: "adhr-trace", name: "ADHR Trace" },
+  { id: "county-criminal", name: "County Criminal Search" },
+  { id: "federal-criminal", name: "Federal Criminal Search" },
+  { id: "employment-verification", name: "Employment Verification" },
+  { id: "education-verification", name: "Education Verification" },
+  { id: "global-watchlist", name: "Global Watch List" },
+  { id: "motor-vehicle", name: "Motor Vehicle Record" },
+  { id: "reference-verification", name: "Reference Verification" },
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 ];
 
 export type SearchStatus = "CLOSED" | "CANCELLED" | "PENDING" | "IN PROGRESS";

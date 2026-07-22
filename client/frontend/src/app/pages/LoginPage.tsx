@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { useState, useEffect, useRef } from "react";
 import { Eye, LogIn, ArrowLeft, ShieldCheck, RefreshCw } from "lucide-react";
+=======
+import { useState } from "react";
+import { Eye, LogIn } from "lucide-react";
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
 
 const LOGO_SRC = "/evalright-logo.jpg";
 const CARD_WIDTH = "430px";
@@ -134,6 +139,7 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+<<<<<<< HEAD
   // OTP Verification State
   const [showOtpScreen, setShowOtpScreen] = useState(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
@@ -170,6 +176,8 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
     return `${local[0]}${"*".repeat(local.length - 2)}${local[local.length - 1]}@${domain}`;
   };
 
+=======
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
@@ -194,6 +202,7 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
         throw new Error(data.error || "Login failed.");
       }
 
+<<<<<<< HEAD
       if (data.otpRequired) {
         setUserId(data.userId);
         setEmail(data.email);
@@ -207,6 +216,9 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
       } else {
         onLogin(data.user);
       }
+=======
+      onLogin(data.user);
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
     } catch (err: any) {
       console.error(err);
       setError(err.message || "An error occurred during login.");
@@ -215,6 +227,7 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
     }
   }
 
+<<<<<<< HEAD
   async function handleOtpSubmit(e: React.FormEvent) {
     e.preventDefault();
     const otpCode = otp.join("").trim();
@@ -326,6 +339,8 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
     }
   };
 
+=======
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
   return (
     <div
       style={{
@@ -368,7 +383,11 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
             overflow: "hidden",
           }}
         >
+<<<<<<< HEAD
           {showLogoutBanner && !showOtpScreen && (
+=======
+          {showLogoutBanner && (
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
             <div
               style={{
                 background: "#D4EDDA",
@@ -399,6 +418,7 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
             </div>
           )}
 
+<<<<<<< HEAD
           {showOtpScreen ? (
             <form onSubmit={handleOtpSubmit} style={{ padding: "28px 32px 32px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
@@ -584,6 +604,66 @@ export function LoginPage({ showLogoutBanner = false, onLogin }: LoginPageProps)
               </button>
             </form>
           )}
+=======
+          <form onSubmit={handleSubmit} style={{ padding: "28px 32px 32px" }}>
+            <h1
+              style={{
+                fontSize: "20px",
+                fontWeight: 600,
+                color: "#6B7280",
+                margin: "0 0 6px 0",
+              }}
+            >
+              Welcome Back !
+            </h1>
+            <p
+              style={{
+                fontSize: "13px",
+                color: "#9CA3AF",
+                margin: "0 0 24px 0",
+                lineHeight: 1.5,
+              }}
+            >
+              Enter your username and password to access account.
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <LoginField label="Username" value={username} onChange={setUsername} />
+              <LoginField
+                label="Password"
+                value={password}
+                onChange={setPassword}
+                type={showPassword ? "text" : "password"}
+                eyeToggle={{
+                  show: showPassword,
+                  onToggle: () => setShowPassword(!showPassword),
+                }}
+              />
+            </div>
+
+            <div style={{ textAlign: "right", marginTop: "10px", marginBottom: "22px" }}>
+              <button
+                type="button"
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#9CA3AF",
+                  fontSize: "12px",
+                  cursor: "pointer",
+                  padding: 0,
+                  fontFamily: "inherit",
+                }}
+              >
+                Forgot your password?
+              </button>
+            </div>
+
+            <button type="submit" disabled={loading} style={{ ...loginButtonStyle, opacity: loading ? 0.7 : 1, cursor: loading ? "not-allowed" : "pointer" }}>
+              {loading ? "Logging in..." : "Log In"}
+              {!loading && <LogIn size={17} strokeWidth={2.25} />}
+            </button>
+          </form>
+>>>>>>> 0a3811cd9fe814f5e37ab930e0a31979b7a14308
         </div>
       </div>
     </div>
