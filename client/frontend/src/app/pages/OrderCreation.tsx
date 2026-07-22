@@ -230,6 +230,37 @@ const allSearchItems = [
 ];
 const itemMap = new Map(allSearchItems.map((item) => [item.id, item]));
 
+function calculateOrderAmounts(selectedIds: Set<string>, rushOrder: boolean) {
+  let grossAmount = 0;
+  selectedIds.forEach((id) => {
+    grossAmount += SERVICE_PRICES[id] || 200;
+  });
+  if (rushOrder) grossAmount += 25;
+  const deductions = 0;
+  const netAmount = Math.max(grossAmount - deductions, 0);
+  return { grossAmount, deductions, netAmount };
+}
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: any) => { open: () => void; on: (event: string, cb: (response: any) => void) => void };
+  }
+}
+
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 function maskAdhr(val: string) {
   if (!val) return "";
   if (val.includes("X") || val.includes("x") || val.includes("*")) return val;
@@ -2186,7 +2217,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 Add Another Search
               </button>
 
-              {/* Submit Order */}
+              {/* Pay Now */}
               <button
                 onClick={() => setShowSubmitModal(true)}
                 style={{
@@ -2204,7 +2235,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   fontWeight: 500,
                 }}
               >
-                Submit Order
+                Pay Now
               </button>
             </div>
           )
@@ -2426,7 +2457,24 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             }}
           >
             <div style={{ fontSize: "14px", color: "#374151", lineHeight: "1.6" }}>
-              By clicking "Submit Order", you agree to the <span style={{ color: "#C70039", fontWeight: "bold" }}>₹{(selected.size * 5 + (rushOrder ? 25 : 0)).toFixed(2)}</span> charge to your credit card, and to the following certifications:
+              By clicking "Pay Now", you agree to the <span style={{ color: "#C70039", fontWeight: "bold" }}>₹{calculateOrderAmounts(selected, rushOrder).netAmount.toFixed(2)}</span> charge, and to the following certifications:
+            </div>
+
+            <div
+              style={{
+                background: "#FFF7ED",
+                border: "1px solid #FDBA74",
+                borderRadius: "6px",
+                padding: "12px 14px",
+                fontSize: "13px",
+                color: "#9A3412",
+                lineHeight: 1.5,
+              }}
+            >
+              <div style={{ fontWeight: 700, marginBottom: "6px" }}>Razorpay Test Mode tips</div>
+              <div>• <b>Netbanking:</b> choose any bank → click <b>Success</b> on the mock page (most reliable).</div>
+              <div>• <b>Card:</b> enter any Razorpay test card → on the bank/OTP page click <b>Success</b>.</div>
+              <div>• <b>UPI QR:</b> cannot be scanned by real apps in test mode — use Netbanking or Card instead.</div>
             </div>
 
             <div style={{ color: "#C70039", fontSize: "14px", lineHeight: "1.6", display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -2478,17 +2526,23 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 disabled={isSubmittingOrder}
                 onClick={async () => {
                   if (!currentUser) {
-                    triggerToast("You must be logged in to submit an order.", true);
+                    triggerToast("You must be logged in to pay for an order.", true);
+                    return;
+                  }
+
+                  if (selected.size === 0) {
+                    triggerToast("Please select at least one search product.", true);
                     return;
                   }
 
                   setIsSubmittingOrder(true);
 
+                  const { grossAmount, deductions, netAmount } = calculateOrderAmounts(selected, rushOrder);
                   const fullName = `${firstName} ${middleNameDisabled ? "" : middleName + " "}${lastName}`.trim();
                   const searchId = "" + Math.floor(8000000 + Math.random() * 1000000);
                   const reportId = "RP-" + Math.floor(20000 + Math.random() * 10000);
-                  
-                  const productNames = Array.from(selected).map(id => {
+
+                  const productNames = Array.from(selected).map((id) => {
                     const knownNames: Record<string, string> = {
                       "personal-details": "Personal Details",
                       "ssn-check": "SSN Check",
@@ -2545,7 +2599,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                     orderDate: new Date().toISOString().substring(0, 10),
                     county: "Cook",
                     state: jobState !== "Select State" ? jobState : "IL",
-                    adhr: adhr ? adhr.replace(/.(?=.{4})/g, '*') : "********XXXX",
+                    adhr: adhr ? adhr.replace(/.(?=.{4})/g, "*") : "********XXXX",
                     dob: dob || "N/A",
                     applicantEmail: applicantEmail,
                     criminalRecordsFound: "None",
@@ -2553,87 +2607,185 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   };
 
                   try {
-                    const response = await fetch("http://localhost:5000/api/orders", {
+                    const razorpayReady = await loadRazorpayScript();
+                    if (!razorpayReady || !window.Razorpay) {
+                      throw new Error("Unable to load Razorpay checkout. Please try again.");
+                    }
+
+                    const paymentRes = await fetch("http://localhost:5000/api/payments/create-order", {
                       method: "POST",
                       headers: {
                         "Content-Type": "application/json",
-                        "x-user-id": currentUser.id
+                        "x-user-id": currentUser.id,
                       },
                       body: JSON.stringify({
-                        applicantDetails: {
-                          firstName,
-                          middleName: middleNameDisabled ? undefined : middleName,
-                          lastName,
-                          email: applicantEmail,
-                          dob,
-                          adhr,
-                          street1: streetAddress,
-                          zipCode,
-                          state: jobState !== "Select State" ? jobState : "IL"
+                        grossAmount,
+                        deductions,
+                        currency: "INR",
+                        createdBy: currentUser.id,
+                        notes: {
+                          applicant: fullName,
+                          services: productNames.join(", "),
                         },
-                        branchId: currentUser.branch_id,
-                        serviceIds: Array.from(selected),
-                        priority: rushOrder ? 'rush' : 'standard',
-                        notes: reference || '',
-                        idempotencyKey: 'idem-' + searchId
-                      })
+                      }),
                     });
 
-                    const data = await response.json();
-                    if (!response.ok || !data.success) {
-                      throw new Error(data.error || "Failed to save order to database.");
+                    const paymentData = await paymentRes.json();
+                    if (!paymentRes.ok || !paymentData.success) {
+                      throw new Error(paymentData.error || "Failed to create payment order.");
                     }
 
-                    const existingOrdersStr = localStorage.getItem("evalright_orders");
-                    let existingOrders = [];
-                    if (existingOrdersStr) {
-                      try {
-                        existingOrders = JSON.parse(existingOrdersStr);
-                      } catch (e) {}
-                    } else {
-                      existingOrders = [...ORDERS];
-                    }
-                    localStorage.setItem("evalright_orders", JSON.stringify([newOrder, ...existingOrders]));
-
-                    // Log candidate email notification in localStorage (evalright_emails)
-                    const inviteUrl = data.inviteUrl || `http://localhost:5173/#invite-form?id=${data.inviteToken}`;
-                    const linkHtml = `<div style="text-align: center; margin: 30px 0;">
-                      <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
-                    </div>`;
-
-                    const mailSubject = `Background Check Process Initiated - ${fullName}`;
-                    const mailBody = `
-                      <p>Hello ${firstName},</p>
-                      <p style="margin-top: 16px;">We wanted to inform you that a background check order has been submitted for you by EvalRight Client Corp.</p>
-                      <p style="margin-top: 16px;"><b>Verification Services:</b> ${verificationType}</p>
-                      <p style="margin-top: 16px;"><b>Order Date:</b> ${new Date().toLocaleDateString()}</p>
-                      <p style="margin-top: 16px;"><b>Please click the button below to view details:</b></p>
-                      ${linkHtml}
-                    `;
-                    const newEmail = {
-                      id: Math.floor(4000000 + Math.random() * 1000000),
-                      subject: mailSubject,
-                      recipient: applicantEmail,
-                      dateSent: new Date().toISOString().replace('T', ' ').substring(0, 19),
-                      lastUpdate: "N/A",
-                      displayDateSent: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                      body: mailBody
-                    };
-                    const existingEmailsStr = localStorage.getItem("evalright_emails");
-                    let existingEmails = [];
-                    if (existingEmailsStr) {
-                      try {
-                        existingEmails = JSON.parse(existingEmailsStr);
-                      } catch (e) {}
-                    }
-                    localStorage.setItem("evalright_emails", JSON.stringify([newEmail, ...existingEmails]));
-
+                    setIsSubmittingOrder(false);
                     setShowSubmitModal(false);
-                    setStep(4);
+
+                    const rzp = new window.Razorpay({
+                      key: paymentData.keyId,
+                      amount: paymentData.amount,
+                      currency: paymentData.currency || "INR",
+                      name: "EvalRight",
+                      description: `Background check order for ${fullName}`,
+                      image: `${window.location.origin}/evalright-logo.jpg`,
+                      order_id: paymentData.razorpayOrderId,
+                      prefill: {
+                        name:
+                          currentUser.firstName && currentUser.lastName
+                            ? `${currentUser.firstName} ${currentUser.lastName}`.trim()
+                            : currentUser.username,
+                        email: currentUser.email || "",
+                        contact: (currentUser.phone || "7075809540").replace(/\D/g, "").slice(-10),
+                      },
+                      theme: { color: "#C70039" },
+                      handler: async (razorpayResponse: any) => {
+                        setIsSubmittingOrder(true);
+                        try {
+                          const response = await fetch("http://localhost:5000/api/orders", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                              "x-user-id": currentUser.id,
+                            },
+                            body: JSON.stringify({
+                              applicantDetails: {
+                                firstName,
+                                middleName: middleNameDisabled ? undefined : middleName,
+                                lastName,
+                                email: applicantEmail,
+                                dob,
+                                adhr,
+                                street1: streetAddress,
+                                zipCode,
+                                state: jobState !== "Select State" ? jobState : "IL",
+                              },
+                              branchId: currentUser.branch_id,
+                              serviceIds: Array.from(selected),
+                              priority: rushOrder ? "rush" : "standard",
+                              notes: reference || "",
+                              idempotencyKey: "idem-" + searchId,
+                            }),
+                          });
+
+                          const data = await response.json();
+                          if (!response.ok || !data.success) {
+                            throw new Error(data.error || "Payment succeeded but order save failed.");
+                          }
+
+                          const verifyRes = await fetch("http://localhost:5000/api/payments/verify", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                              "x-user-id": currentUser.id,
+                            },
+                            body: JSON.stringify({
+                              razorpay_order_id: razorpayResponse.razorpay_order_id,
+                              razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+                              razorpay_signature: razorpayResponse.razorpay_signature,
+                              orderId: data.orderId,
+                              transactionId: paymentData.transactionId,
+                              grossAmount,
+                              deductions,
+                              netAmount,
+                              createdBy: currentUser.id,
+                            }),
+                          });
+
+                          const verifyData = await verifyRes.json();
+                          if (!verifyRes.ok || !verifyData.success) {
+                            throw new Error(verifyData.error || "Payment verification failed.");
+                          }
+
+                          const existingOrdersStr = localStorage.getItem("evalright_orders");
+                          let existingOrders = [];
+                          if (existingOrdersStr) {
+                            try {
+                              existingOrders = JSON.parse(existingOrdersStr);
+                            } catch (e) {}
+                          } else {
+                            existingOrders = [...ORDERS];
+                          }
+                          localStorage.setItem("evalright_orders", JSON.stringify([newOrder, ...existingOrders]));
+
+                          const inviteUrl =
+                            data.inviteUrl || `http://localhost:5173/#invite-form?id=${data.inviteToken}`;
+                          const linkHtml = `<div style="text-align: center; margin: 30px 0;">
+                            <a href="${inviteUrl}" style="background-color: rgb(199, 0, 57); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Start Background Check Form</a>
+                          </div>`;
+
+                          const mailSubject = `Background Check Process Initiated - ${fullName}`;
+                          const mailBody = `
+                            <p>Hello ${firstName},</p>
+                            <p style="margin-top: 16px;">We wanted to inform you that a background check order has been submitted for you by EvalRight Client Corp.</p>
+                            <p style="margin-top: 16px;"><b>Verification Services:</b> ${verificationType}</p>
+                            <p style="margin-top: 16px;"><b>Payment ID:</b> ${razorpayResponse.razorpay_payment_id}</p>
+                            <p style="margin-top: 16px;"><b>Order Date:</b> ${new Date().toLocaleDateString()}</p>
+                            <p style="margin-top: 16px;"><b>Please click the button below to view details:</b></p>
+                            ${linkHtml}
+                          `;
+                          const newEmail = {
+                            id: Math.floor(4000000 + Math.random() * 1000000),
+                            subject: mailSubject,
+                            recipient: applicantEmail,
+                            dateSent: new Date().toISOString().replace("T", " ").substring(0, 19),
+                            lastUpdate: "N/A",
+                            displayDateSent:
+                              new Date().toLocaleDateString() +
+                              " " +
+                              new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                            body: mailBody,
+                          };
+                          const existingEmailsStr = localStorage.getItem("evalright_emails");
+                          let existingEmails = [];
+                          if (existingEmailsStr) {
+                            try {
+                              existingEmails = JSON.parse(existingEmailsStr);
+                            } catch (e) {}
+                          }
+                          localStorage.setItem("evalright_emails", JSON.stringify([newEmail, ...existingEmails]));
+
+                          triggerToast("Payment successful. Order created.");
+                          setStep(4);
+                        } catch (err: any) {
+                          console.error("Error after payment:", err);
+                          triggerToast(err.message || "Payment received but order finalization failed.", true);
+                        } finally {
+                          setIsSubmittingOrder(false);
+                        }
+                      },
+                    });
+
+                    rzp.on("payment.failed", (response: any) => {
+                      console.error("Razorpay payment failed:", response);
+                      triggerToast(
+                        response?.error?.description ||
+                          "Payment failed. Try Netbanking and click Success on the mock bank page.",
+                        true
+                      );
+                      setIsSubmittingOrder(false);
+                    });
+
+                    rzp.open();
                   } catch (err: any) {
-                    console.error("Error saving order:", err);
-                    triggerToast(err.message || "Failed to submit order. Please try again.", true);
-                  } finally {
+                    console.error("Error starting payment:", err);
+                    triggerToast(err.message || "Failed to start payment. Please try again.", true);
                     setIsSubmittingOrder(false);
                   }
                 }}
@@ -2649,7 +2801,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                   cursor: isSubmittingOrder ? "not-allowed" : "pointer",
                 }}
               >
-                {isSubmittingOrder ? "Submitting..." : "Submit Order"}
+                {isSubmittingOrder ? "Processing..." : "Pay Now"}
               </button>
             </div>
 
