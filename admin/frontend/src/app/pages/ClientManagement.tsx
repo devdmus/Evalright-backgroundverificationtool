@@ -8,6 +8,7 @@ interface ClientManagementProps {
   isDarkMode?: boolean;
   onViewClient?: (clientId: string) => void;
   clients?: ClientRecord[];
+  onClientStatusChange?: (clientId: string, status: "ACTIVE" | "INACTIVE") => void;
 }
 
 function SortIcon() {
@@ -19,27 +20,85 @@ function SortIcon() {
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const isActive = status === "ACTIVE";
+function StatusToggle({
+  active,
+  disabled,
+  onToggle,
+}: {
+  active: boolean;
+  disabled?: boolean;
+  onToggle: () => void;
+}) {
   return (
-    <span
+    <button
+      type="button"
+      role="switch"
+      aria-checked={active}
+      aria-label={active ? "Disable client access" : "Enable client access"}
+      disabled={disabled}
+      onClick={onToggle}
       style={{
-        display: "inline-block",
-        padding: "3px 10px",
-        borderRadius: "12px",
-        fontSize: "11px",
-        fontWeight: 600,
-        background: isActive ? "#D1FAE5" : "#FEF3C7",
-        color: isActive ? "#065F46" : "#92400E",
-        letterSpacing: "0.03em",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 8,
+        width: 118,
+        border: "none",
+        background: "transparent",
+        padding: 0,
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.6 : 1,
       }}
     >
-      {status}
-    </span>
+      <span
+        style={{
+          width: 42,
+          height: 22,
+          borderRadius: 999,
+          background: active ? "#10B981" : "#D1D5DB",
+          position: "relative",
+          transition: "background 0.2s ease",
+          flexShrink: 0,
+        }}
+      >
+        <span
+          style={{
+            position: "absolute",
+            top: 2,
+            left: active ? 22 : 2,
+            width: 18,
+            height: 18,
+            borderRadius: "50%",
+            background: "#FFFFFF",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.2)",
+            transition: "left 0.2s ease",
+          }}
+        />
+      </span>
+      <span
+        style={{
+          width: 68,
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: "0.03em",
+          color: active ? "#065F46" : "#6B7280",
+          textAlign: "left",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          display: "inline-block",
+        }}
+      >
+        {active ? "ACTIVE" : "INACTIVE"}
+      </span>
+    </button>
   );
 }
 
-export function ClientManagement({ isDarkMode = false, onViewClient, clients }: ClientManagementProps) {
+export function ClientManagement({
+  isDarkMode = false,
+  onViewClient,
+  clients,
+  onClientStatusChange,
+}: ClientManagementProps) {
   const [perPage, setPerPage] = useState(10);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -51,6 +110,8 @@ export function ClientManagement({ isDarkMode = false, onViewClient, clients }: 
   const [salesRep, setSalesRep] = useState("Any");
   const [dateRange, setDateRange] = useState("");
   const [configGroup, setConfigGroup] = useState("Any");
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [statusError, setStatusError] = useState<string | null>(null);
 
   const cardBg = isDarkMode ? "#252830" : "#FFFFFF";
   const borderColor = isDarkMode ? "#333333" : "#E5E7EB";
@@ -78,6 +139,31 @@ export function ClientManagement({ isDarkMode = false, onViewClient, clients }: 
   const totalEntries = filtered.length;
   const totalPages = Math.max(1, Math.ceil(totalEntries / perPage));
   const paginated = filtered.slice((page - 1) * perPage, page * perPage);
+
+  async function handleToggleStatus(client: ClientRecord) {
+    const nextStatus: "ACTIVE" | "INACTIVE" = client.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    setTogglingId(client.id);
+    setStatusError(null);
+    try {
+      const response = await fetch(
+        `http://localhost:5001/api/clients/${encodeURIComponent(client.id)}/status`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: nextStatus.toLowerCase() }),
+        }
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update status");
+      }
+      onClientStatusChange?.(client.id, nextStatus);
+    } catch (err: any) {
+      setStatusError(err.message || "Failed to update client status");
+    } finally {
+      setTogglingId(null);
+    }
+  }
 
   const linkBtnStyle: React.CSSProperties = {
     background: "none",
@@ -118,7 +204,6 @@ export function ClientManagement({ isDarkMode = false, onViewClient, clients }: 
           Client Management
         </h1>
 
-        {/* Filter Section */}
         <div
           style={{
             background: cardBg,
@@ -203,7 +288,6 @@ export function ClientManagement({ isDarkMode = false, onViewClient, clients }: 
           </div>
         </div>
 
-        {/* Client List */}
         <div
           style={{
             background: cardBg,
@@ -216,6 +300,12 @@ export function ClientManagement({ isDarkMode = false, onViewClient, clients }: 
           <div style={{ padding: "16px 20px", borderBottom: `1px solid ${borderColor}` }}>
             <h2 style={{ fontSize: "15px", fontWeight: 600, color: textColor, margin: 0 }}>Client List</h2>
           </div>
+
+          {statusError && (
+            <div style={{ margin: "12px 20px 0", padding: "10px 12px", borderRadius: 4, background: "#FEF2F2", color: "#991B1B", fontSize: 13 }}>
+              {statusError}
+            </div>
+          )}
 
           <div style={{ padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: mutedColor }}>
@@ -278,6 +368,9 @@ export function ClientManagement({ isDarkMode = false, onViewClient, clients }: 
                         color: mutedColor,
                         cursor: "pointer",
                         userSelect: "none",
+                        width: col === "Status" ? 140 : undefined,
+                        minWidth: col === "Status" ? 140 : undefined,
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {col}
@@ -295,37 +388,33 @@ export function ClientManagement({ isDarkMode = false, onViewClient, clients }: 
                   </tr>
                 ) : (
                   paginated.map((client, idx) => (
-                  <tr
-                    key={client.id}
-                    style={{
-                      borderBottom: `1px solid ${borderColor}`,
-                      background: idx % 2 === 0 ? "transparent" : (isDarkMode ? "rgba(255,255,255,0.02)" : "#FAFAFA"),
-                    }}
-                  >
-                    <td style={{ padding: "12px 16px", fontSize: "13px" }}>
-                      <button
-                        type="button"
-                        onClick={() => onViewClient?.(client.id)}
-                        style={linkBtnStyle}
-                      >
-                        {client.id}
-                      </button>
-                    </td>
-                    <td style={{ padding: "12px 16px", fontSize: "13px" }}>
-                      <button
-                        type="button"
-                        onClick={() => onViewClient?.(client.id)}
-                        style={linkBtnStyle}
-                      >
-                        {client.companyName}
-                      </button>
-                    </td>
-                    <td style={{ padding: "12px 16px", fontSize: "13px", color: mutedColor }}>{client.salesRep}</td>
-                    <td style={{ padding: "12px 16px", fontSize: "13px", color: mutedColor }}>{client.created}</td>
-                    <td style={{ padding: "12px 16px" }}>
-                      <StatusBadge status={client.status} />
-                    </td>
-                  </tr>
+                    <tr
+                      key={client.id}
+                      style={{
+                        borderBottom: `1px solid ${borderColor}`,
+                        background: idx % 2 === 0 ? "transparent" : (isDarkMode ? "rgba(255,255,255,0.02)" : "#FAFAFA"),
+                      }}
+                    >
+                      <td style={{ padding: "12px 16px", fontSize: "13px" }}>
+                        <button type="button" onClick={() => onViewClient?.(client.id)} style={linkBtnStyle}>
+                          {client.id}
+                        </button>
+                      </td>
+                      <td style={{ padding: "12px 16px", fontSize: "13px" }}>
+                        <button type="button" onClick={() => onViewClient?.(client.id)} style={linkBtnStyle}>
+                          {client.companyName}
+                        </button>
+                      </td>
+                      <td style={{ padding: "12px 16px", fontSize: "13px", color: mutedColor }}>{client.salesRep}</td>
+                      <td style={{ padding: "12px 16px", fontSize: "13px", color: mutedColor }}>{client.created}</td>
+                      <td style={{ padding: "12px 16px", width: 140, minWidth: 140, whiteSpace: "nowrap" }}>
+                        <StatusToggle
+                          active={client.status === "ACTIVE"}
+                          disabled={togglingId === client.id}
+                          onToggle={() => handleToggleStatus(client)}
+                        />
+                      </td>
+                    </tr>
                   ))
                 )}
               </tbody>

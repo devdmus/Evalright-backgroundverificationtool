@@ -171,7 +171,10 @@ router.post('/api/orders', async (req: any, res: any) => {
 
     const authUser = userRes.rows[0];
     if (!authUser.is_active) {
-      return res.status(403).json({ error: 'Your account is deactivated' });
+      return res.status(403).json({
+        message: 'Your account has been deactivated. Please contact the administrator.',
+        error: 'Your account has been deactivated. Please contact the administrator.',
+      });
     }
 
     companyId = authUser.company_id;
@@ -228,11 +231,13 @@ router.post('/api/orders', async (req: any, res: any) => {
 
     try {
       const servicesRes = await pool.query(
-        'SELECT id, base_price FROM services WHERE service_code = ANY($1::text[]) OR id::text = ANY($1::text[])',
+        `SELECT id, COALESCE(sale_price, base_price, 0) AS unit_price
+         FROM services
+         WHERE service_code = ANY($1::text[]) OR id::text = ANY($1::text[])`,
         [mappedIds]
       );
       servicesRes.rows.forEach(row => {
-        const price = parseFloat(row.base_price) || 0.00;
+        const price = parseFloat(row.unit_price) || 0.00;
         subtotal += price;
         servicePriceList.push({ id: row.id, price });
       });
@@ -296,7 +301,7 @@ router.post('/api/orders', async (req: any, res: any) => {
           applicantDetails.street2 || null,
           applicantDetails.city?.trim() || 'Unknown',
           applicantDetails.state || 'Unknown',
-          applicantDetails.country || 'USA',
+          applicantDetails.country || 'India',
           applicantDetails.zipCode?.trim() || '00000'
         ]
       );

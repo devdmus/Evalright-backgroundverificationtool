@@ -209,24 +209,57 @@ router.post('/api/payments/verify', async (req: any, res: any) => {
       );
     }
 
-    // Also create invoice + payments row when an order exists (matches existing schema)
+    // Also create invoice + payments row when an order exists (idempotent)
+    let invoiceId: string | null = null;
+    let invoiceNumber: string | null = null;
+
     if (orderId) {
-      const invoiceId = crypto.randomUUID();
-      const invoiceNumber = `INV-${Date.now()}`;
-      const dueDate = new Date();
-      dueDate.setDate(dueDate.getDate() + 15);
-
-      await client.query(
-        `INSERT INTO invoices (id, order_id, invoice_number, amount, tax, discount, total, status, issue_date, due_date)
-         VALUES ($1, $2, $3, $4, 0, $5, $6, 'paid', CURRENT_DATE, $7)`,
-        [invoiceId, orderId, invoiceNumber, gross, deductionAmt, net, dueDate.toISOString().slice(0, 10)]
+      const existingInvoice = await client.query(
+        `SELECT id, invoice_number FROM invoices WHERE order_id = $1 LIMIT 1`,
+        [orderId]
       );
 
-      await client.query(
-        `INSERT INTO payments (id, invoice_id, gateway, transaction_id, amount, currency, status, paid_at, created_at)
-         VALUES ($1, $2, 'razorpay', $3, $4, 'INR', 'completed', NOW(), NOW())`,
-        [crypto.randomUUID(), invoiceId, razorpay_payment_id, net]
-      );
+      if (existingInvoice.rows.length > 0) {
+        invoiceId = existingInvoice.rows[0].id;
+        invoiceNumber = existingInvoice.rows[0].invoice_number;
+      } else {
+        // Prefer authoritative order totals from DB
+        const orderTotals = await client.query(
+          `SELECT subtotal, tax_amount, discount_amount, total_amount FROM orders WHERE id = $1 LIMIT 1`,
+          [orderId]
+        );
+        const ot = orderTotals.rows[0] || {};
+        const invoiceAmount = Number(ot.subtotal) || gross;
+        const invoiceTax = Number(ot.tax_amount) || 0;
+        const invoiceDiscount = Number(ot.discount_amount) || deductionAmt;
+        const invoiceTotal = Number(ot.total_amount) || net;
+
+        invoiceId = crypto.randomUUID();
+        invoiceNumber = `INV-${Date.now()}`;
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + 15);
+
+        await client.query(
+          `INSERT INTO invoices (id, order_id, invoice_number, amount, tax, discount, total, status, issue_date, due_date)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, 'paid', CURRENT_DATE, $8)`,
+          [
+            invoiceId,
+            orderId,
+            invoiceNumber,
+            invoiceAmount,
+            invoiceTax,
+            invoiceDiscount,
+            invoiceTotal,
+            dueDate.toISOString().slice(0, 10),
+          ]
+        );
+
+        await client.query(
+          `INSERT INTO payments (id, invoice_id, gateway, transaction_id, amount, currency, status, paid_at, created_at)
+           VALUES ($1, $2, 'razorpay', $3, $4, 'INR', 'completed', NOW(), NOW())`,
+          [crypto.randomUUID(), invoiceId, razorpay_payment_id, invoiceTotal]
+        );
+      }
     }
 
     await client.query('COMMIT');
@@ -240,6 +273,8 @@ router.post('/api/payments/verify', async (req: any, res: any) => {
       grossAmount: gross,
       deductions: deductionAmt,
       netAmount: net,
+      invoiceId,
+      invoiceNumber,
     });
   } catch (error: any) {
     await client.query('ROLLBACK');

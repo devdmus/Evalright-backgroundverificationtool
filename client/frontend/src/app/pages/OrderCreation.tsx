@@ -181,7 +181,7 @@ const STATES_LIST = [
 
 
 
-const SERVICE_PRICES: Record<string, number> = {
+const DEFAULT_SERVICE_PRICES: Record<string, number> = {
   "personal-details": 300,
   "ssn-check": 300,
   "id-verification-aadhar": 300,
@@ -224,21 +224,71 @@ const SERVICE_PRICES: Record<string, number> = {
   "adhr-validation": 300
 };
 
+const TAX_RATE = 0.08; // Same 8% applied on the server when creating orders/invoices (not from Razorpay)
+
 const allSearchItems = [
   ...COL1_CATEGORIES.flatMap((cat) => cat.items),
   ...COL2_CATEGORIES.flatMap((cat) => cat.items),
 ];
 const itemMap = new Map(allSearchItems.map((item) => [item.id, item]));
 
-function calculateOrderAmounts(selectedIds: Set<string>, rushOrder: boolean) {
-  let grossAmount = 0;
+function calculateOrderAmounts(
+  selectedIds: Set<string>,
+  rushOrder: boolean,
+  servicePrices: Record<string, number>
+) {
+  const lineItems: Array<{
+    id: string;
+    name: string;
+    unitPrice: number;
+    tax: number;
+    amount: number;
+  }> = [];
+
+  let servicesSubtotal = 0;
   selectedIds.forEach((id) => {
-    grossAmount += SERVICE_PRICES[id] || 200;
+    const unitPrice = servicePrices[id] ?? DEFAULT_SERVICE_PRICES[id] ?? 200;
+    const tax = Number((unitPrice * TAX_RATE).toFixed(2));
+    const amount = Number((unitPrice + tax).toFixed(2));
+    servicesSubtotal += unitPrice;
+    lineItems.push({
+      id,
+      name: itemMap.get(id)?.name || id,
+      unitPrice,
+      tax,
+      amount,
+    });
   });
-  if (rushOrder) grossAmount += 25;
+
+  const rushFee = rushOrder ? 25 : 0;
+  if (rushOrder) {
+    lineItems.push({
+      id: "rush-order-fee",
+      name: "Rush Order Fee",
+      unitPrice: rushFee,
+      tax: 0,
+      amount: rushFee,
+    });
+  }
+
+  // Matches backend Order.ts: tax = 8% of service sale prices only
+  const taxAmount = Number((servicesSubtotal * TAX_RATE).toFixed(2));
+  const subtotal = Number((servicesSubtotal + rushFee).toFixed(2));
   const deductions = 0;
+  const grossAmount = Number((servicesSubtotal + taxAmount + rushFee).toFixed(2));
   const netAmount = Math.max(grossAmount - deductions, 0);
-  return { grossAmount, deductions, netAmount };
+
+  return {
+    lineItems,
+    servicesSubtotal: Number(servicesSubtotal.toFixed(2)),
+    subtotal,
+    taxRate: TAX_RATE,
+    taxAmount,
+    rushFee,
+    deductions,
+    grossAmount,
+    netAmount,
+  };
 }
 
 declare global {
@@ -281,6 +331,7 @@ function getSearchDisplayName(itemId: string, name: string) {
 export function OrderCreation({ isInvitation = false, showInvitationBanner = false, isDarkMode = false, onNavigate, currentUser }: OrderCreationProps) {
   const t = getPageTheme(isDarkMode);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [servicePrices, setServicePrices] = useState<Record<string, number>>(DEFAULT_SERVICE_PRICES);
   const [bannerVisible, setBannerVisible] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
@@ -303,6 +354,25 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
         }
       } catch (e) {}
     }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/services/prices");
+        const data = await response.json();
+        if (!response.ok || cancelled) return;
+        if (data?.prices && typeof data.prices === "object") {
+          setServicePrices((prev) => ({ ...prev, ...data.prices }));
+        }
+      } catch {
+        // Keep DEFAULT_SERVICE_PRICES if API is unavailable
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Form states
@@ -1769,38 +1839,43 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
                   <thead>
                     <tr style={{ background: "#F9FAFB", borderBottom: "1px solid #E5E7EB" }}>
-                      <th style={{ textAlign: "left", padding: "12px 20px", fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>Product Name</th>
-                      <th style={{ textAlign: "left", padding: "12px 20px", fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>Location</th>
+                      <th style={{ textAlign: "left", padding: "12px 20px", fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>Service</th>
                       <th style={{ textAlign: "left", padding: "12px 20px", fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>Edit</th>
-                      <th style={{ textAlign: "right", padding: "12px 20px", fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>Price</th>
+                      <th style={{ textAlign: "right", padding: "12px 20px", fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>Unit Price</th>
+                      <th style={{ textAlign: "right", padding: "12px 20px", fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>Tax (8%)</th>
+                      <th style={{ textAlign: "right", padding: "12px 20px", fontSize: "13px", fontWeight: 600, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.5px" }}>Amount</th>
                       <th style={{ width: "60px", padding: "12px 20px" }}></th>
                     </tr>
                   </thead>
                   <tbody>
                     {(() => {
-                      let orderSubtotal = 0;
+                      const breakdown = calculateOrderAmounts(selected, rushOrder, servicePrices);
                       return (
                         <>
-                          {Array.from(selected).map((itemId) => {
-                            const item = itemMap.get(itemId);
-                            const productName = item ? item.name : itemId;
-                            const editLabel = itemId === "adhr-trace-address" ? "Show ADHR Report" : "Show Report";
-                            const price = SERVICE_PRICES[itemId] || 200;
-                            orderSubtotal += price;
-                            
+                          {breakdown.lineItems.map((line) => {
+                            const editLabel = line.id === "adhr-trace-address" ? "Show ADHR Report" : line.id === "rush-order-fee" ? "" : "Show Report";
                             return (
-                              <tr key={itemId} style={{ borderBottom: "1px solid #E5E7EB" }}>
-                                <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", fontWeight: 500 }}>{productName}</td>
-                                <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151" }}></td>
+                              <tr key={line.id} style={{ borderBottom: "1px solid #E5E7EB" }}>
+                                <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", fontWeight: 500 }}>{line.name}</td>
                                 <td style={{ padding: "16px 20px", fontSize: "14px" }}>
-                                  <span 
-                                    style={{ color: "#2563EB", cursor: "pointer", fontWeight: 500 }}
-                                    onClick={() => setStep(1)}
-                                  >
-                                    {editLabel}
-                                  </span>
+                                  {editLabel ? (
+                                    <span
+                                      style={{ color: "#2563EB", cursor: "pointer", fontWeight: 500 }}
+                                      onClick={() => setStep(1)}
+                                    >
+                                      {editLabel}
+                                    </span>
+                                  ) : null}
                                 </td>
-                                <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 500 }}>₹{price.toFixed(2)}</td>
+                                <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 500 }}>
+                                  ₹{line.unitPrice.toFixed(2)}
+                                </td>
+                                <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 500 }}>
+                                  ₹{line.tax.toFixed(2)}
+                                </td>
+                                <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 500 }}>
+                                  ₹{line.amount.toFixed(2)}
+                                </td>
                                 <td style={{ padding: "16px 20px", textAlign: "right" }}>
                                   <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "18px", height: "18px", background: "#C70039", borderRadius: "4px", color: "#FFFFFF", fontSize: "11px", fontWeight: "bold" }}>
                                     ✓
@@ -1809,30 +1884,36 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                               </tr>
                             );
                           })}
-                          
-                          {rushOrder && (
+
+                          <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                            <td colSpan={4} style={{ padding: "12px 20px", fontSize: "14px", color: "#6B7280", textAlign: "right" }}>Services Sub Total</td>
+                            <td style={{ padding: "12px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 600 }}>
+                              ₹{breakdown.servicesSubtotal.toFixed(2)}
+                            </td>
+                            <td />
+                          </tr>
+                          <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                            <td colSpan={4} style={{ padding: "12px 20px", fontSize: "14px", color: "#6B7280", textAlign: "right" }}>Tax (8% on services)</td>
+                            <td style={{ padding: "12px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 600 }}>
+                              ₹{breakdown.taxAmount.toFixed(2)}
+                            </td>
+                            <td />
+                          </tr>
+                          {breakdown.rushFee > 0 && (
                             <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
-                              <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", fontWeight: 500 }}>Rush Order Fee</td>
-                              <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151" }}></td>
-                              <td style={{ padding: "16px 20px", fontSize: "14px" }}></td>
-                              <td style={{ padding: "16px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 500 }}>₹25.00</td>
-                              <td style={{ padding: "16px 20px", textAlign: "right" }}>
-                                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "18px", height: "18px", background: "#C70039", borderRadius: "4px", color: "#FFFFFF", fontSize: "11px", fontWeight: "bold" }}>
-                                  ✓
-                                </div>
+                              <td colSpan={4} style={{ padding: "12px 20px", fontSize: "14px", color: "#6B7280", textAlign: "right" }}>Rush Fee</td>
+                              <td style={{ padding: "12px 20px", fontSize: "14px", color: "#374151", textAlign: "right", fontWeight: 600 }}>
+                                ₹{breakdown.rushFee.toFixed(2)}
                               </td>
+                              <td />
                             </tr>
                           )}
-                          
-                          {/* Total Row */}
                           <tr style={{ background: "#F9FAFB" }}>
-                            <td style={{ padding: "16px 20px", fontSize: "15px", color: "#1F2937", fontWeight: "bold" }}>Total</td>
-                            <td style={{ padding: "16px 20px" }}></td>
-                            <td style={{ padding: "16px 20px" }}></td>
+                            <td colSpan={4} style={{ padding: "16px 20px", fontSize: "15px", color: "#1F2937", fontWeight: "bold", textAlign: "right" }}>Total Payable</td>
                             <td style={{ padding: "16px 20px", fontSize: "15px", color: "#1F2937", textAlign: "right", fontWeight: "bold" }}>
-                              ₹{(orderSubtotal + (rushOrder ? 25 : 0)).toFixed(2)}
+                              ₹{breakdown.netAmount.toFixed(2)}
                             </td>
-                            <td style={{ padding: "16px 20px" }}></td>
+                            <td />
                           </tr>
                         </>
                       );
@@ -2457,8 +2538,70 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
             }}
           >
             <div style={{ fontSize: "14px", color: "#374151", lineHeight: "1.6" }}>
-              By clicking "Pay Now", you agree to the <span style={{ color: "#C70039", fontWeight: "bold" }}>₹{calculateOrderAmounts(selected, rushOrder).netAmount.toFixed(2)}</span> charge, and to the following certifications:
+              By clicking "Pay Now", you agree to the <span style={{ color: "#C70039", fontWeight: "bold" }}>₹{calculateOrderAmounts(selected, rushOrder, servicePrices).netAmount.toFixed(2)}</span> charge (including 8% tax), and to the following certifications:
             </div>
+
+            {(() => {
+              const payBreakdown = calculateOrderAmounts(selected, rushOrder, servicePrices);
+              return (
+                <div
+                  style={{
+                    border: "1px solid #E5E7EB",
+                    borderRadius: "6px",
+                    overflow: "hidden",
+                    background: "#FAFAFA",
+                  }}
+                >
+                  <div style={{ padding: "10px 14px", borderBottom: "1px solid #E5E7EB", fontSize: 13, fontWeight: 700, color: "#374151" }}>
+                    Payment Summary (before Razorpay)
+                  </div>
+                  <div style={{ padding: "8px 14px", maxHeight: 180, overflowY: "auto" }}>
+                    {payBreakdown.lineItems.map((line) => (
+                      <div
+                        key={line.id}
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr auto auto auto",
+                          gap: 12,
+                          fontSize: 12,
+                          color: "#4B5563",
+                          padding: "6px 0",
+                          borderBottom: "1px solid #F3F4F6",
+                        }}
+                      >
+                        <span>{line.name}</span>
+                        <span>₹{line.unitPrice.toFixed(2)}</span>
+                        <span>+₹{line.tax.toFixed(2)} tax</span>
+                        <span style={{ fontWeight: 600 }}>₹{line.amount.toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ padding: "10px 14px", borderTop: "1px solid #E5E7EB", fontSize: 13, color: "#374151" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <span>Services Sub Total</span>
+                      <span>₹{payBreakdown.servicesSubtotal.toFixed(2)}</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <span>Tax (8% on services)</span>
+                      <span>₹{payBreakdown.taxAmount.toFixed(2)}</span>
+                    </div>
+                    {payBreakdown.rushFee > 0 && (
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                        <span>Rush Fee</span>
+                        <span>₹{payBreakdown.rushFee.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, color: "#C70039", marginTop: 6 }}>
+                      <span>Total Payable via Razorpay</span>
+                      <span>₹{payBreakdown.netAmount.toFixed(2)}</span>
+                    </div>
+                    <div style={{ marginTop: 8, fontSize: 11, color: "#6B7280" }}>
+                      Tax is calculated by EvalRight as 8% of each service sale price (Unit Price × 0.08). Razorpay only collects this total — it does not calculate or add tax.
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             <div
               style={{
@@ -2537,7 +2680,7 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
 
                   setIsSubmittingOrder(true);
 
-                  const { grossAmount, deductions, netAmount } = calculateOrderAmounts(selected, rushOrder);
+                  const { grossAmount, deductions, netAmount } = calculateOrderAmounts(selected, rushOrder, servicePrices);
                   const fullName = `${firstName} ${middleNameDisabled ? "" : middleName + " "}${lastName}`.trim();
                   const searchId = "" + Math.floor(8000000 + Math.random() * 1000000);
                   const reportId = "RP-" + Math.floor(20000 + Math.random() * 10000);
@@ -2674,7 +2817,8 @@ export function OrderCreation({ isInvitation = false, showInvitationBanner = fal
                                 adhr,
                                 street1: streetAddress,
                                 zipCode,
-                                state: jobState !== "Select State" ? jobState : "IL",
+                                country: "India",
+                                state: jobState !== "Select State" ? jobState : "Andhra Pradesh",
                               },
                               branchId: currentUser.branch_id,
                               serviceIds: Array.from(selected),

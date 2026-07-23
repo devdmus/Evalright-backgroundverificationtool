@@ -142,6 +142,34 @@ export default function App() {
     setCurrentPage("home");
   };
 
+  // Force logout when any protected API reports the account is deactivated
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const originalFetch = window.fetch.bind(window);
+
+    window.fetch = async (...args) => {
+      const response = await originalFetch(...args);
+      if (response.status === 403) {
+        try {
+          const cloned = response.clone();
+          const data = await cloned.json();
+          const msg = String(data?.message || data?.error || "").toLowerCase();
+          if (msg.includes("deactivated") || msg.includes("disabled by the administrator")) {
+            handleLogout();
+          }
+        } catch {
+          // ignore non-JSON 403 bodies
+        }
+      }
+      return response;
+    };
+
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, [isAuthenticated]);
+
   // Dynamically update browser tab title
   useEffect(() => {
     if (!isAuthenticated) {
@@ -215,7 +243,7 @@ export default function App() {
       case "setup-random-drug-checks":
         return <SetupRandomDrugChecks isDarkMode={isDarkMode} />;
       case "invoices":
-        return <Invoices isDarkMode={isDarkMode} />;
+        return <Invoices isDarkMode={isDarkMode} currentUser={currentUser} />;
       case "support-center":
         return <BulkOrderRequests isDarkMode={isDarkMode} />;
       case "forms-documents":
