@@ -1,5 +1,6 @@
 export interface ClientRecord {
   id: string;
+  companyUuid?: string;
   companyName: string;
   salesRep: string;
   created: string;

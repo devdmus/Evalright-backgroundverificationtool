@@ -137,7 +137,18 @@ export default function App() {
       case "home":
         return <HomePage isDarkMode={isDarkMode} onNavigate={setCurrentPage} onViewClient={handleViewClient} clients={clients} />;
       case "client-management":
-        return <ClientManagement isDarkMode={isDarkMode} onViewClient={handleViewClient} clients={clients} />;
+        return (
+          <ClientManagement
+            isDarkMode={isDarkMode}
+            onViewClient={handleViewClient}
+            clients={clients}
+            onClientStatusChange={(clientId, status) => {
+              setClients((prev) =>
+                prev.map((c) => (c.id === clientId ? { ...c, status } : c))
+              );
+            }}
+          />
+        );
       case "add-new-client":
         return <AddNewClient isDarkMode={isDarkMode} onClientAdded={fetchClients} />;
       case "client-summary":

@@ -138,3 +138,14 @@ admin/backend/dist/
 # Backends specific environment variables
 client/backend/.env
 admin/backend/.env
+
+# Documentation, Workflow, Scripts & API Specs
+GoldQuest API.pdf
+Workflow/
+api  for ida/
+api for ida/
+Untitled
+scripts/
+client/backend/scripts/
+
+

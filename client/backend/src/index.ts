@@ -6,6 +6,9 @@ import { pool } from './config/db';
 import orderRouter from './Order';
 import invitationRouter from './Invitation';
 import paymentRouter from './Payment';
+import invoiceRouter from './Invoice';
+import { ensureServicesPricingSchema } from './serviceCatalog';
+import { requireActiveAccount } from './authMiddleware';
 
 dotenv.config();
 
@@ -14,9 +17,45 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+
+// Enforce ACTIVE account status on every protected API request
+app.use(requireActiveAccount);
+
 app.use(orderRouter);
 app.use(invitationRouter);
 app.use(paymentRouter);
+app.use(invoiceRouter);
+
+ensureServicesPricingSchema(pool).catch((err) => {
+  console.error('❌ Failed to initialize services pricing schema:', err);
+});
+
+// Client-facing sale prices for order review / payments
+app.get('/api/services/prices', async (_req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        service_code AS "serviceCode",
+        name,
+        COALESCE(sale_price, base_price, 0)::float AS "salePrice",
+        COALESCE(is_active, TRUE) AS enabled
+      FROM services
+      WHERE service_code IS NOT NULL
+        AND COALESCE(is_active, TRUE) = TRUE
+      ORDER BY name ASC
+    `);
+
+    const prices: Record<string, number> = {};
+    result.rows.forEach((row) => {
+      prices[row.serviceCode] = Number(row.salePrice) || 0;
+    });
+
+    res.json({ prices, services: result.rows });
+  } catch (error: any) {
+    console.error('❌ Error fetching client service prices:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // API Health Check
 app.get('/api/health', async (req, res) => {
@@ -97,11 +136,16 @@ app.post('/api/auth/login', async (req, res) => {
   }
 
   try {
-    // 1. Fetch user by username
+    // 1. Fetch user by username (include company access status)
     const query = `
-      SELECT id, company_id, branch_id, username, email, password_hash, first_name, last_name, is_active 
-      FROM users 
-      WHERE username = $1 LIMIT 1
+      SELECT
+        u.id, u.company_id, u.branch_id, u.username, u.email, u.password_hash,
+        u.first_name, u.last_name, u.is_active,
+        COALESCE(c.status, 'active') AS company_status
+      FROM users u
+      LEFT JOIN companies c ON c.id = u.company_id
+      WHERE u.username = $1
+      LIMIT 1
     `;
     const result = await pool.query(query, [username]);
 
@@ -111,9 +155,14 @@ app.post('/api/auth/login', async (req, res) => {
 
     const user = result.rows[0];
 
-    // 2. Check if the user is active
+    // 2. Check if the user / company is allowed access
     if (!user.is_active) {
       return res.status(403).json({ error: 'Your account is deactivated. Please contact support.' });
+    }
+    if (String(user.company_status).toLowerCase() !== 'active') {
+      return res.status(403).json({
+        error: 'Your company access has been disabled by the administrator. Please contact support.',
+      });
     }
 
     // 3. Compare SHA-256 password hash
@@ -203,10 +252,15 @@ app.post('/api/auth/verify-otp', async (req, res) => {
     // 3. Mark OTP as verified
     await pool.query('UPDATE user_otps SET is_verified = TRUE WHERE id = $1', [dbOtp.id]);
 
-    // 4. Fetch and return user metadata
+    // 4. Fetch and return user metadata (re-check company access)
     const userRes = await pool.query(
-      `SELECT id, company_id, branch_id, username, email, first_name, last_name, is_active 
-       FROM users WHERE id = $1 LIMIT 1`,
+      `SELECT
+         u.id, u.company_id, u.branch_id, u.username, u.email, u.first_name, u.last_name, u.is_active,
+         LOWER(COALESCE(c.status, 'active')) AS company_status
+       FROM users u
+       LEFT JOIN companies c ON c.id = u.company_id
+       WHERE u.id = $1
+       LIMIT 1`,
       [userId]
     );
 
@@ -215,6 +269,12 @@ app.post('/api/auth/verify-otp', async (req, res) => {
     }
 
     const user = userRes.rows[0];
+    if (!user.is_active || String(user.company_status).toLowerCase() !== 'active') {
+      return res.status(403).json({
+        message: 'Your account has been deactivated. Please contact the administrator.',
+        error: 'Your account has been deactivated. Please contact the administrator.',
+      });
+    }
 
     res.json({
       success: true,
@@ -246,8 +306,13 @@ app.post('/api/auth/resend-otp', async (req, res) => {
   try {
     // 1. Fetch user
     const userRes = await pool.query(
-      `SELECT id, email, username, first_name, last_name, is_active 
-       FROM users WHERE id = $1 LIMIT 1`,
+      `SELECT
+         u.id, u.email, u.username, u.first_name, u.last_name, u.is_active,
+         LOWER(COALESCE(c.status, 'active')) AS company_status
+       FROM users u
+       LEFT JOIN companies c ON c.id = u.company_id
+       WHERE u.id = $1
+       LIMIT 1`,
       [userId]
     );
 
@@ -256,8 +321,11 @@ app.post('/api/auth/resend-otp', async (req, res) => {
     }
 
     const user = userRes.rows[0];
-    if (!user.is_active) {
-      return res.status(403).json({ error: 'Your account is deactivated' });
+    if (!user.is_active || String(user.company_status).toLowerCase() !== 'active') {
+      return res.status(403).json({
+        message: 'Your account has been deactivated. Please contact the administrator.',
+        error: 'Your account has been deactivated. Please contact the administrator.',
+      });
     }
 
     // 2. Generate and save new OTP

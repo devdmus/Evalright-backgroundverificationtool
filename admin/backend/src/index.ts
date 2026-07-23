@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
 import { pool } from './config/db';
+import { ensureServicesPricingSchema } from './serviceCatalog';
 
 dotenv.config();
 
@@ -11,6 +12,99 @@ const PORT = process.env.PORT || 5001;
 
 app.use(cors());
 app.use(express.json());
+
+ensureServicesPricingSchema(pool).catch((err) => {
+  console.error('❌ Failed to initialize services pricing schema:', err);
+});
+
+// List all searchable services with sale price + default cost
+app.get('/api/services/pricing', async (_req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        id,
+        name,
+        service_code AS "serviceCode",
+        COALESCE(sale_price, base_price, 0)::float AS "salePrice",
+        COALESCE(base_price, 0)::float AS "yourCost",
+        COALESCE(is_active, TRUE) AS enabled
+      FROM services
+      WHERE service_code IS NOT NULL
+      ORDER BY name ASC
+    `);
+
+    res.json(
+      result.rows.map((row) => ({
+        ...row,
+        salePrice: Number(row.salePrice).toFixed(2),
+        yourCost: Number(row.yourCost).toFixed(2),
+        hasOverride: Number(row.salePrice) !== Number(row.yourCost),
+      }))
+    );
+  } catch (error: any) {
+    console.error('❌ Error fetching service pricing:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update sale price / enabled status (your cost / base_price is never writable here)
+app.put('/api/services/pricing/:serviceCode', async (req, res) => {
+  const { serviceCode } = req.params;
+  const { salePrice, enabled } = req.body || {};
+
+  if (salePrice === undefined && enabled === undefined) {
+    return res.status(400).json({ error: 'Provide salePrice and/or enabled' });
+  }
+
+  const parsedSale =
+    salePrice === undefined || salePrice === null || salePrice === ''
+      ? null
+      : Number(salePrice);
+
+  if (parsedSale !== null && (Number.isNaN(parsedSale) || parsedSale < 0)) {
+    return res.status(400).json({ error: 'salePrice must be a non-negative number' });
+  }
+
+  try {
+    const result = await pool.query(
+      `
+      UPDATE services
+      SET
+        sale_price = COALESCE($2, sale_price),
+        is_active = COALESCE($3, is_active)
+      WHERE service_code = $1
+      RETURNING
+        id,
+        name,
+        service_code AS "serviceCode",
+        COALESCE(sale_price, base_price, 0)::float AS "salePrice",
+        COALESCE(base_price, 0)::float AS "yourCost",
+        COALESCE(is_active, TRUE) AS enabled
+      `,
+      [serviceCode, parsedSale, typeof enabled === 'boolean' ? enabled : null]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Service not found' });
+    }
+
+    const row = result.rows[0];
+    res.json({
+      success: true,
+      message: 'Pricing updated',
+      service: {
+        ...row,
+        salePrice: Number(row.salePrice).toFixed(2),
+        yourCost: Number(row.yourCost).toFixed(2),
+        hasOverride: Number(row.salePrice) !== Number(row.yourCost),
+      },
+    });
+  } catch (error: any) {
+    console.error('❌ Error updating service pricing:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 // API Health Check
 app.get('/api/health', async (req, res) => {
@@ -246,6 +340,7 @@ app.get('/api/clients', async (req, res) => {
 
     const dbClients = result.rows.map(row => ({
       id: row.numeric_id || row.id,
+      companyUuid: row.id,
       companyName: row.companyName,
       salesRep: 'Admin', // Default sales rep for administrative clients
       created: row.created ? new Date(row.created).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
@@ -265,6 +360,63 @@ app.get('/api/clients', async (req, res) => {
     res.json(dbClients);
   } catch (error: any) {
     console.error('❌ Error fetching clients:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Toggle client access (active = can sign in / use portal; inactive = blocked)
+app.put('/api/clients/:clientId/status', async (req, res) => {
+  const { clientId } = req.params;
+  const { status } = req.body || {};
+
+  const normalized =
+    typeof status === 'string'
+      ? status.trim().toLowerCase()
+      : status === true
+        ? 'active'
+        : status === false
+          ? 'inactive'
+          : '';
+
+  if (normalized !== 'active' && normalized !== 'inactive') {
+    return res.status(400).json({ error: 'status must be "active" or "inactive"' });
+  }
+
+  try {
+    const result = await pool.query(
+      `
+      UPDATE companies
+      SET status = $2, updated_at = NOW()
+      WHERE id::text = $1 OR numeric_id = $1
+      RETURNING id, numeric_id, name, status
+      `,
+      [clientId, normalized]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+
+    const row = result.rows[0];
+
+    // Keep primary users aligned with company access
+    await pool.query(
+      `UPDATE users SET is_active = $2, updated_at = NOW() WHERE company_id = $1`,
+      [row.id, normalized === 'active']
+    );
+
+    res.json({
+      success: true,
+      message: `Client ${normalized === 'active' ? 'enabled' : 'disabled'}`,
+      client: {
+        id: row.numeric_id || row.id,
+        companyUuid: row.id,
+        companyName: row.name,
+        status: String(row.status || normalized).toUpperCase(),
+      },
+    });
+  } catch (error: any) {
+    console.error('❌ Error updating client status:', error);
     res.status(500).json({ error: error.message });
   }
 });
